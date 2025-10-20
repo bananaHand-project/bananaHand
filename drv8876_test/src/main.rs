@@ -11,20 +11,117 @@ use {defmt_rtt as _, panic_probe as _};
 use embassy_executor::Spawner;
 use embassy_stm32::{
     Config,
-    adc::{Adc, SampleTime},
+    adc::{Adc, AdcChannel, AnyAdcChannel, Instance, SampleTime},
     gpio::{Level, Output, OutputType, Speed},
-    peripherals::TIM3,
+    peripherals::{ADC1, TIM3},
     time::khz,
     timer::{
-        Ch2,
-        simple_pwm::{PwmPin, SimplePwm},
+        Ch2, GeneralInstance4Channel,
+        simple_pwm::{PwmPin, SimplePwm, SimplePwmChannel},
     },
 };
 use embassy_time::Timer;
 use fmt::info;
 
-// const VREF_POS_UPPER: f32 = 3.3;
-// const VREF_POS_LOWER: f32 = 0.0;
+struct Actuator<'a, T: GeneralInstance4Channel, C: Instance> {
+    pub vref_position_upper: f32,
+    pub vref_position_lower: f32,
+    pub pwm: SimplePwmChannel<'a, T>,
+    pub dir_select: Output<'a>,
+    pub adc_pin: AnyAdcChannel<C>,
+}
+
+impl<'a, T: GeneralInstance4Channel, C: Instance> Actuator<'a, T, C> {
+    const STROKE_LENGTH: f32 = 20.0;
+    const ADC_VREF: f32 = 3.3;
+    const ADC_MAX_RAW: u16 = 4096;
+
+    pub fn new(
+        vref_position_upper: f32,
+        vref_position_lower: f32,
+        pwm: SimplePwmChannel<'a, T>,
+        dir_select: Output<'a>,
+        adc_pin: AnyAdcChannel<C>,
+    ) -> Self {
+        Actuator {
+            vref_position_upper,
+            vref_position_lower,
+            pwm,
+            dir_select,
+            adc_pin,
+        }
+    }
+
+    pub fn set_direction_in(&mut self) {
+        self.dir_select.set_low();
+    }
+
+    pub fn set_direction_out(&mut self) {
+        self.dir_select.set_high();
+    }
+
+    pub fn toggle_direction(&mut self) {
+        self.dir_select.toggle();
+    }
+
+    pub fn set_speed(&mut self, percent: u8) {
+        self.pwm.set_duty_cycle_percent(percent);
+    }
+
+    pub fn read_position_v(&mut self, adc: &mut Adc<'_, C>) -> f32 {
+        let raw_reading = adc.blocking_read(&mut self.adc_pin);
+        let pos_as_v = (raw_reading as f32 / Self::ADC_MAX_RAW as f32) * Self::ADC_VREF;
+        pos_as_v
+    }
+
+    pub fn read_position_mm(&mut self, adc: &mut Adc<'_, C>) -> f32 {
+        let pos_as_v = self.read_position_v(adc);
+        let pos_in_mm = Self::STROKE_LENGTH * (pos_as_v - self.vref_position_lower)
+            / (self.vref_position_upper - self.vref_position_lower);
+        pos_in_mm
+    }
+
+    pub fn move_to_pos(
+        &mut self,
+        target_position_mm: f32,
+        duty_cycle_percent: u8,
+        adc: &mut Adc<'_, C>,
+    ) {
+        const TOLERANCE_MM: f32 = 0.1;
+
+        let target = target_position_mm.clamp(1.0, 19.0);
+        let mut current = self.read_position_mm(adc);
+
+        info!("Target Pos: {}, Current Pos: {}", target, current);
+
+        let direction = if current + TOLERANCE_MM < target {
+            self.set_direction_out();
+            Some(1.0_f32)
+        } else if current - TOLERANCE_MM > target {
+            self.set_direction_in();
+            Some(-1.0_f32)
+        } else {
+            None
+        };
+
+        if direction.is_none() {
+            self.set_speed(0);
+            return;
+        }
+
+        self.set_speed(duty_cycle_percent);
+
+        loop {
+            current = self.read_position_mm(adc);
+
+            if (current - target).abs() <= TOLERANCE_MM {
+                info!("Reached target window.");
+                break;
+            }
+        }
+        self.set_speed(0);
+    }
+}
 
 #[embassy_executor::main]
 async fn main(_spawner: Spawner) {
@@ -43,15 +140,15 @@ async fn main(_spawner: Spawner) {
         config.rcc.mux.adc12sel = mux::Adcsel::SYS;
         config.rcc.sys = Sysclk::PLL1_R;
     }
-    let mut p = embassy_stm32::init(config);
+    let p = embassy_stm32::init(config);
     info!("Peripherals initialized.");
 
     let mut adc = Adc::new(p.ADC1);
-    adc.set_sample_time(SampleTime::CYCLES12_5);
+    adc.set_sample_time(SampleTime::CYCLES247_5);
     info!("ADC initialized.");
 
-    // let motor_dir_pin: Output<'_> = Output::new(p.PA9, Level::High, Speed::High);
-    // info!("Motor direction pin initialized.");
+    let motor_dir_pin: Output<'_> = Output::new(p.PA9, Level::High, Speed::High); // D8 on nucleo
+    info!("Motor direction pin initialized.");
 
     let motor_pwm_pin: PwmPin<'_, TIM3, Ch2> = PwmPin::new(p.PC7, OutputType::PushPull); // PWM/D9 On nucleo
     let mut pwm = SimplePwm::new(
@@ -70,36 +167,19 @@ async fn main(_spawner: Spawner) {
 
     let mut led = Output::new(p.PA5, Level::High, Speed::Low);
 
+    let mut actuator: Actuator<'_, TIM3, ADC1> =
+        Actuator::new(3.3, 0.0, ch2, motor_dir_pin, p.PA0.degrade_adc());
+
     info!("Entering test loop.");
     loop {
-        let measured = adc_read_to_volts(adc.blocking_read(&mut p.PA0)); // A0 on nucleo
-        ch2.set_duty_cycle_fraction(1, 4);
-        led.set_high();
-        info!("Set PWM: 25%, LED: On, ADC Measurement: {}", measured);
-        Timer::after_millis(1000).await;
-
-        let measured = adc_read_to_volts(adc.blocking_read(&mut p.PA0)); // A0 on nucleo
-        ch2.set_duty_cycle_fraction(1, 2);
-        led.set_low();
-        info!("Set PWM: 50%, LED: Off, ADC Measurement: {}", measured);
-        Timer::after_millis(1000).await;
-
-        let measured = adc_read_to_volts(adc.blocking_read(&mut p.PA0)); // A0 on nucleo
-        ch2.set_duty_cycle_fraction(3, 4);
-        led.set_high();
-        info!("Set PWM: 75%, LED: On, ADC Measurement: {}", measured);
-        Timer::after_millis(1000).await;
-
-        let measured = adc_read_to_volts(adc.blocking_read(&mut p.PA0)); // A0 on nucleo
-        ch2.set_duty_cycle(ch2.max_duty_cycle() - 1);
-        led.set_low();
-        info!("Set PWM: 99%, LED: Off, ADC Measurement: {}", measured);
-        Timer::after_millis(1000).await;
+        actuator.move_to_pos(1.0, 90, &mut adc);
+        led.toggle();
+        Timer::after_secs(1).await;
+        actuator.move_to_pos(10.0, 90, &mut adc);
+        led.toggle();
+        Timer::after_secs(1).await;
+        actuator.move_to_pos(19.0, 90, &mut adc);
+        led.toggle();
+        Timer::after_secs(1).await;
     }
-}
-
-fn adc_read_to_volts(adc_reading: u16) -> f32 {
-    const U12_MAX: u16 = 4095;
-    const ADC_VREF: f32 = 3.3; // Based on the nucleo schematic it should be 3.25V, but 3.3V seems to give more accurate readings. Need to investigate further. 
-    (adc_reading as f32 / U12_MAX as f32) * ADC_VREF
 }
