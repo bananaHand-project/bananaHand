@@ -1,0 +1,12 @@
+name: capstone
+channels:
+  - conda-forge
+dependencies:
+  - python=3.10
+  - pip
+  - pip:
+    - ultralytics
+    - opencv-python
+    - numpy
+    - matplotlib
+    - tqdm
