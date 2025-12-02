@@ -1,0 +1,20 @@
+name: graspnet_lite
+channels:
+  - pytorch
+  - nvidia
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10
+  - pip
+  - numpy
+  - pandas
+  - scikit-learn
+  - matplotlib
+  - seaborn
+  - pillow
+  - opencv
+  - pytorch
+  - torchvision
+  - pytorch-cuda=11.8
+  - jupyterlab

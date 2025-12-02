@@ -1,0 +1,4020 @@
+{
+  "train": [
+    {
+      "path": "data/raw/apple/img_p1_88.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p3_19.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p1_28.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p2_70.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p3_27.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p1_86.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p1_36.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p1_18.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p2_8.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p1_139.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p2_19.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p1_68.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p1_39.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p2_67.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p2_102.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p1_125.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p1_65.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p1_92.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p1_111.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p3_80.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p2_94.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p3_77.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p2_55.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p3_109.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p2_35.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p2_30.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p3_86.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p1_20.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p1_107.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p3_48.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p2_88.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p1_34.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p1_109.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p1_129.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p2_16.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p1_37.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p3_70.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p1_8.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p2_21.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p2_37.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p1_59.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p3_111.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p2_17.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p3_115.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p1_12.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p3_21.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p1_119.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p1_123.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p1_30.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p2_7.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p1_44.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p3_24.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p3_44.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p3_17.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p3_88.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p2_11.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p1_9.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p3_11.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p1_13.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p2_72.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p2_65.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p2_84.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p1_6.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p1_10.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p3_8.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p2_100.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p3_25.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p1_29.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p3_12.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p3_98.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p2_47.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p2_18.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p3_36.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p3_4.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p3_90.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p1_22.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p3_52.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p2_96.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p2_28.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p1_4.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p3_105.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p2_45.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p1_84.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p2_69.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p3_42.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p1_90.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p1_135.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p2_61.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p3_6.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p3_101.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p2_32.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p1_67.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p2_57.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p3_96.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p1_38.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p2_49.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p2_15.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p1_48.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p3_76.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p2_53.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p2_23.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p3_84.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p2_90.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p2_12.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p3_117.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p3_16.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p1_23.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p2_77.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p2_6.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p1_94.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p3_56.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p1_63.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p3_62.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p2_43.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p2_5.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p3_18.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p2_34.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p1_78.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p2_9.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p1_16.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p3_72.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p1_24.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p1_42.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p3_38.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p2_20.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p1_11.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p2_22.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p3_100.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p1_127.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p1_98.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p3_46.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p1_72.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p3_107.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p2_41.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p3_58.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p3_9.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p2_74.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p1_35.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p1_133.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p1_70.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p1_46.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p2_110.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p2_118.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p1_33.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p2_116.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p2_39.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p3_29.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p3_20.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p1_144.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p3_64.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p3_113.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p1_80.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/bottle/00000689.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000121.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000918.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004176.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004911.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004149.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004156.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004915.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000890.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000910.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000136.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000892.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000011.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000884.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004181.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004928.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000127.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004952.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004152.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004936.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004179.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000128.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000004.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000903.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004935.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000904.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000898.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000895.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004903.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000697.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000002.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004178.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000663.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004932.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000131.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004905.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000698.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000120.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004921.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000886.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004946.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004949.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004157.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000677.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004158.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004953.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000690.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004167.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000006.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004933.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000679.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004907.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000672.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004168.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004166.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004904.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000661.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004163.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004159.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004901.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000665.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000133.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004959.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004956.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004144.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000135.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000667.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004923.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000915.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000664.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000914.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000891.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004160.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004920.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000688.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004153.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004151.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000899.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000901.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004955.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000009.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004925.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004950.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000137.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000885.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000894.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004963.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000670.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000896.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004146.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000897.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000888.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000125.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004938.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000660.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000686.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000909.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004957.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004947.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000673.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004172.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000699.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004961.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004183.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004150.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000130.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000692.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004154.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000671.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000129.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004937.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004914.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004919.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000696.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004948.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004177.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004927.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000010.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000685.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000007.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000119.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004182.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000912.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000920.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000684.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000681.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000694.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004180.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004945.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000883.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004169.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000113.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000675.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000695.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004910.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000138.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004173.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004918.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000693.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000919.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000687.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000902.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000000.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000900.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004175.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004916.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000905.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004940.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004147.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004941.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004931.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000662.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004944.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000122.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000003.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004939.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_24.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_51.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_148.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_96.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_12.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_154.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_114.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_161.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_69.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_55.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_80.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_46.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_91.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_109.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_141.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_58.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_79.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_78.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_30.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_50.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_71.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_74.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_84.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_27.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_13.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_100.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_76.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_155.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_131.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_105.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_127.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_10.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_8.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_11.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_4.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_152.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_65.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_37.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_118.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_87.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_73.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_99.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_23.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_108.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_126.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_35.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_72.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_138.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_39.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_124.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_125.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_117.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_164.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_19.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_162.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_144.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_81.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_49.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_115.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_116.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_31.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_16.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_63.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_68.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_85.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_67.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_142.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_98.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_7.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_113.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_132.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_6.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_90.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_146.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_92.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_157.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_133.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_112.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_44.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_22.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_56.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_66.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_75.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_140.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_121.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_86.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_57.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_159.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_1.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_42.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_95.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_103.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_128.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_120.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_17.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_70.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_54.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_60.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_20.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_93.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_94.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_43.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_36.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_62.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_149.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_2.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_110.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_102.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_53.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_18.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_119.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_129.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_111.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/grape/Grape (87).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (987).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (853).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (816).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (931).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (808).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (992).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (850).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (944).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (837).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (825).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (95).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (773).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (848).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (782).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (818).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (937).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (810).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (972).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (930).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (942).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (927).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (792).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (929).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (921).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (827).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (961).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (981).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (775).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (824).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (980).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (986).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (79).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (765).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (924).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (973).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (859).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (988).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (970).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (797).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (786).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (840).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (928).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (932).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (98).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (822).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (974).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (812).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (996).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (950).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (985).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (849).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (80).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (769).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (776).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (807).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (967).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (788).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (99).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (86).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (799).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (838).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (830).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (968).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (777).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (975).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (965).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (833).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (785).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (809).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (854).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (934).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (991).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (999).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (778).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (852).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (926).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (793).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (971).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (977).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (851).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (789).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (794).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (990).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (947).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (847).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (772).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (843).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (791).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (806).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (910).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (997).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (767).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (998).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (983).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (795).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (814).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (855).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (964).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (995).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (946).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (805).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (90).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (819).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (790).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (803).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (81).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (796).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (770).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (787).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (962).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (912).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (780).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (96).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (842).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (774).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (945).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (956).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (831).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (834).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (811).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (918).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (768).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (828).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (839).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (959).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (919).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (952).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (804).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (88).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (846).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (941).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (771).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (94).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (913).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (969).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (955).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (976).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (817).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (938).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/mug/image_833.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_96.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_948.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_934.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_88.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_806.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_852.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_92.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_958.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_924.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_78.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_926.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_90.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_831.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_922.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_984.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_996.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_821.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_970.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_811.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_797.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_82.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_914.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_95.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_950.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_91.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_913.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_962.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_967.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_964.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_943.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_836.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_937.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_966.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_920.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_790.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_990.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_997.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_805.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_89.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_999.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_841.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_812.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_976.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_810.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_929.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_851.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_917.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_974.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_800.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_955.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_87.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_939.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_960.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_982.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_987.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_791.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_849.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_957.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_814.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_998.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_963.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_775.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_835.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_9.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_795.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_951.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_793.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_857.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_804.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_8.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_799.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_786.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_781.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_859.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_81.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_995.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_941.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_961.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_918.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_826.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_985.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_993.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_80.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_846.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_843.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_986.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_822.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_991.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_789.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_802.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_784.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_809.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_944.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_860.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_792.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_915.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_992.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_977.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_975.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_783.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_925.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_820.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_782.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_788.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_959.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_936.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_780.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_973.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_813.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_971.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_98.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_829.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_807.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_840.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_776.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_99.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_933.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_97.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_861.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_919.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_848.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_79.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_927.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_855.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_808.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_935.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_787.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_785.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_965.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_803.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_778.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_844.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_815.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_858.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_827.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_972.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_949.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_798.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_84.png",
+      "label": "mug"
+    }
+  ],
+  "val": [
+    {
+      "path": "data/raw/apple/img_p1_55.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p3_121.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p1_131.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p1_40.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p2_92.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p2_114.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p1_82.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p2_81.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p1_137.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p2_13.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p1_21.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p2_76.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p2_4.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p1_121.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p1_7.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p3_60.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p2_108.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p2_112.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p1_143.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p2_14.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p3_68.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p3_82.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p2_104.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p3_66.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p1_31.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p3_54.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p2_106.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p3_74.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p3_31.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p1_32.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p1_100.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p1_76.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/bottle/00000111.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004917.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004164.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000916.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000118.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004942.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000921.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004943.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000666.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004924.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000134.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000917.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004161.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004930.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000669.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000683.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000126.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004962.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000906.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004951.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000124.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004906.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004908.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004913.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000112.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000922.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000908.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000911.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000893.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000913.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004909.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004929.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000123.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_101.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_137.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_83.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_5.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_3.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_77.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_158.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_25.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_139.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_130.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_41.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_64.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_106.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_52.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_163.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_28.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_45.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_143.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_88.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_150.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_151.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_21.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_32.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_59.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/grape/Grape (949).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (948).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (836).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (85).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (766).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (923).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (856).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (77).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (858).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (91).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (813).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (779).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (958).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (920).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (966).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (844).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (89).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (908).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (78).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (815).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (801).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (857).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (82).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (800).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (798).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (784).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (939).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (994).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (845).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (829).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/mug/image_94.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_989.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_93.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_824.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_953.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_817.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_942.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_954.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_847.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_819.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_801.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_828.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_832.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_969.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_837.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_923.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_994.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_850.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_945.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_916.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_854.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_940.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_946.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_979.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_86.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_952.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_845.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_830.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_911.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_825.png",
+      "label": "mug"
+    }
+  ],
+  "test": [
+    {
+      "path": "data/raw/apple/img_p2_98.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p2_36.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p1_50.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p2_24.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p3_79.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p3_32.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p3_13.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p3_40.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p1_41.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p2_86.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p3_94.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p3_103.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p2_63.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p1_57.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p1_5.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p1_141.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p1_115.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p1_117.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p2_26.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p3_10.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p1_14.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p2_79.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p3_92.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p3_22.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p1_15.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p3_5.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p1_25.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p1_52.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p1_61.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p1_74.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p3_50.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p1_113.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p1_17.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/apple/img_p3_119.jpeg",
+      "label": "apple"
+    },
+    {
+      "path": "data/raw/bottle/00000668.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000907.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004934.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000682.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004145.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004171.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004170.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004926.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000132.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004162.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000674.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004148.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004912.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000691.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000680.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004155.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004954.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000887.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000008.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000116.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004958.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000114.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004902.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004922.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000117.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000001.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000676.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004960.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000678.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004165.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00004174.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000005.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000889.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/bottle/00000115.jpg",
+      "label": "bottle"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_145.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_15.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_61.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_107.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_40.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_123.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_135.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_160.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_97.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_89.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_29.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_9.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_104.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_48.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_14.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_136.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_153.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_134.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_47.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_82.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_33.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_122.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_156.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_147.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/egg/not_damaged_34.jpg",
+      "label": "egg"
+    },
+    {
+      "path": "data/raw/grape/Grape (820).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (832).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (783).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (914).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (978).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (821).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (960).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (925).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (933).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (83).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (963).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (823).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (826).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (917).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (922).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (802).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (916).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (940).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (911).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (93).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (984).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (957).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (915).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (993).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (841).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (951).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (943).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (935).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (97).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/grape/Grape (92).jpeg",
+      "label": "grape"
+    },
+    {
+      "path": "data/raw/mug/image_842.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_796.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_779.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_921.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_981.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_968.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_928.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_978.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_983.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_988.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_931.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_912.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_83.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_794.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_818.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_938.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_777.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_947.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_838.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_980.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_956.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_839.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_853.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_834.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_856.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_823.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_930.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_816.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_85.png",
+      "label": "mug"
+    },
+    {
+      "path": "data/raw/mug/image_932.png",
+      "label": "mug"
+    }
+  ]
+}
