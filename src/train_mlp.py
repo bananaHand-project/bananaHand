@@ -1,9 +1,11 @@
 """
-Trains and evaluates a Multi-Layer Perceptron (MLP) classifier for image classification.
-
-This script uses a pre-defined data split from a JSON file to train an MLP model,
-evaluates its performance on validation and test sets, and saves detailed classification
-metrics and plots. It is designed to be configurable via command-line arguments.
+Two-head MLP baselines (object + grip via fixed mapping).
+- Uses precomputed splits.json; images are resized, flattened, and fed to MLPClassifier.
+- Runs 5 hardcoded trials with varied hidden sizes / activation / learning rate.
+- Per trial, saves plots under plots_mlp/trial_*:
+  * confusion matrices (object + grip, val + test)
+  * precision/recall bars (object + grip, val + test)
+Summary plot compares test accuracy across trials for object vs grip heads.
 """
 
 import argparse
@@ -35,13 +37,11 @@ OBJECT_TO_GRIP = {
 
 
 def load_splits(path: Path) -> Dict[str, List[Dict[str, str]]]:
-    """Loads data splits from a JSON file."""
     with path.open("r", encoding="utf-8") as f:
         return json.load(f)
 
 
 def load_image(path: Path, size: Tuple[int, int]) -> np.ndarray:
-    """Loads, converts, resizes, and normalizes an image."""
     img = Image.open(path).convert("RGB")
     img = img.resize(size)
     arr = np.asarray(img, dtype=np.float32) / 255.0
@@ -51,8 +51,7 @@ def load_image(path: Path, size: Tuple[int, int]) -> np.ndarray:
 def build_dataset(
     entries: List[Dict[str, str]],
     image_size: Tuple[int, int],
-) -> Tuple[np.ndarray, np.ndarray]:
-    """Builds a dataset from a list of entries."""
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     xs: List[np.ndarray] = []
     obj_labels: List[str] = []
     grip_labels: List[str] = []
@@ -63,8 +62,7 @@ def build_dataset(
         xs.append(load_image(img_path, image_size))
         obj_labels.append(obj_label)
         grip_labels.append(grip_label)
-    x_arr = np.stack(xs, axis=0)
-    return x_arr, np.array(obj_labels), np.array(grip_labels)
+    return np.stack(xs, axis=0), np.array(obj_labels), np.array(grip_labels)
 
 
 def plot_confusion(
@@ -76,7 +74,6 @@ def plot_confusion(
     split_name: str,
     title_suffix: str = "",
 ) -> None:
-    """Plots a normalized confusion matrix."""
     cm = confusion_matrix(y_true, y_pred, labels=np.arange(len(class_names)))
     cm_norm = cm.astype(np.float32) / cm.sum(axis=1, keepdims=True)
 
@@ -97,8 +94,7 @@ def plot_confusion(
     ax.set_title(f"{title_prefix} - {split_name} confusion matrix{extra}")
     plt.tight_layout()
     output_dir.mkdir(parents=True, exist_ok=True)
-    out_path = output_dir / f"{model_name.replace(' ', '_')}_{split_name}_confusion.png"
-    fig.savefig(out_path, dpi=200)
+    fig.savefig(output_dir / f"{title_prefix}_{split_name}_confusion.png", dpi=200)
     plt.close(fig)
 
 
@@ -111,7 +107,9 @@ def plot_precision_recall(
     split_name: str,
     title_suffix: str = "",
 ) -> None:
-    """Plots per-class precision and recall as grouped bars."""
+    precision, recall, _, _ = precision_recall_fscore_support(
+        y_true, y_pred, labels=np.arange(len(class_names)), zero_division=0
+    )
     indices = np.arange(len(class_names))
     width = 0.35
 
@@ -127,8 +125,7 @@ def plot_precision_recall(
     ax.legend(loc="lower right")
     plt.tight_layout()
     output_dir.mkdir(parents=True, exist_ok=True)
-    out_path = output_dir / f"{model_name.replace(' ', '_')}_{split_name}_precision_recall.png"
-    fig.savefig(out_path, dpi=200)
+    fig.savefig(output_dir / f"{title_prefix}_{split_name}_precision_recall.png", dpi=200)
     plt.close(fig)
 
 
@@ -143,31 +140,19 @@ def train_and_report(
     class_names: List[str],
     title_prefix: str,
     plots_dir: Path,
-    params: Dict[str, Any],
-) -> None:
-    """Trains a model and evaluates it on validation and test sets."""
-    print(f"=== Training {name} ===")
+    title_suffix: str,
+) -> Dict[str, Any]:
     model.fit(x_train, y_train)
 
     def eval_split(split_name: str, x: np.ndarray, y_true: np.ndarray) -> Dict[str, Any]:
         y_pred = model.predict(x)
         acc = accuracy_score(y_true, y_pred)
-        report = classification_report(
-            y_true, y_pred, target_names=class_names, digits=4
+        print(f"\n{title_prefix} - {split_name} accuracy: {acc:.4f}")
+        print(
+            classification_report(
+                y_true, y_pred, target_names=class_names, digits=4
+            )
         )
-        precision, recall, _, _ = precision_recall_fscore_support(
-            y_true, y_pred, labels=np.arange(len(target_names))
-        )
-        return {"y_true": y_true, "y_pred": y_pred, "precision": precision, "recall": recall}
-
-    title_suffix = ", ".join(f"{k}={v}" for k, v in params.items())
-
-    results["val"] = report_split("val", x_val, y_val)
-    results["test"] = report_split("test", x_test, y_test)
-
-    # Generate and save plots
-    for split_name in ("val", "test"):
-        split_res = results[split_name]
         plot_confusion(
             title_prefix,
             y_true,
@@ -186,92 +171,185 @@ def train_and_report(
             split_name,
             title_suffix=title_suffix,
         )
-        return {"accuracy": acc, "report": report}
+        return {"accuracy": acc}
+
+    return {
+        "val": eval_split("val", x_val, y_val),
+        "test": eval_split("test", x_test, y_test),
+    }
 
 
 def main() -> None:
-    """Main entry point for the script."""
     parser = argparse.ArgumentParser(
-        description="Train an MLP classifier on an image dataset."
+        description="Two-head MLP baselines (object + grip) with 5 trials."
     )
     parser.add_argument(
-        "--splits", type=str, default="data/splits.json", help="Path to data splits JSON file."
+        "--splits",
+        type=str,
+        default="data/splits.json",
+        help="Path to data splits JSON file.",
     )
     parser.add_argument(
-        "--image-size", type=int, nargs=2, default=(128, 128), metavar=("W", "H"), help="Image resize dimensions."
+        "--image-size",
+        type=int,
+        nargs=2,
+        default=(128, 128),
+        metavar=("W", "H"),
+        help="Image resize dimensions.",
     )
     parser.add_argument(
-        "--plots-dir", type=str, default="plots", help="Directory to save evaluation plots."
-    )
-    parser.add_argument(
-        "--hidden-layer-sizes", type=int, nargs="+", default=[100, 50], help="Sizes of hidden layers."
-    )
-    parser.add_argument(
-        "--activation", type=str, default="relu", help="Activation function for hidden layers."
-    )
-    parser.add_argument(
-        "--solver", type=str, default="adam", help="The solver for weight optimization."
-    )
-    parser.add_argument(
-        "--learning-rate-init", type=float, default=0.001, help="Initial learning rate."
-    )
-    parser.add_argument(
-        "--max-iter", type=int, default=1000, help="Maximum number of iterations."
+        "--plots-dir",
+        type=str,
+        default="plots_mlp",
+        help="Base directory to save per-trial plots.",
     )
     args = parser.parse_args()
 
-    # Validate paths
     splits_path = Path(args.splits)
     if not splits_path.exists():
         raise SystemExit(f"Splits file not found: {splits_path}")
 
-    # Load data
     splits = load_splits(splits_path)
     image_size = tuple(args.image_size)
-    plots_dir = Path(args.plots_dir)
+    base_plots_dir = Path(args.plots_dir)
+    base_plots_dir.mkdir(parents=True, exist_ok=True)
 
-    print("Building datasets...")
-    x_train, y_train_str = build_dataset(splits["train"], image_size)
-    x_val, y_val_str = build_dataset(splits["val"], image_size)
-    x_test, y_test_str = build_dataset(splits["test"], image_size)
+    x_train, y_train_obj_str, y_train_grip_str = build_dataset(splits["train"], image_size)
+    x_val, y_val_obj_str, y_val_grip_str = build_dataset(splits["val"], image_size)
+    x_test, y_test_obj_str, y_test_grip_str = build_dataset(splits["test"], image_size)
 
-    # Encode labels
-    label_encoder = LabelEncoder()
-    y_train = label_encoder.fit_transform(y_train_str)
-    y_val = label_encoder.transform(y_val_str)
-    y_test = label_encoder.transform(y_test_str)
-    target_names = list(label_encoder.classes_)
-    print(f"Found {len(target_names)} classes: {target_names}")
+    obj_encoder = LabelEncoder()
+    grip_encoder = LabelEncoder()
+    y_train_obj = obj_encoder.fit_transform(y_train_obj_str)
+    y_val_obj = obj_encoder.transform(y_val_obj_str)
+    y_test_obj = obj_encoder.transform(y_test_obj_str)
+    obj_classes = list(obj_encoder.classes_)
 
-    # Define model and its parameters
-    mlp_params = {
-        "hidden_layer_sizes": tuple(args.hidden_layer_sizes),
-        "activation": args.activation,
-        "solver": args.solver,
-        "learning_rate_init": args.learning_rate_init,
-        "max_iter": args.max_iter,
-        "random_state": 42,
-        "early_stopping": True,
-        "validation_fraction": 0.1,
-        "n_iter_no_change": 10,
-    }
-    mlp = MLPClassifier(**mlp_params)
+    y_train_grip = grip_encoder.fit_transform(y_train_grip_str)
+    y_val_grip = grip_encoder.transform(y_val_grip_str)
+    y_test_grip = grip_encoder.transform(y_test_grip_str)
+    grip_classes = list(grip_encoder.classes_)
 
-    # Train and evaluate
-    train_and_evaluate(
-        name="MLP",
-        model=mlp,
-        x_train=x_train,
-        y_train=y_train,
-        x_val=x_val,
-        y_val=y_val,
-        x_test=x_test,
-        y_test=y_test,
-        target_names=target_names,
-        plots_dir=plots_dir,
-        params=mlp_params,
-    )
-    print(f"\n MLP evaluation complete. Plots saved to '{plots_dir}'.")
+    trials: List[Dict[str, Any]] = [
+        {
+            "name": "trial_1",
+            "hidden": (256, 128),
+            "activation": "relu",
+            "lr": 1e-3,
+        },
+        {
+            "name": "trial_2",
+            "hidden": (512, 256),
+            "activation": "relu",
+            "lr": 1e-3,
+        },
+        {
+            "name": "trial_3",
+            "hidden": (256, 128, 64),
+            "activation": "tanh",
+            "lr": 1e-3,
+        },
+        {
+            "name": "trial_4",
+            "hidden": (512, 256, 128),
+            "activation": "relu",
+            "lr": 5e-4,
+        },
+        {
+            "name": "trial_5",
+            "hidden": (256, 256),
+            "activation": "logistic",
+            "lr": 7e-4,
+        },
+    ]
+
+    summary_test_acc = []
+
+    for trial in trials:
+        trial_dir = base_plots_dir / trial["name"]
+        trial_dir.mkdir(parents=True, exist_ok=True)
+        suffix = (
+            f"hidden={trial['hidden']}, act={trial['activation']}, lr={trial['lr']}"
+        )
+        print(f"\n=== Running {trial['name']} ===")
+        print(suffix)
+
+        common_params = dict(
+            hidden_layer_sizes=trial["hidden"],
+            activation=trial["activation"],
+            learning_rate_init=trial["lr"],
+            solver="adam",
+            max_iter=500,
+            random_state=42,
+            early_stopping=True,
+            validation_fraction=0.1,
+            n_iter_no_change=10,
+        )
+
+        obj_model = MLPClassifier(**common_params)
+        grip_model = MLPClassifier(**common_params)
+
+        obj_results = train_and_report(
+            obj_model,
+            x_train,
+            y_train_obj,
+            x_val,
+            y_val_obj,
+            x_test,
+            y_test_obj,
+            obj_classes,
+            f"{trial['name']}_MLP_object",
+            trial_dir,
+            suffix,
+        )
+
+        grip_results = train_and_report(
+            grip_model,
+            x_train,
+            y_train_grip,
+            x_val,
+            y_val_grip,
+            x_test,
+            y_test_grip,
+            grip_classes,
+            f"{trial['name']}_MLP_grip",
+            trial_dir,
+            suffix,
+        )
+
+        summary_test_acc.append(
+            (
+                trial["name"],
+                obj_results["test"]["accuracy"],
+                grip_results["test"]["accuracy"],
+            )
+        )
+
+        print(
+            f"Completed {trial['name']}: "
+            f"test obj acc={obj_results['test']['accuracy']:.4f}, "
+            f"test grip acc={grip_results['test']['accuracy']:.4f}"
+        )
+
+    # Summary bar plot
+    trial_names = [t[0] for t in summary_test_acc]
+    obj_accs = [t[1] for t in summary_test_acc]
+    grip_accs = [t[2] for t in summary_test_acc]
+    x_idx = np.arange(len(trial_names))
+    width = 0.35
+
+    fig, ax = plt.subplots(figsize=(10, 5))
+    ax.bar(x_idx - width / 2, obj_accs, width, label="Object head")
+    ax.bar(x_idx + width / 2, grip_accs, width, label="Grip head")
+    ax.set_xticks(x_idx)
+    ax.set_xticklabels(trial_names, rotation=25, ha="right")
+    ax.set_ylabel("Test accuracy")
+    ax.set_ylim(0.0, 1.05)
+    ax.set_title("MLP trials - test accuracy (object vs grip)")
+    ax.legend()
+    plt.tight_layout()
+    fig.savefig(base_plots_dir / "mlp_trials_test_accuracy.png", dpi=200)
+    plt.close(fig)
 
     print(f"\nAll trials complete. Plots saved under '{base_plots_dir}'.")
 
