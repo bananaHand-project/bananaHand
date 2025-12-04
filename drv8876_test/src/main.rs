@@ -3,6 +3,8 @@
 
 mod fmt;
 
+use core::time::Duration;
+
 #[cfg(not(feature = "defmt"))]
 use panic_halt as _;
 #[cfg(feature = "defmt")]
@@ -12,6 +14,7 @@ use embassy_executor::Spawner;
 use embassy_stm32::{
     Config,
     adc::{Adc, AdcChannel, AnyAdcChannel, Instance, SampleTime},
+    can::filter::StandardFilter,
     gpio::{Level, Output, OutputType, Speed},
     peripherals::{ADC1, TIM3},
     time::khz,
@@ -20,7 +23,7 @@ use embassy_stm32::{
         simple_pwm::{PwmPin, SimplePwm, SimplePwmChannel},
     },
 };
-use embassy_time::Timer;
+use embassy_time::{Instant, Timer};
 use fmt::info;
 
 struct Actuator<'a, T: GeneralInstance4Channel, C: Instance> {
@@ -68,6 +71,10 @@ impl<'a, T: GeneralInstance4Channel, C: Instance> Actuator<'a, T, C> {
         self.pwm.set_duty_cycle_percent(percent);
     }
 
+    pub fn read_position_raw(&mut self, adc: &mut Adc<'_, C>) -> u16 {
+        adc.blocking_read(&mut self.adc_pin)
+    }
+
     pub fn read_position_v(&mut self, adc: &mut Adc<'_, C>) -> f32 {
         let raw_reading = adc.blocking_read(&mut self.adc_pin);
         let pos_as_v = (raw_reading as f32 / Self::ADC_MAX_RAW as f32) * Self::ADC_VREF;
@@ -81,6 +88,7 @@ impl<'a, T: GeneralInstance4Channel, C: Instance> Actuator<'a, T, C> {
         pos_in_mm
     }
 
+    /// Bang-Bang Controller
     pub fn move_to_pos(
         &mut self,
         target_position_mm: f32,
@@ -115,11 +123,86 @@ impl<'a, T: GeneralInstance4Channel, C: Instance> Actuator<'a, T, C> {
             current = self.read_position_mm(adc);
 
             if (current - target).abs() <= TOLERANCE_MM {
+                info!("{}", current);
                 info!("Reached target window.");
                 break;
             }
         }
         self.set_speed(0);
+    }
+
+    /// P Controller
+    pub fn move_to_pos_P(
+        &mut self,
+        kp: f32,
+        target_position_mm: f32,
+        // duty_cycle_percent: u8,
+        adc: &mut Adc<'_, C>,
+    ) {
+        const TOLERANCE_MM: f32 = 0.1;
+
+        let target = target_position_mm.clamp(1.0, 19.0);
+        let mut loop_count = 0;
+        loop {
+            let current = self.read_position_mm(adc);
+
+            let error = target_position_mm - current;
+
+            let duty_cycle_percent: i8 = (error * kp) as i8;
+
+            let duty_cycle_percent = duty_cycle_percent.clamp(-100, 100);
+
+            if duty_cycle_percent < 0 {
+                self.set_direction_in();
+            } else {
+                self.set_direction_out();
+            }
+
+            self.set_speed(duty_cycle_percent.abs() as u8);
+
+            if loop_count % 1000 == 0 {
+                info!(
+                    "Target Pos: {}, Current Pos: {}, Error: {}, DC: {}",
+                    target, current, error, duty_cycle_percent
+                );
+            }
+
+            loop_count += 1;
+
+            if (current - target).abs() <= TOLERANCE_MM {
+                info!("{}", current);
+                info!("Reached target window.");
+                break;
+            }
+        }
+
+        // let direction = if current + TOLERANCE_MM < target {
+        //     self.set_direction_out();
+        //     Some(1.0_f32)
+        // } else if current - TOLERANCE_MM > target {
+        //     self.set_direction_in();
+        //     Some(-1.0_f32)
+        // } else {
+        //     None
+        // };
+
+        // if direction.is_none() {
+        //     self.set_speed(0);
+        //     return;
+        // }
+
+        // self.set_speed(duty_cycle_percent);
+
+        // loop {
+        //     current = self.read_position_mm(adc);
+
+        //     if (current - target).abs() <= TOLERANCE_MM {
+        //         info!("{}", current);
+        //         info!("Reached target window.");
+        //         break;
+        //     }
+        // }
+        // self.set_speed(0);
     }
 }
 
@@ -171,15 +254,39 @@ async fn main(_spawner: Spawner) {
         Actuator::new(3.3, 0.0, ch2, motor_dir_pin, p.PA0.degrade_adc());
 
     info!("Entering test loop.");
-    loop {
-        actuator.move_to_pos(1.0, 90, &mut adc);
-        led.toggle();
-        Timer::after_secs(1).await;
-        actuator.move_to_pos(10.0, 90, &mut adc);
-        led.toggle();
-        Timer::after_secs(1).await;
-        actuator.move_to_pos(19.0, 90, &mut adc);
-        led.toggle();
-        Timer::after_secs(1).await;
-    }
+    let dcp = 100;
+    let kp = 35.0;
+
+    actuator.move_to_pos(1.0, dcp, &mut adc);
+    // led.toggle();
+    Timer::after_secs(3).await;
+
+    // starting pwm speed test
+    let start_forward = Instant::now();
+    actuator.move_to_pos(19.0, dcp, &mut adc);
+    let time_passed_forward = start_forward.elapsed().as_millis();
+    info!("{}", time_passed_forward);
+    // led.toggle();
+    Timer::after_secs(3).await;
+
+    let start_backward = Instant::now();
+    actuator.move_to_pos(1.0, dcp, &mut adc);
+    let time_passed_backward = start_backward.elapsed().as_millis();
+    info!("{}", time_passed_backward);
+
+    // loop {
+        // actuator.move_to_pos_P(kp, 1.0, &mut adc);
+        // led.toggle();
+        // Timer::after_secs(2).await;
+        // actuator.move_to_pos_P(kp, 19.0, &mut adc);
+        // led.toggle();
+        // Timer::after_secs(2).await;
+
+        // actuator.move_to_pos(1.0, dcp, &mut adc);
+        // led.toggle();
+        // Timer::after_secs(2).await;
+        // actuator.move_to_pos(19.5, dcp, &mut adc);
+        // led.toggle();
+        // Timer::after_secs(2).await;
+    // }
 }
