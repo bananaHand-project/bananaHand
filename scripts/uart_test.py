@@ -42,54 +42,50 @@ def parse_frame(frame: bytes) -> list[float] | None:
     return positions
 
 
+
 def main():
-    ser = serial.Serial("/dev/ttyACM0", baudrate=115200, timeout=0.2)
+    ser = serial.Serial("/dev/ttyACM0", baudrate=115200, timeout=0.5)
     seq = 0
     try:
         while True:
-            # generate 8 positions between 1 and 19
             positions = [random.uniform(1.0, 19.0) for _ in range(8)]
             frame = build_frame(positions)
 
+            send_time = time.monotonic()
             ser.write(frame)
             try:
                 ser.flush()
             except Exception:
                 pass
 
-            print(f"sent seq={seq} positions: {[round(x,3) for x in positions]}")
-            seq = (seq + 1) & 0xFFFF
-
-            # read header (blocking up to timeout)
+            # Wait for echo
             hdr = ser.read(3)
             if len(hdr) < 3:
                 print("no response header (timeout)")
-                time.sleep(0.1)
                 continue
 
             if hdr[0] != START_BYTE:
                 print("invalid start, draining")
                 _ = ser.read(256)
-                time.sleep(0.1)
                 continue
 
             msg_type = hdr[1]
             length = hdr[2]
-            rest = ser.read(length + 2)  # payload + checksum + end
+            rest = ser.read(length + 2)
             if len(rest) < (length + 2):
                 print("incomplete response")
-                time.sleep(0.1)
                 continue
+
+            recv_time = time.monotonic()
+            rtt_ms = (recv_time - send_time) * 1000.0
 
             candidate = bytes(hdr + rest)
             positions_resp = parse_frame(candidate)
             if positions_resp is not None:
-                print(f"recv seq echo positions: {[round(x,3) for x in positions_resp]}")
+                print(f"RTT={rtt_ms:.2f} ms | sent: {[round(x,3) for x in positions]} | recv: {[round(x,3) for x in positions_resp]}")
             else:
-                print(f"invalid frame: {candidate.hex()}")
-
-            time.sleep(0.2)
-
+                print(f"invalid frame: {candidate.hex()} | RTT={rtt_ms:.2f} ms")
+            
     except KeyboardInterrupt:
         print("stopping")
     finally:

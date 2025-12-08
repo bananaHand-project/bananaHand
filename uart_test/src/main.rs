@@ -40,7 +40,7 @@ async fn main(_spawner: Spawner) {
 
         for &b in &buf[..n] {
             if let Some((msg_type, data)) = parser.parse_byte(b) {
-                defmt::info!("Got frame type={} len={}", msg_type, data.len());
+                // defmt::info!("Got frame type={} len={}", msg_type, data.len());
 
                 // If this is a position update frame, try to interpret payload as 8 little-endian f32s
                 if msg_type == MessageType::PositionUpdate as u8 {
@@ -50,7 +50,7 @@ async fn main(_spawner: Spawner) {
                         let start = i * 4;
                         let bytes: [u8; 4] = [data[start], data[start + 1], data[start + 2], data[start + 3]];
                         positions[i] = f32::from_le_bytes(bytes);
-                        defmt::info!(" pos[{}] = {}", i, positions[i]);
+                        // defmt::info!(" pos[{}] = {}", i, positions[i]);
                     }
 
                     // Echo the positions back using build_frame
