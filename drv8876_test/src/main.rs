@@ -259,7 +259,7 @@ async fn main(_spawner: Spawner) {
 
     actuator.move_to_pos(1.0, dcp, &mut adc);
     // led.toggle();
-    Timer::after_secs(3).await;
+    Timer::after_secs(2).await;
 
     // starting pwm speed test
     let start_forward = Instant::now();
@@ -273,6 +273,7 @@ async fn main(_spawner: Spawner) {
     actuator.move_to_pos(1.0, dcp, &mut adc);
     let time_passed_backward = start_backward.elapsed().as_millis();
     info!("{}", time_passed_backward);
+    Timer::after_secs(1).await;
 
     // loop {
         // actuator.move_to_pos_P(kp, 1.0, &mut adc);
