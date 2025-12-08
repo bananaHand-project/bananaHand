@@ -1,1 +1,0 @@
-Result<embassy_stm32::usart::Uart<'_, embassy_stm32::mode::Async>, ConfigError>

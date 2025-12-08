@@ -1,3 +1,0 @@
-cargo:rustc-link-search=/home/lokesh/BananaHand/uart_test/target/debug/build/defmt-3eeeb2bff46a41c4/out
-cargo:rustc-check-cfg=cfg(c_variadic)
-cargo:rustc-check-cfg=cfg(no_cas)

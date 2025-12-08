@@ -1,2 +1,0 @@
-embassy_stm32::usart::InterruptHandler<embassy_stm32::peripherals::USART2>
-embassy_stm32::usart::Config: Binding<embassy_stm32::interrupt::typelevel::USART2, embassy_stm32::usart::InterruptHandler<embassy_stm32::peripherals::USART2>>

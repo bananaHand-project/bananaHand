@@ -1,1 +1,0 @@
-DMA1_CH2: embassy_stm32::usart::RxDma<embassy_stm32::peripherals::USART2>
