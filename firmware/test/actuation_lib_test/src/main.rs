@@ -98,6 +98,8 @@ async fn main(_spawner: Spawner) {
     let current_pos_mm = actuator.read_position_mm_async(&mut adc, &mut dma).await;
     info!("Current position reading (mm): {}", current_pos_mm);
 
+    Timer::after_secs(3).await;
+
     info!("Retract actuator fully");
     actuator
         .move_to_position(5.0, 90, true, &mut adc, &mut dma)
@@ -105,18 +107,48 @@ async fn main(_spawner: Spawner) {
     let current_pos_mm = actuator.read_position_mm_async(&mut adc, &mut dma).await;
     info!("Homing complete");
     info!("Current position reading (mm): {}", current_pos_mm);
-    Timer::after_millis(500).await;
+    Timer::after_secs(3).await;
     actuator
         .move_to_position(15.0, 90, true, &mut adc, &mut dma)
         .await;
     let current_pos_mm = actuator.read_position_mm_async(&mut adc, &mut dma).await;
     info!("Move complete");
     info!("Current position reading (mm): {}", current_pos_mm);
-    Timer::after_millis(500).await;
+    Timer::after_secs(3).await;
+
+    info!("Returning to 0.0 mm");
     actuator
-        .move_to_position(15.0, 90, true, &mut adc, &mut dma)
+        .move_to_position(0.0, 20, true, &mut adc, &mut dma)
         .await;
     let current_pos_mm = actuator.read_position_mm_async(&mut adc, &mut dma).await;
     info!("Move complete");
     info!("Current position reading (mm): {}", current_pos_mm);
+    Timer::after_secs(3).await;
+
+    info!("Move to 19.0 mm, end in coast");
+    actuator
+        .move_to_position(19.0, 20, false, &mut adc, &mut dma)
+        .await;
+    let current_pos_mm = actuator.read_position_mm_async(&mut adc, &mut dma).await;
+    info!("Move complete");
+    info!("Current position reading (mm): {}", current_pos_mm);
+    info!("Backdrive plunger [8 second window]");
+    Timer::after_secs(8).await;
+
+    info!("Returning to 0.0 mm");
+    actuator
+        .move_to_position(0.0, 90, false, &mut adc, &mut dma)
+        .await;
+    let current_pos_mm = actuator.read_position_mm_async(&mut adc, &mut dma).await;
+    info!("Move complete");
+    info!("Current position reading (mm): {}", current_pos_mm);
+
+    actuator.coast();
+    led.set_low();
+
+    loop {
+        info!("Tests complete");
+        led.toggle();
+        Timer::after_secs(1).await;
+    }
 }
