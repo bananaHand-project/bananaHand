@@ -62,7 +62,7 @@ async fn main(_spawner: Spawner) {
 
     let mut led = Output::new(p.PA5, Level::High, Speed::Low);
 
-    let mut pwm = SimplePwm::new(
+    let pwm = SimplePwm::new(
         TIM3,
         Some(PwmPin::new(p.PA6, OutputType::PushPull)),
         Some(PwmPin::new(p.PC7, OutputType::PushPull)),
@@ -87,6 +87,7 @@ async fn main(_spawner: Spawner) {
     );
 
     info!("Starting PQ12 test");
+    led.set_high();
 
     let current_i_raw = actuator.read_current_raw_async(&mut adc, &mut dma).await;
     info!("Current I reading (RAW): {}", current_i_raw);
