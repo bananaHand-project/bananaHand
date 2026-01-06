@@ -34,7 +34,24 @@ const CMP2: usize = 1;
 
 #[embassy_executor::main]
 async fn main(_spawner: Spawner) {
-    let p = embassy_stm32::init(Default::default());
+    let mut config = Config::default();
+    {
+        use embassy_stm32::rcc::*;
+        config.rcc.pll = Some(Pll {
+            source: PllSource::HSI,  // 16 Mhz
+            prediv: PllPreDiv::DIV4, // /4 = 4Mhz
+            mul: PllMul::MUL85,      // x85 =   340Mhz
+            divp: None,
+            divq: None,
+            divr: Some(PllRDiv::DIV2), // /2 = 170MHz
+        });
+        config.rcc.mux.adc12sel = mux::Adcsel::SYS;
+        config.rcc.sys = Sysclk::PLL1_R;
+    }
+
+    let p = embassy_stm32::init(config);
+
+    // let p = embassy_stm32::init(Default::default());
     let mut led = Output::new(p.PA5, Level::High, Speed::Low);
 
     let rcc = pac::RCC;
@@ -69,22 +86,24 @@ async fn main(_spawner: Spawner) {
     let hrtim1 = pac::HRTIM1;
     // Set Timer A (idx 0)  to operate in continuous mode.
     hrtim1.tim(TIM_A).cr().modify(|w| w.set_cont(true));
+    hrtim1.tim(TIM_A).cr().modify(|w| w.set_ckpsc(5)); // Clock prescaler of /32
 
-    // The HRTIM clocked by what appears as a  5.376Ghz clock (168Mhz x 32 = 5.376Ghz).
+    // The HRTIM clocked by what appears as a  5.44Ghz clock (170Mhz x 32 = 5.44Ghz).
+    // In the line above we set a prescaler of /32, brining our effective HRTIM clock to 170Mhz or a period of
     // The counting period of the clock is selected by writing to a 16-bit register using the formula:
     // PER = T_count / T_hrtim
-    // Example: Want a period of 10us? PER = 10us / 0.0002us = 50,000
+    // Example: Want a frequency of 20kHz (period of 50us)? PER = 50us / 0.005882us = 8500
 
     // Set Timer A (idx 0) period to 10us.
-    hrtim1.tim(TIM_A).per().modify(|w| w.set_per(0xB400));
+    hrtim1.tim(TIM_A).per().modify(|w| w.set_per(8500));
 
     // The X% duty cycle is obtained by multiplying the period by the duty cycle: PER x DC.
 
     // Set Timer A Compare 1 to 50% of the Timer A period (Will result in 50% DC)
-    hrtim1.tim(TIM_A).cmp(CMP1).modify(|w| w.set_cmp(0x5A00));
+    hrtim1.tim(TIM_A).cmp(CMP1).modify(|w| w.set_cmp(8500 / 2));
 
     // Set Timer A Compare 1 to 25% of the Timer A period (Will result in 25% DC)
-    hrtim1.tim(TIM_A).cmp(CMP2).modify(|w| w.set_cmp(0x2D00));
+    hrtim1.tim(TIM_A).cmp(CMP2).modify(|w| w.set_cmp(8500 / 4));
 
     hrtim1.tim(TIM_A).setr(CH1).modify(|w| w.set_per(true)); // Tim A Ch1 set on Tim A period
     hrtim1
@@ -93,6 +112,7 @@ async fn main(_spawner: Spawner) {
         .modify(|w| w.set_cmp(CMP1, true)); // Tim A Ch1 reset on Tim A CMP1 event
 
     hrtim1.tim(TIM_A).setr(CH2).modify(|w| w.set_per(true)); // Tim A Ch2 set on Tim A period
+
     hrtim1
         .tim(TIM_A)
         .rstr(CH2)
