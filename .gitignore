@@ -1,0 +1,12 @@
+# Build artifacts
+/target/
+/firmware/target/
+
+# IDE / tooling
+.vscode/
+.idea/
+**/*.swp
+**/*.swo
+
+# OS junk
+**/.DS_Store
