@@ -118,7 +118,7 @@ async fn main(_spawner: Spawner) {
 
     info!("Returning to 0.0 mm");
     actuator
-        .move_to_position(0.0, 20, true, &mut adc, &mut dma)
+        .move_to_position(0.0, 50, true, &mut adc, &mut dma)
         .await;
     let current_pos_mm = actuator.read_position_mm_async(&mut adc, &mut dma).await;
     info!("Move complete");
@@ -127,7 +127,7 @@ async fn main(_spawner: Spawner) {
 
     info!("Move to 19.0 mm, end in coast");
     actuator
-        .move_to_position(19.0, 20, false, &mut adc, &mut dma)
+        .move_to_position(19.0, 50, false, &mut adc, &mut dma)
         .await;
     let current_pos_mm = actuator.read_position_mm_async(&mut adc, &mut dma).await;
     info!("Move complete");

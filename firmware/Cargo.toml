@@ -1,5 +1,5 @@
 [workspace]
-members = ["actuation", "pq12p_actuator", "test/actuation_lib_test", "test/force_control_test"]
+members = ["actuation", "pq12p_actuator", "test/actuation_lib_test", "test/force_control_test", "test/force_control_actuation"]
 
 resolver = "2"
 

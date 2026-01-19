@@ -1,20 +1,11 @@
-use embassy_stm32::adc::{Adc, AnyAdcChannel, BasicAdcRegs, Instance, SampleTime};
+use embassy_stm32::adc::{Adc, AnyAdcChannel, Instance};
 
-use crate::fmt::info;
-
-pub struct ForceSensor<'a, C: Instance>
-where
-    C::Regs: BasicAdcRegs<SampleTime = SampleTime>,
-{
-    channel: AnyAdcChannel<'a, C>,
+pub struct ForceSensor<C: Instance> {
+    channel: AnyAdcChannel<C>,
     last_raw: u16,
-    sample_time: SampleTime,
 }
 
-impl<'a, C: Instance> ForceSensor<'a, C>
-where
-    C::Regs: BasicAdcRegs<SampleTime = SampleTime>,
-{
+impl<C: Instance> ForceSensor<C> {
     pub const ADC_MAX_RAW: u16 = 4095;
     pub const ADC_VREF: f32 = 3.3;
     pub const FSR_FORCE_MIN: f32 = 0.0;
@@ -22,16 +13,15 @@ where
     pub const FSR_BITS_MIN: u16 = 0;
     pub const FSR_BITS_MAX: u16 = 4095;
 
-    pub fn new(channel: AnyAdcChannel<'a, C>, sample_time: SampleTime) -> Self {
+    pub fn new(channel: AnyAdcChannel<C>) -> Self {
         Self {
             channel,
             last_raw: 0,
-            sample_time,
         }
     }
 
     pub fn read_raw_blocking(&mut self, adc: &mut Adc<'_, C>) -> u16 {
-        let raw = adc.blocking_read(&mut self.channel, self.sample_time);
+        let raw = adc.blocking_read(&mut self.channel);
         self.last_raw = raw;
         raw
     }
