@@ -11,7 +11,7 @@ use {defmt_rtt as _, panic_probe as _};
 
 use embassy_executor::Spawner;
 use embassy_stm32::{
-    adc::{Adc, AdcChannel, SampleTime},
+    adc::{Adc, AdcChannel, Resolution, SampleTime},
     gpio::{Level, Output, Speed},
 };
 use embassy_time::{Duration, Timer};
@@ -22,15 +22,12 @@ use force_sensor::ForceSensor;
 async fn main(_spawner: Spawner) {
     let p = embassy_stm32::init(Default::default());
     let mut led = Output::new(p.PB7, Level::High, Speed::Low);
-    let mut adc = Adc::new(p.ADC1);
+    let mut adc = Adc::new(p.ADC1, Resolution::BITS12);
 
-    let mut force_sensor = ForceSensor::new(p.PA0.degrade_adc(), SampleTime::CYCLES480);
+    let mut force_sensor = ForceSensor::new(p.PA0.degrade_adc(), SampleTime::CYCLES247_5);
     loop {
-        let force_v = force_sensor.read_voltage_blocking(&mut adc);
-        info!("Force sensor voltage: {} V", force_v);
-        led.set_high();
-        Timer::after(Duration::from_millis(500)).await;
-        led.set_low();
-        Timer::after(Duration::from_millis(500)).await;
+        let force = force_sensor.read_force_blocking(&mut adc);
+        info!("Force sensor force: {} g", force);
+        Timer::after(Duration::from_millis(50)).await;
     }
 }
