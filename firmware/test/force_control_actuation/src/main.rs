@@ -26,16 +26,17 @@ use embassy_time::{Duration, Ticker};
 use fmt::info;
 use pq12p_actuator::Pq12P;
 
-const TARGET_FORCE_G: f32 = 100.0;
-const FORCE_DEADBAND_G: f32 = 2.0;
+const TARGET_FORCE_G: f32 = 150.0;
+const FORCE_DEADBAND_G: f32 = 30.0;
 const CONTROL_LOOP_HZ: u64 = 50;
 
-const KP: f32 = 1.2;
+const KP: f32 = 0.5;
 const KI: f32 = 0.0;
 const KD: f32 = 0.0;
 const INTEGRAL_LIMIT: f32 = 500.0;
+const DERIVATIVE_FILTER_TAU_S: f32 = 0.5;
 
-const DUTY_MIN_PERCENT: f32 = 40.0; // stiction
+const DUTY_MIN_PERCENT: f32 = 20.0; // stiction
 const DUTY_MAX_PERCENT: f32 = 100.0;
 
 const UART_LINE_MAX: usize = 64;
@@ -89,8 +90,10 @@ async fn main(_spawner: Spawner) {
 
     let mut ticker = Ticker::every(Duration::from_hz(CONTROL_LOOP_HZ));
     let dt = 1.0 / CONTROL_LOOP_HZ as f32;
+    let derivative_alpha = dt / (DERIVATIVE_FILTER_TAU_S + dt);
     let mut integral = 0.0;
     let mut prev_error = 0.0;
+    let mut filtered_derivative = 0.0;
     let mut current_force = None;
 
     let mut line_buf = [0u8; UART_LINE_MAX];
@@ -108,14 +111,17 @@ async fn main(_spawner: Spawner) {
         };
 
         let error = TARGET_FORCE_G - force;
+        let mut control: f32 = 0.0;
         if error.abs() <= FORCE_DEADBAND_G {
             actuator.coast();
             integral = 0.0;
             prev_error = error;
+            filtered_derivative = 0.0;
         } else {
             integral = (integral + error * dt).clamp(-INTEGRAL_LIMIT, INTEGRAL_LIMIT);
-            let derivative = (error - prev_error) / dt;
-            let control = KP * error + KI * integral + KD * derivative;
+            let raw_derivative = (error - prev_error) / dt;
+            filtered_derivative += derivative_alpha * (raw_derivative - filtered_derivative);
+            control = KP * error + KI * integral + KD * filtered_derivative;
             prev_error = error;
 
             let duty = control.abs().clamp(DUTY_MIN_PERCENT, DUTY_MAX_PERCENT);
@@ -128,7 +134,8 @@ async fn main(_spawner: Spawner) {
             }
         }
 
-        info!("Force (uart): {} g", force);
+        // info!("Force (uart): {} g", force);
+        info!("Control: {}", control);
         led.toggle();
         ticker.next().await;
     }
