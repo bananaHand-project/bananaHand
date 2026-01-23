@@ -2,4 +2,4 @@
 
 High-level code (ROS, tools, etc.).
 
-[Running ROS Nodes](ros/README.md)
+[Running ROS](ros/README.md)
