@@ -1,0 +1,1 @@
+/home/lokesh/BananaHand/firmware/uart_test/target/thumbv7em-none-eabihf/debug/uart_test: /home/lokesh/BananaHand/firmware/uart_test/build.rs /home/lokesh/BananaHand/firmware/uart_test/src/main.rs /home/lokesh/BananaHand/firmware/uart_test/src/protocol.rs

@@ -1,0 +1,8 @@
+cargo:rustc-check-cfg=cfg(armv6m)
+cargo:rustc-check-cfg=cfg(armv7m)
+cargo:rustc-check-cfg=cfg(armv8m)
+cargo:rustc-check-cfg=cfg(cortex_m)
+cargo:rustc-check-cfg=cfg(has_fpu)
+cargo:rustc-link-search=/home/lokesh/BananaHand/uart_test/target/debug/build/cortex-m-rt-41102fcf723efd8b/out
+cargo:rerun-if-changed=build.rs
+cargo:rerun-if-changed=link.x.in

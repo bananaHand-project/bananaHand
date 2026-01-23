@@ -1,0 +1,15 @@
+/home/lokesh/BananaHand/uart_test/target/thumbv7em-none-eabihf/debug/deps/embassy_time-285d4aa457888ea1.d: /home/lokesh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/embassy-time-0.5.0/src/lib.rs /home/lokesh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/embassy-time-0.5.0/src/fmt.rs /home/lokesh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/embassy-time-0.5.0/src/delay.rs /home/lokesh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/embassy-time-0.5.0/src/duration.rs /home/lokesh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/embassy-time-0.5.0/src/instant.rs /home/lokesh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/embassy-time-0.5.0/src/timer.rs /home/lokesh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/embassy-time-0.5.0/src/../README.md
+
+/home/lokesh/BananaHand/uart_test/target/thumbv7em-none-eabihf/debug/deps/libembassy_time-285d4aa457888ea1.rlib: /home/lokesh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/embassy-time-0.5.0/src/lib.rs /home/lokesh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/embassy-time-0.5.0/src/fmt.rs /home/lokesh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/embassy-time-0.5.0/src/delay.rs /home/lokesh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/embassy-time-0.5.0/src/duration.rs /home/lokesh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/embassy-time-0.5.0/src/instant.rs /home/lokesh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/embassy-time-0.5.0/src/timer.rs /home/lokesh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/embassy-time-0.5.0/src/../README.md
+
+/home/lokesh/BananaHand/uart_test/target/thumbv7em-none-eabihf/debug/deps/libembassy_time-285d4aa457888ea1.rmeta: /home/lokesh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/embassy-time-0.5.0/src/lib.rs /home/lokesh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/embassy-time-0.5.0/src/fmt.rs /home/lokesh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/embassy-time-0.5.0/src/delay.rs /home/lokesh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/embassy-time-0.5.0/src/duration.rs /home/lokesh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/embassy-time-0.5.0/src/instant.rs /home/lokesh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/embassy-time-0.5.0/src/timer.rs /home/lokesh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/embassy-time-0.5.0/src/../README.md
+
+/home/lokesh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/embassy-time-0.5.0/src/lib.rs:
+/home/lokesh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/embassy-time-0.5.0/src/fmt.rs:
+/home/lokesh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/embassy-time-0.5.0/src/delay.rs:
+/home/lokesh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/embassy-time-0.5.0/src/duration.rs:
+/home/lokesh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/embassy-time-0.5.0/src/instant.rs:
+/home/lokesh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/embassy-time-0.5.0/src/timer.rs:
+/home/lokesh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/embassy-time-0.5.0/src/../README.md:
+
+# env-dep:DEFMT_LOG=trace

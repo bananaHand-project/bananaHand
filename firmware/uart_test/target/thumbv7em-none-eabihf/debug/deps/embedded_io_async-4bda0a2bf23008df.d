@@ -1,0 +1,9 @@
+/home/lokesh/BananaHand/uart_test/target/thumbv7em-none-eabihf/debug/deps/embedded_io_async-4bda0a2bf23008df.d: /home/lokesh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/embedded-io-async-0.6.1/src/lib.rs /home/lokesh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/embedded-io-async-0.6.1/src/impls/mod.rs /home/lokesh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/embedded-io-async-0.6.1/src/impls/slice_mut.rs /home/lokesh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/embedded-io-async-0.6.1/src/impls/slice_ref.rs /home/lokesh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/embedded-io-async-0.6.1/src/../README.md
+
+/home/lokesh/BananaHand/uart_test/target/thumbv7em-none-eabihf/debug/deps/libembedded_io_async-4bda0a2bf23008df.rmeta: /home/lokesh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/embedded-io-async-0.6.1/src/lib.rs /home/lokesh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/embedded-io-async-0.6.1/src/impls/mod.rs /home/lokesh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/embedded-io-async-0.6.1/src/impls/slice_mut.rs /home/lokesh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/embedded-io-async-0.6.1/src/impls/slice_ref.rs /home/lokesh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/embedded-io-async-0.6.1/src/../README.md
+
+/home/lokesh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/embedded-io-async-0.6.1/src/lib.rs:
+/home/lokesh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/embedded-io-async-0.6.1/src/impls/mod.rs:
+/home/lokesh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/embedded-io-async-0.6.1/src/impls/slice_mut.rs:
+/home/lokesh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/embedded-io-async-0.6.1/src/impls/slice_ref.rs:
+/home/lokesh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/embedded-io-async-0.6.1/src/../README.md:

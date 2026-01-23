@@ -1,0 +1,3 @@
+cargo:rustc-link-arg-bins=--nmagic
+cargo:rustc-link-arg-bins=-Tlink.x
+cargo:rustc-link-arg-bins=-Tdefmt.x
