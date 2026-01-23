@@ -44,7 +44,7 @@ def parse_frame(frame: bytes) -> list[float] | None:
 
 
 def main():
-    ser = serial.Serial("/dev/ttyACM0", baudrate=576000, timeout=0.5)
+    ser = serial.Serial("/dev/ttyACM0", baudrate=115200, timeout=0.1)
     seq = 0
     try:
         while True:
@@ -71,15 +71,18 @@ def main():
 
             msg_type = hdr[1]
             length = hdr[2]
-            rest = ser.read(length + 2)
-            if len(rest) < (length + 2):
-                print("incomplete response")
+
+            rest = ser.read(length + 2)  # payload + checksum + end
+            if len(rest) < length + 2:
+                print("incomplete response (timeout)")
                 continue
+
+            candidate = hdr + rest
 
             recv_time = time.monotonic()
             rtt_ms = (recv_time - send_time) * 1000.0
 
-            candidate = bytes(hdr + rest)
+            # candidate = bytes(hdr + rest)
             positions_resp = parse_frame(candidate)
             if positions_resp is not None:
                 print(f"RTT={rtt_ms:.2f} ms | sent: {[round(x,3) for x in positions]} | recv: {[round(x,3) for x in positions_resp]}")

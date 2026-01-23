@@ -18,7 +18,7 @@ async fn main(_spawner: Spawner) {
     let p = embassy_stm32::init(Default::default());
 
     let mut config = Config::default();
-    config.baudrate = 576_000;
+    config.baudrate = 115_200;
 
     let mut uart = Uart::new(
         p.USART2,

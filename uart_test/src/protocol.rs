@@ -1,34 +1,47 @@
 use heapless::CapacityError;
+use heapless::{Vec as HeapVec};
+
 
 pub const START_BYTE: u8 = 0xFF;
 pub const END_BYTE: u8 = 0xFE;
 
-pub fn checksum(data: &[u8]) -> u8 {
-    let sum: u8 = data.iter().fold(0u8, |acc, &x| acc.wrapping_add(x));
-    sum
+fn checksum(data: &[u8]) -> u8 {
+    data.iter().fold(0u8, |acc, &b| acc.wrapping_add(b))
 }
 
-pub fn build_frame(msg_type: u8, positions: [f32; 8]) -> heapless::Vec<u8, 128> {
-    let mut frame = heapless::Vec::<u8, 128>::new();
+
+pub fn build_frame(msg_type: u8, positions: [f32; 8]) -> HeapVec<u8, 128> {
+    let mut frame = HeapVec::<u8, 128>::new();
+
+    let payload_len = (positions.len() * 4) as u8;
 
     let _ = frame.push(START_BYTE);
     let _ = frame.push(msg_type);
-    let len = positions.len() * 4; // each f32 is 4 bytes
-    let _ = frame.push(len as u8);
+    let _ = frame.push(payload_len);
 
-    let mut pos_status: Result<(), CapacityError> = Ok(());
-    for pos in positions {
-        pos_status = frame.extend_from_slice(&pos.to_le_bytes());
+    let payload_start = frame.len();
+
+    let mut ok = true;
+    for p in positions {
+        if frame.extend_from_slice(&p.to_le_bytes()).is_err() {
+            ok = false;
+            break;
+        }
     }
-    if pos_status.is_err() {
+    if !ok {
         defmt::error!("Failed to build frame: CapacityError");
+        return frame; 
     }
 
-    let _  = frame.push(checksum(&frame.as_slice()[3..(len + 3)]));
-    let _  = frame.push(END_BYTE);
+    let payload_end = payload_start + payload_len as usize;
+    let chk = checksum(&frame.as_slice()[payload_start..payload_end]);
+
+    let _ = frame.push(chk);
+    let _ = frame.push(END_BYTE);
 
     frame
 }
+
 
 pub enum MessageType {
     PositionUpdate = 0x01,
