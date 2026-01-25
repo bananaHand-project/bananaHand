@@ -2,6 +2,7 @@
 #![no_main]
 
 mod fmt;
+mod hrtim_pwm;
 
 #[cfg(not(feature = "defmt"))]
 use panic_halt as _;
@@ -15,18 +16,7 @@ use embassy_stm32::{
     pac,
 };
 use embassy_time::{Duration, Timer};
-use fmt::info;
-
-// Timer Index:
-const TIM_A: usize = 0;
-
-// Channel Index:
-const CH1: usize = 0;
-const CH2: usize = 1;
-
-// Comparator Index:
-const CMP1: usize = 0;
-const CMP2: usize = 1;
+use fmt::{info, unwrap};
 
 #[embassy_executor::main]
 async fn main(_spawner: Spawner) {
@@ -52,77 +42,37 @@ async fn main(_spawner: Spawner) {
 
     let rcc = pac::RCC;
 
-    rcc.ahb2enr().modify(|w| w.set_gpioaen(true));
-
     rcc.apb2enr().modify(|w| w.set_hrtim1en(true));
 
-    let gpioa = pac::GPIOA;
+    pac::HRTIM1.mcr().modify(|w| w.set_mcen(true)); // Enable hrtim globally
 
-    gpioa.moder().modify(|w| {
-        w.set_moder(8, pac::gpio::vals::Moder::ALTERNATE);
-        w.set_moder(9, pac::gpio::vals::Moder::ALTERNATE);
-    });
+    let ch1 = p.PA8;
+    let ch2 = p.PA9;
+    let clock_prescaler = hrtim_pwm::Prescaler::DIV32;
+    let period = 8500u16;
 
-    gpioa.pupdr().modify(|w| {
-        w.set_pupdr(8, pac::gpio::vals::Pupdr::FLOATING);
-        w.set_pupdr(9, pac::gpio::vals::Pupdr::FLOATING);
-    });
-
-    gpioa.ospeedr().modify(|w| {
-        w.set_ospeedr(8, pac::gpio::vals::Ospeedr::VERY_HIGH_SPEED);
-        w.set_ospeedr(9, pac::gpio::vals::Ospeedr::VERY_HIGH_SPEED);
-    });
-
-    // AFRH index 0 -> pin 8, index 1 -> pin 9. AF13 for both.
-    gpioa.afr(1).modify(|w| {
-        w.set_afr(0, 13);
-        w.set_afr(1, 13);
-    });
-
-    let hrtim1 = pac::HRTIM1;
-    // Set Timer A (idx 0)  to operate in continuous mode.
-    hrtim1.tim(TIM_A).cr().modify(|w| w.set_cont(true));
-    hrtim1.tim(TIM_A).cr().modify(|w| w.set_ckpsc(5)); // Clock prescaler of /32
-
-    // The HRTIM clocked by what appears as a  5.44Ghz clock (170Mhz x 32 = 5.44Ghz).
-    // In the line above we set a prescaler of /32, brining our effective HRTIM clock to 170Mhz or a period of
-    // The counting period of the clock is selected by writing to a 16-bit register using the formula:
-    // PER = T_count / T_hrtim
-    // Example: Want a frequency of 20kHz (period of 50us)? PER = 50us / 0.005882us = 8500
-
-    // Set Timer A (idx 0) period to 10us.
-    hrtim1.tim(TIM_A).per().modify(|w| w.set_per(8500));
-
-    // The X% duty cycle is obtained by multiplying the period by the duty cycle: PER x DC.
-
-    // Set Timer A Compare 1 to 50% of the Timer A period (Will result in 50% DC)
-    hrtim1.tim(TIM_A).cmp(CMP1).modify(|w| w.set_cmp(8500 / 2));
-
-    // Set Timer A Compare 1 to 25% of the Timer A period (Will result in 25% DC)
-    hrtim1.tim(TIM_A).cmp(CMP2).modify(|w| w.set_cmp(8500 / 4));
-
-    hrtim1.tim(TIM_A).setr(CH1).modify(|w| w.set_per(true)); // Tim A Ch1 set on Tim A period
-    hrtim1
-        .tim(TIM_A)
-        .rstr(CH1)
-        .modify(|w| w.set_cmp(CMP1, true)); // Tim A Ch1 reset on Tim A CMP1 event
-
-    hrtim1.tim(TIM_A).setr(CH2).modify(|w| w.set_per(true)); // Tim A Ch2 set on Tim A period
-
-    hrtim1
-        .tim(TIM_A)
-        .rstr(CH2)
-        .modify(|w| w.set_cmp(CMP2, true)); // Tim A Ch2 reset on Tim A CMP2 event
-
-    hrtim1.mcr().modify(|w| w.set_mcen(true)); // Enable hrtim globally
-    hrtim1.mcr().modify(|w| w.set_tcen(TIM_A, true)); // Start Tim A
-    hrtim1.oenr().modify(|w| w.set_t1oen(TIM_A, true)); // Enable Tim A Ch1 output
-    hrtim1.oenr().modify(|w| w.set_t2oen(TIM_A, true)); // Enable Tim A Ch2 output
+    let hrtim_a_pwm = unwrap!(hrtim_pwm::Hrtim1APWM::new(
+        Some(ch1),
+        Some(ch2),
+        period,
+        clock_prescaler
+    ));
+    hrtim_a_pwm.set_ch1_percent_dc(100);
+    hrtim_a_pwm.set_ch2_percent_dc(0);
+    unwrap!(hrtim_a_pwm.ch1_enable());
+    unwrap!(hrtim_a_pwm.ch2_enable());
+    Timer::after_secs(2).await;
+    hrtim_a_pwm.set_ch1_percent_dc(0);
+    hrtim_a_pwm.set_ch2_percent_dc(100);
 
     loop {
         info!("Hello, World!");
+        hrtim_a_pwm.set_ch1_percent_dc(25);
+        hrtim_a_pwm.set_ch2_percent_dc(75);
         led.set_high();
         Timer::after(Duration::from_millis(500)).await;
+        hrtim_a_pwm.set_ch1_percent_dc(75);
+        hrtim_a_pwm.set_ch2_percent_dc(25);
         led.set_low();
         Timer::after(Duration::from_millis(500)).await;
     }
