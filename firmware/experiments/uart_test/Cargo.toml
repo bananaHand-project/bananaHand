@@ -2,7 +2,7 @@
 
 [package]
 edition = "2024"
-name = "actuation"
+name = "uart_test"
 version = "0.1.0"
 
 [dependencies]
@@ -18,24 +18,36 @@ embassy-executor = { version = "0.9.1", features = [
     "executor-thread",
 ] }
 embassy-futures = "0.1.2"
+embassy-sync = "0.7.2"
+embassy-time = { version = "0.5.0", features = ["tick-hz-32_768"] }
+panic-halt = "1.0.0"
+panic-probe = { version = "1.0.0", features = ["print-defmt"], optional = true }
 embassy-stm32 = { version = "0.4.0", features = [
     "memory-x",
-    "stm32g474re",
+    "stm32f401re",
     "time-driver-any",
     "exti",
     "unstable-pac",
     "single-bank",
 ] }
-embassy-sync = "0.7.2"
-embassy-time = { version = "0.5.0", features = ["tick-hz-32_768"] }
-panic-halt = "1.0.0"
-panic-probe = { version = "1.0.0", features = ["print-defmt"], optional = true }
-pq12p_actuator = { path = "../pq12p_actuator" }
+heapless = "0.9.2"
 
 [[bin]]
-name = "actuation"
+name = "uart_test"
 test = false
 bench = false
+
+[profile.dev]
+debug = true
+lto = true
+opt-level = "z"
+incremental = true
+
+[profile.release]
+debug = false
+lto = true
+opt-level = "z"
+incremental = true
 
 [features]
 defmt = ["dep:defmt"]

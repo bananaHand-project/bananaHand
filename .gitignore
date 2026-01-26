@@ -1,6 +1,6 @@
 # Build artifacts
 /target/
-/firmware/target/
+/firmware/**/target/
 
 # IDE / tooling
 .vscode/
