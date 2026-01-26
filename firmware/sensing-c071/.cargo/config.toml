@@ -1,0 +1,14 @@
+# This file was automatically generated.
+
+[target.thumbv6m-none-eabi]
+runner = 'probe-rs run --chip stm32c071rbTx'
+
+[build]
+target = "thumbv6m-none-eabi"
+
+[env]
+DEFMT_LOG = "trace"
+
+[unstable]
+build-std = ["core"]
+build-std-features = ["panic_immediate_abort"]
