@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>banana_hand_teleop_msgs</name>
+  <version>0.0.0</version>
+  <description>Custom messages for hand teleop (skeleton).</description>
+  <maintainer email="dew.bhaumik8@gmail.com">TODO</maintainer>
+  <license>TODO</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>
