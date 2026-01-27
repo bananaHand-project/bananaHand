@@ -6,6 +6,21 @@ Example: Creating webcam_node
 - Add to Launch file: `Node(package="banana_webcam", executable="webcam_node", name="webcam", output="screen")`
 - Create webcam main file in the banana_webcam package
 
+### Vision Teleop
+Packages added under `software/ros/src`:
+- `banana_hand_tracking` (webcam capture + `/camera/image_raw`)
+- `banana_hand_mapping` (placeholder)
+- `banana_interfaces` (custom messages)
+
+Run webcam node:
+```
+cd software/ros
+source /opt/ros/humble/setup.bash
+colcon build --symlink-install --packages-select banana_hand_tracking
+source install/setup.bash
+ros2 launch banana_hand_tracking webcam.launch.py
+```
+
 ### How to Run Serial Node
 - Start mcu code: `cargo run -p uart_test`
 - Start ros code:

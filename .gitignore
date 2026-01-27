@@ -1,6 +1,19 @@
 # Build artifacts
 /target/
 /firmware/**/target/
+/firmware/target/
+/vision_teleop/teleop_ws/build/
+/vision_teleop/teleop_ws/install/
+/vision_teleop/teleop_ws/log/
+/vision_teleop/teleop_ws/.colcon/
+
+# Python artifacts
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+**/*.egg-info/
+**/*.egg/
+**/.pytest_cache/
 
 # IDE / tooling
 .vscode/
