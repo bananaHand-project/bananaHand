@@ -10,7 +10,7 @@ Example: Creating webcam_node
 Packages added under `software/ros/src`:
 - `banana_hand_tracking` (webcam capture + `/camera/image_raw`)
 - `banana_hand_mapping` (placeholder)
-- `banana_hand_teleop_msgs` (placeholder)
+- `banana_interfaces` (custom messages)
 
 Run webcam node:
 ```
