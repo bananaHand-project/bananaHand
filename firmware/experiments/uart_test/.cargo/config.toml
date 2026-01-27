@@ -1,7 +1,7 @@
 # This file was automatically generated.
 
 [target.thumbv7em-none-eabi]
-runner = 'probe-rs run --chip STM32F401RETx'
+runner = 'probe-rs run --chip STM32G474RETx'
 
 [build]
 target = "thumbv7em-none-eabi"

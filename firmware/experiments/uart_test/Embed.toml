@@ -1,4 +1,4 @@
 # This file was automatically generated.
 
 [default.general]
-chip = "STM32F401RETx"
+chip = "STM32G474RETx"
