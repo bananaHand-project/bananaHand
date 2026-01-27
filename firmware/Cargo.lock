@@ -599,7 +599,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "force_control_test"
+name = "force_sensor_test"
 version = "0.1.0"
 dependencies = [
  "cortex-m",
