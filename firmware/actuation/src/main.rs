@@ -4,16 +4,18 @@
 mod fmt;
 mod hrtim_pwm;
 
+use crate::hrtim_pwm::Hrtim1CPwm;
 #[cfg(not(feature = "defmt"))]
 use panic_halt as _;
+
 #[cfg(feature = "defmt")]
 use {defmt_rtt as _, panic_probe as _};
 
 use embassy_executor::Spawner;
 use embassy_stm32::{
-    Config,
+    Config, Peri,
     gpio::{Level, Output, Speed},
-    pac,
+    pac, peripherals,
 };
 use embassy_time::{Duration, Timer};
 use fmt::{info, unwrap};
@@ -40,40 +42,91 @@ async fn main(_spawner: Spawner) {
     // let p = embassy_stm32::init(Default::default());
     let mut led = Output::new(p.PA5, Level::High, Speed::Low);
 
-    let rcc = pac::RCC;
-
-    rcc.apb2enr().modify(|w| w.set_hrtim1en(true));
-
-    pac::HRTIM1.mcr().modify(|w| w.set_mcen(true)); // Enable hrtim globally
-
-    let ch1 = p.PA8;
-    let ch2 = p.PA9;
+    // let ch1 = p.PA8;
+    // let ch2 = p.PA9;
     let clock_prescaler = hrtim_pwm::Prescaler::DIV32;
     let period = 8500u16;
 
-    let hrtim_a_pwm = unwrap!(hrtim_pwm::Hrtim1APWM::new(
-        Some(ch1),
-        Some(ch2),
+    let hrtim_a_pwm = hrtim_pwm::Hrtim1APwm {
+        ch1_pin: Some(p.PA8),
+        ch2_pin: Some(p.PA9),
         period,
-        clock_prescaler
+        clock_prescaler,
+    };
+
+    let hrtim_b_pwm = hrtim_pwm::Hrtim1BPwm {
+        ch1_pin: Some(p.PA10),
+        ch2_pin: Some(p.PA11),
+        period,
+        clock_prescaler,
+    };
+
+    let hrtim_c_pwm = hrtim_pwm::Hrtim1CPwm {
+        ch1_pin: Some(p.PB12),
+        ch2_pin: Some(p.PB13),
+        period,
+        clock_prescaler,
+    };
+
+    let hrtim_d_pwm = hrtim_pwm::Hrtim1DPwm {
+        ch1_pin: Some(p.PB14),
+        ch2_pin: Some(p.PB15),
+        period,
+        clock_prescaler,
+    };
+
+    let hrtim_e_pwm = hrtim_pwm::Hrtim1EPwm {
+        ch1_pin: Some(p.PC8),
+        ch2_pin: Some(p.PC9),
+        period,
+        clock_prescaler,
+    };
+
+    let hrtim_f_pwm = hrtim_pwm::Hrtim1FPwm {
+        ch1_pin: Some(p.PC6),
+        ch2_pin: Some(p.PC7),
+        period,
+        clock_prescaler,
+    };
+
+    let manager = unwrap!(hrtim_pwm::HrtimPwmManager::new(
+        Some(hrtim_a_pwm),
+        Some(hrtim_b_pwm),
+        Some(hrtim_c_pwm),
+        Some(hrtim_d_pwm),
+        Some(hrtim_e_pwm),
+        // Some(hrtim_f_pwm), // Causes assertion failed: n < 5usize in set_tcen. I think this is an issue with the PAC, it should be n < 6usize see pg. 995 stm32 ref manual (RM0440).
+        None::<hrtim_pwm::Hrtim1FPwm<peripherals::PC6, peripherals::PC7>>,
     ));
-    hrtim_a_pwm.set_ch1_percent_dc(100);
-    hrtim_a_pwm.set_ch2_percent_dc(0);
-    unwrap!(hrtim_a_pwm.ch1_enable());
-    unwrap!(hrtim_a_pwm.ch2_enable());
-    Timer::after_secs(2).await;
-    hrtim_a_pwm.set_ch1_percent_dc(0);
-    hrtim_a_pwm.set_ch2_percent_dc(100);
+
+    unwrap!(manager.set_tima_ch1_dc(50));
+    unwrap!(manager.set_tima_ch2_dc(25));
+    unwrap!(manager.enable_tima_ch1());
+    unwrap!(manager.enable_tima_ch2());
+
+    unwrap!(manager.set_timb_ch1_dc(50));
+    unwrap!(manager.set_timb_ch2_dc(25));
+    unwrap!(manager.enable_timb_ch1());
+    unwrap!(manager.enable_timb_ch2());
+
+    unwrap!(manager.set_timc_ch1_dc(50));
+    unwrap!(manager.set_timc_ch2_dc(25));
+    unwrap!(manager.enable_timc_ch1());
+    unwrap!(manager.enable_timc_ch2());
+
+    unwrap!(manager.set_timd_ch1_dc(50));
+    unwrap!(manager.set_timd_ch2_dc(25));
+    unwrap!(manager.enable_timd_ch1());
+    unwrap!(manager.enable_timd_ch2());
+
+    unwrap!(manager.set_time_ch1_dc(50));
+    unwrap!(manager.set_time_ch2_dc(25));
+    unwrap!(manager.enable_time_ch1());
+    unwrap!(manager.enable_time_ch2());
 
     loop {
         info!("Hello, World!");
-        hrtim_a_pwm.set_ch1_percent_dc(25);
-        hrtim_a_pwm.set_ch2_percent_dc(75);
-        led.set_high();
-        Timer::after(Duration::from_millis(500)).await;
-        hrtim_a_pwm.set_ch1_percent_dc(75);
-        hrtim_a_pwm.set_ch2_percent_dc(25);
-        led.set_low();
+        led.toggle();
         Timer::after(Duration::from_millis(500)).await;
     }
 }

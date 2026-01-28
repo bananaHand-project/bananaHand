@@ -1,15 +1,7 @@
 //! Expose *simple* **but unsafe** PWM interface for Hrtim
-
-use embassy_stm32::{
-    self, Peri,
-    gpio::AnyPin,
-    hrtim::{self},
-    pac::{self, RCC},
-    peripherals::HRTIM1,
-};
+use embassy_stm32::{self, Peri, gpio, hrtim, pac, peripherals::HRTIM1};
 
 use paste::paste;
-
 #[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 #[derive(Debug, Copy, Clone)]
 pub enum HrtimError {
@@ -30,6 +22,7 @@ pub enum HrtimSubTimer {
 }
 
 /// Prescaler applied from HRTIM clock frequency to sub timer.
+#[allow(unused)]
 #[repr(u8)]
 #[derive(Debug, Copy, Clone)]
 pub enum Prescaler {
@@ -89,7 +82,7 @@ macro_rules! gpio_x_setup {
     ($port:ident, $pin:expr, $af:expr) => {{
         paste! {
             // Enable GPIO clock: set_gpioaen / set_gpioben / ...
-            RCC.ahb2enr().modify(|w| w.[<set_gpio $port:lower en>](true));
+            pac::RCC.ahb2enr().modify(|w| w.[<set_gpio $port:lower en>](true));
 
             // Pick GPIOA / GPIOB / ...
             let gpio = pac::[<GPIO $port:upper>];
@@ -107,159 +100,288 @@ macro_rules! gpio_x_setup {
         }
     }};
 }
-
-// TODO: Make a HRTIM Pwm manger for controlling all subtimers, and controlling global intializations for HRTIM.
-// TODO: Make MACRO to create structs for all other subtimers.s
-pub struct Hrtim1APWM<
-    'a,
-    P1: hrtim::ChannelAPin<HRTIM1>,
-    P2: hrtim::ChannelAComplementaryPin<HRTIM1>,
-> {
-    ch1_pin: Option<Peri<'a, P1>>,
-    ch2_pin: Option<Peri<'a, P2>>,
-    period: u16,
-    clock_prescaler: Prescaler,
+macro_rules! subtimer_controls_creator {
+    ($port:ident) => {
+        paste! {
+            pub fn [<set_tim $port:lower _ch1_dc>](&self, dc: u8) -> Result<(), HrtimError> {
+                let timer = self.[<tim_ $port:lower>].as_ref().ok_or(HrtimError::ChannelNotSetup)?;
+                timer.set_ch1_percent_dc(dc);
+                Ok(())
+            }
+            pub fn [<enable_tim $port:lower _ch1>](&self) -> Result<(), HrtimError> {
+                let timer = self.[<tim_ $port:lower>].as_ref().ok_or(HrtimError::ChannelNotSetup)?;
+                timer.ch1_enable()?;
+                Ok(())
+            }
+            pub fn [<set_tim $port:lower _ch2_dc>](&self, dc: u8) -> Result<(), HrtimError> {
+                let timer = self.[<tim_ $port:lower>].as_ref().ok_or(HrtimError::ChannelNotSetup)?;
+                timer.set_ch2_percent_dc(dc);
+                Ok(())
+            }
+            pub fn [<enable_tim $port:lower _ch2>](&self) -> Result<(), HrtimError> {
+                let timer = self.[<tim_ $port:lower>].as_ref().ok_or(HrtimError::ChannelNotSetup)?;
+                timer.ch2_enable()?;
+                Ok(())
+            }
+        }
+    };
 }
 
-impl<'a, P1: hrtim::ChannelAPin<HRTIM1>, P2: hrtim::ChannelAComplementaryPin<HRTIM1>>
-    Hrtim1APWM<'a, P1, P2>
+pub(crate) trait HrtimXPwm {
+    fn init(&self) -> Result<(), HrtimError>;
+
+    fn set_ch1_percent_dc(&self, percent_dc: u8);
+    fn ch1_enable(&self) -> Result<(), HrtimError>;
+
+    fn set_ch2_percent_dc(&self, percent_dc: u8);
+    fn ch2_enable(&self) -> Result<(), HrtimError>;
+}
+
+pub(crate) trait SubtimerA: HrtimXPwm {}
+pub(crate) trait SubtimerB: HrtimXPwm {}
+pub(crate) trait SubtimerC: HrtimXPwm {}
+pub(crate) trait SubtimerD: HrtimXPwm {}
+pub(crate) trait SubtimerE: HrtimXPwm {}
+pub(crate) trait SubtimerF: HrtimXPwm {}
+
+pub struct HrtimPwmManager<
+    STA: SubtimerA,
+    STB: SubtimerB,
+    STC: SubtimerC,
+    STD: SubtimerD,
+    STE: SubtimerE,
+    STF: SubtimerF,
+> {
+    tim_a: Option<STA>,
+    tim_b: Option<STB>,
+    tim_c: Option<STC>,
+    tim_d: Option<STD>,
+    tim_e: Option<STE>,
+    tim_f: Option<STF>,
+}
+
+impl<STA: SubtimerA, STB: SubtimerB, STC: SubtimerC, STD: SubtimerD, STE: SubtimerE, STF: SubtimerF>
+    HrtimPwmManager<STA, STB, STC, STD, STE, STF>
 {
     pub fn new(
-        ch1_pin: Option<Peri<'a, P1>>,
-        ch2_pin: Option<Peri<'a, P2>>,
-        period: u16,
-        clock_prescaler: Prescaler,
-    ) -> Result<Hrtim1APWM<'a, P1, P2>, HrtimError> {
-        let mut hrtim1_a_pwm = Hrtim1APWM {
-            ch1_pin,
-            ch2_pin,
-            period,
-            clock_prescaler,
+        subtimer_a: Option<STA>,
+        subtimer_b: Option<STB>,
+        subtimer_c: Option<STC>,
+        subtimer_d: Option<STD>,
+        subtimer_e: Option<STE>,
+        subtimer_f: Option<STF>,
+    ) -> Result<Self, HrtimError> {
+        let mut manager = Self {
+            tim_a: None,
+            tim_b: None,
+            tim_c: None,
+            tim_d: None,
+            tim_e: None,
+            tim_f: None,
         };
 
-        hrtim1_a_pwm.setup_gpio()?;
-        hrtim1_a_pwm.init_subtimer(hrtim1_a_pwm.clock_prescaler, hrtim1_a_pwm.period);
-        hrtim1_a_pwm.config_channels();
+        // Enable hrtim globally
+        pac::RCC.apb2enr().modify(|w| w.set_hrtim1en(true));
+        pac::HRTIM1.mcr().modify(|w| w.set_mcen(true));
 
-        Ok(hrtim1_a_pwm)
+        if let Some(sta) = subtimer_a {
+            sta.init()?;
+            manager.tim_a = Some(sta);
+        };
+        if let Some(stb) = subtimer_b {
+            stb.init()?;
+            manager.tim_b = Some(stb);
+        };
+        if let Some(stc) = subtimer_c {
+            stc.init()?;
+            manager.tim_c = Some(stc);
+        };
+        if let Some(std) = subtimer_d {
+            std.init()?;
+            manager.tim_d = Some(std);
+        };
+        if let Some(ste) = subtimer_e {
+            ste.init()?;
+            manager.tim_e = Some(ste);
+        };
+        if let Some(stf) = subtimer_f {
+            stf.init()?;
+            manager.tim_f = Some(stf);
+        };
+
+        Ok(manager)
     }
 
-    pub fn setup_gpio(&self) -> Result<(), HrtimError> {
-        if let Some(pin) = &self.ch1_pin {
-            let alt_func_num = pin.af_num();
-            let pin_num = pin.pin() as usize;
-
-            match PinPort::try_from(pin.port()) {
-                Ok(PinPort::A) => gpio_x_setup!(a, pin_num, alt_func_num)?,
-                Ok(PinPort::B) => gpio_x_setup!(b, pin_num, alt_func_num)?,
-                Ok(PinPort::C) => gpio_x_setup!(c, pin_num, alt_func_num)?,
-                Ok(PinPort::D) => gpio_x_setup!(d, pin_num, alt_func_num)?,
-                Ok(PinPort::E) => gpio_x_setup!(e, pin_num, alt_func_num)?,
-                Err(v) => panic!("Invalid port value: {v}"),
-            }
-        }
-        if let Some(pin) = &self.ch2_pin {
-            let alt_func_num = pin.af_num();
-            let pin_num = pin.pin() as usize;
-
-            match PinPort::try_from(pin.port()) {
-                Ok(PinPort::A) => gpio_x_setup!(a, pin_num, alt_func_num)?,
-                Ok(PinPort::B) => gpio_x_setup!(b, pin_num, alt_func_num)?,
-                Ok(PinPort::C) => gpio_x_setup!(c, pin_num, alt_func_num)?,
-                Ok(PinPort::D) => gpio_x_setup!(d, pin_num, alt_func_num)?,
-                Ok(PinPort::E) => gpio_x_setup!(e, pin_num, alt_func_num)?,
-                Err(v) => panic!("Invalid port value: {v}"),
-            }
-        }
-        Ok(())
-    }
-
-    fn init_subtimer(&mut self, clock_prescaler: Prescaler, period: u16) {
-        // Set Timer A to operate in continuous mode.
-        pac::HRTIM1
-            .tim(HrtimSubTimer::TimA as usize)
-            .cr()
-            .modify(|w| w.set_cont(true));
-
-        // Set Timer A clock prescaler.
-        pac::HRTIM1
-            .tim(HrtimSubTimer::TimA as usize)
-            .cr()
-            .modify(|w| w.set_ckpsc(clock_prescaler as u8));
-        // Set Timer A clock Period.
-        pac::HRTIM1
-            .tim(HrtimSubTimer::TimA as usize)
-            .per()
-            .modify(|w| w.set_per(self.period));
-        // Start Timer A
-        pac::HRTIM1
-            .mcr()
-            .modify(|w| w.set_tcen(HrtimSubTimer::TimA as usize, true));
-    }
-
-    fn config_channels(&self) {
-        // Channel 1 Setup:
-        if let Some(_) = self.ch1_pin {
-            pac::HRTIM1
-                .tim(HrtimSubTimer::TimA as usize)
-                .setr(HrtimXChannel::Ch1 as usize)
-                .modify(|w| w.set_per(true)); // Tim A Ch1 set on Tim A period
-            pac::HRTIM1
-                .tim(HrtimSubTimer::TimA as usize)
-                .rstr(HrtimXChannel::Ch1 as usize)
-                .modify(|w| w.set_cmp(HrtimXComparator::Cmp1 as usize, true)); // Tim A Ch1 reset on Tim A CMP1 event
-        }
-
-        // Channel 2 Setup:
-        if let Some(_) = self.ch2_pin {
-            pac::HRTIM1
-                .tim(HrtimSubTimer::TimA as usize)
-                .setr(HrtimXChannel::Ch2 as usize)
-                .modify(|w| w.set_per(true)); // Tim A Ch2 set on Tim A period
-            pac::HRTIM1
-                .tim(HrtimSubTimer::TimA as usize)
-                .rstr(HrtimXChannel::Ch2 as usize)
-                .modify(|w| w.set_cmp(HrtimXComparator::Cmp2 as usize, true)); // Tim A Ch2 reset on Tim A CMP2 event
-        }
-    }
-
-    pub fn set_ch1_percent_dc(&self, percent: u8) {
-        let cmp_set = (self.period as f32 * (percent as f32 / 100.0)) as u16;
-        // let cmp_set = self.period / (100 - percent as u16);
-        pac::HRTIM1
-            .tim(HrtimSubTimer::TimA as usize)
-            .cmp(HrtimXComparator::Cmp1 as usize)
-            .modify(|w| w.set_cmp(cmp_set));
-    }
-
-    pub fn set_ch2_percent_dc(&self, percent: u8) {
-        let cmp_set = (self.period as f32 * (percent as f32 / 100.0)) as u16;
-        // let cmp_set = self.period / (100 - percent as u16);
-        pac::HRTIM1
-            .tim(HrtimSubTimer::TimA as usize)
-            .cmp(HrtimXComparator::Cmp2 as usize)
-            .modify(|w| w.set_cmp(cmp_set));
-    }
-
-    pub fn ch1_enable(&self) -> Result<(), HrtimError> {
-        if let Some(_) = self.ch1_pin {
-            pac::HRTIM1
-                .oenr()
-                .modify(|w| w.set_t1oen(HrtimSubTimer::TimA as usize, true)); // Enable Tim A Ch2 output
-            Ok(())
-        } else {
-            Err(HrtimError::ChannelNotSetup)
-        }
-    }
-
-    pub fn ch2_enable(&self) -> Result<(), HrtimError> {
-        if let Some(_) = self.ch2_pin {
-            pac::HRTIM1
-                .oenr()
-                .modify(|w| w.set_t2oen(HrtimSubTimer::TimA as usize, true)); // Enable Tim A Ch2 output
-            Ok(())
-        } else {
-            Err(HrtimError::ChannelNotSetup)
-        }
-    }
+    subtimer_controls_creator!(a);
+    subtimer_controls_creator!(b);
+    subtimer_controls_creator!(c);
+    subtimer_controls_creator!(d);
+    subtimer_controls_creator!(e);
+    subtimer_controls_creator!(f);
 }
+
+macro_rules! subtimer_interface_creator {
+    ($port:ident) => {
+        paste! {
+            /// Struct for HRTIM sub timer.
+            pub struct [<Hrtim1 $port:upper Pwm>]<'a, P1, P2>
+            where
+                P1: hrtim::[<Channel $port:upper Pin>]<HRTIM1>,
+                P2: hrtim::[<Channel $port:upper ComplementaryPin>]<HRTIM1>,
+            {
+                pub ch1_pin: Option<Peri<'a, P1>>,
+                pub ch2_pin: Option<Peri<'a, P2>>,
+                pub period: u16,
+                pub clock_prescaler: Prescaler,
+            }
+
+            impl<'a, P1: hrtim::[<Channel $port:upper Pin>]<HRTIM1>, P2: hrtim::[<Channel $port:upper ComplementaryPin>]<HRTIM1>> HrtimXPwm
+                for [<Hrtim1 $port:upper Pwm>]<'a, P1, P2>
+            {
+                fn init(&self) -> Result<(), HrtimError> {
+                    self.setup_gpio()?;
+                    self.init_subtimer();
+                    self.config_channels();
+                    Ok(())
+                }
+
+                fn set_ch1_percent_dc(&self, percent: u8) {
+                    let cmp_set = (self.period as f32 * (percent as f32 / 100.0)) as u16;
+                    pac::HRTIM1
+                        .tim(HrtimSubTimer::[<Tim $port:upper>] as usize)
+                        .cmp(HrtimXComparator::Cmp1 as usize)
+                        .modify(|w| w.set_cmp(cmp_set));
+                }
+
+                fn ch1_enable(&self) -> Result<(), HrtimError> {
+                    if let Some(_) = self.ch1_pin {
+                        pac::HRTIM1
+                            .oenr()
+                            .modify(|w| w.set_t1oen(HrtimSubTimer::[<Tim $port:upper>] as usize, true)); // Enable TimX Ch1 output
+                        Ok(())
+                    } else {
+                        Err(HrtimError::ChannelNotSetup)
+                    }
+                }
+
+                fn set_ch2_percent_dc(&self, percent: u8) {
+                    let cmp_set = (self.period as f32 * (percent as f32 / 100.0)) as u16;
+                    pac::HRTIM1
+                        .tim(HrtimSubTimer::[<Tim $port:upper>] as usize)
+                        .cmp(HrtimXComparator::Cmp2 as usize)
+                        .modify(|w| w.set_cmp(cmp_set));
+                }
+
+                fn ch2_enable(&self) -> Result<(), HrtimError> {
+                    if let Some(_) = self.ch2_pin {
+                        pac::HRTIM1
+                            .oenr()
+                            .modify(|w| w.set_t2oen(HrtimSubTimer::[<Tim $port:upper>] as usize, true)); // Enable TimX Ch2 output
+                        Ok(())
+                    } else {
+                        Err(HrtimError::ChannelNotSetup)
+                    }
+                }
+            }
+
+            impl<'a, P1: hrtim::[<Channel $port:upper Pin>]<HRTIM1>, P2: hrtim::[<Channel $port:upper ComplementaryPin>]<HRTIM1>> [<Subtimer $port:upper>]
+                for [<Hrtim1 $port:upper Pwm>]<'a, P1, P2>
+            {
+            }
+
+            impl<'a, P1: hrtim::[<Channel $port:upper Pin>]<HRTIM1>, P2: hrtim::[<Channel $port:upper ComplementaryPin>]<HRTIM1>>
+                [<Hrtim1 $port:upper Pwm>]<'a, P1, P2>
+            {
+                fn setup_gpio(&self) -> Result<(), HrtimError> {
+                    if let Some(pin) = &self.ch1_pin {
+                        let alt_func_num = pin.af_num();
+                        let pin_num = pin.pin() as usize;
+
+                        match PinPort::try_from(pin.port()) {
+                            Ok(PinPort::A) => gpio_x_setup!(a, pin_num, alt_func_num)?,
+                            Ok(PinPort::B) => gpio_x_setup!(b, pin_num, alt_func_num)?,
+                            Ok(PinPort::C) => gpio_x_setup!(c, pin_num, alt_func_num)?,
+                            Ok(PinPort::D) => gpio_x_setup!(d, pin_num, alt_func_num)?,
+                            Ok(PinPort::E) => gpio_x_setup!(e, pin_num, alt_func_num)?,
+                            Err(v) => panic!("Invalid port value: {v}"),
+                        }
+                    }
+                    if let Some(pin) = &self.ch2_pin {
+                        let alt_func_num = pin.af_num();
+                        let pin_num = pin.pin() as usize;
+
+                        match PinPort::try_from(pin.port()) {
+                            Ok(PinPort::A) => gpio_x_setup!(a, pin_num, alt_func_num)?,
+                            Ok(PinPort::B) => gpio_x_setup!(b, pin_num, alt_func_num)?,
+                            Ok(PinPort::C) => gpio_x_setup!(c, pin_num, alt_func_num)?,
+                            Ok(PinPort::D) => gpio_x_setup!(d, pin_num, alt_func_num)?,
+                            Ok(PinPort::E) => gpio_x_setup!(e, pin_num, alt_func_num)?,
+                            Err(v) => panic!("Invalid port value: {v}"),
+                        }
+                    }
+                    Ok(())
+                }
+
+                fn init_subtimer(&self) {
+                    // Set TimX to operate in continuous mode.
+                    pac::HRTIM1
+                        .tim(HrtimSubTimer::[<Tim $port:upper>] as usize)
+                        .cr()
+                        .modify(|w| w.set_cont(true));
+
+                    // Set TimX clock prescaler.
+                    pac::HRTIM1
+                        .tim(HrtimSubTimer::[<Tim $port:upper>] as usize)
+                        .cr()
+                        .modify(|w| w.set_ckpsc(self.clock_prescaler as u8));
+                    // Set TimX clock Period.
+                    pac::HRTIM1
+                        .tim(HrtimSubTimer::[<Tim $port:upper>] as usize)
+                        .per()
+                        .modify(|w| w.set_per(self.period));
+                    // Start TimX
+                    pac::HRTIM1
+                        .mcr()
+                        .modify(|w| w.set_tcen(HrtimSubTimer::[<Tim $port:upper>] as usize, true));
+                }
+
+                fn config_channels(&self) {
+                    // Channel 1 Setup:
+                    if let Some(_) = self.ch1_pin {
+                        pac::HRTIM1
+                            .tim(HrtimSubTimer::[<Tim $port:upper>] as usize)
+                            .setr(HrtimXChannel::Ch1 as usize)
+                            .modify(|w| w.set_per(true)); // TimX Ch1 set on TimX period
+                        pac::HRTIM1
+                            .tim(HrtimSubTimer::[<Tim $port:upper>] as usize)
+                            .rstr(HrtimXChannel::Ch1 as usize)
+                            .modify(|w| w.set_cmp(HrtimXComparator::Cmp1 as usize, true)); // TimX Ch1 reset on TimX CMP1 event
+                    }
+
+                    // Channel 2 Setup:
+                    if let Some(_) = self.ch2_pin {
+                        pac::HRTIM1
+                            .tim(HrtimSubTimer::[<Tim $port:upper>] as usize)
+                            .setr(HrtimXChannel::Ch2 as usize)
+                            .modify(|w| w.set_per(true)); // TimX Ch2 set on TimX period
+                        pac::HRTIM1
+                            .tim(HrtimSubTimer::[<Tim $port:upper>] as usize)
+                            .rstr(HrtimXChannel::Ch2 as usize)
+                            .modify(|w| w.set_cmp(HrtimXComparator::Cmp2 as usize, true)); // TimX Ch2 reset on TimX CMP2 event
+                    }
+                }
+            }
+        }
+    };
+}
+
+subtimer_interface_creator!(a);
+subtimer_interface_creator!(b);
+subtimer_interface_creator!(c);
+subtimer_interface_creator!(d);
+subtimer_interface_creator!(e);
+subtimer_interface_creator!(f);
+
+// TODO:
+// instead of where clause use separate impl blocks for generics P1, P2, first block if only P1 one is used, second block if only p2 is used, third block if both
+// the manager will also need separate impl blocks for each subtimer variant
