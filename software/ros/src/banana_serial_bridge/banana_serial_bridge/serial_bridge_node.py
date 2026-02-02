@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import struct
-import time
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 import rclpy
 from rclpy.node import Node
@@ -10,11 +9,13 @@ from sensor_msgs.msg import JointState
 from std_msgs.msg import Float32MultiArray
 
 import serial
+from cobs import cobs  # pip install cobs
 
 
-START_BYTE = 0xFF
-END_BYTE = 0xFE
+COBS_DELIM = b"\x00"
 MSG_TYPE_POSITION = 0x01
+
+MAX_ENC_FRAME = 512  # cap to avoid runaway buffer on noise
 
 
 def checksum(data: bytes) -> int:
@@ -22,36 +23,43 @@ def checksum(data: bytes) -> int:
 
 
 def build_frame(msg_type: int, positions: List[float]) -> bytes:
-    # positions: list of 8 floats
+    # payload: N floats, little-endian
     payload = b"".join(struct.pack("<f", float(p)) for p in positions)
-    length = len(payload)
+    length = len(payload)  # bytes
     chk = checksum(payload)
-    return bytes([START_BYTE, msg_type, length]) + payload + bytes([chk, END_BYTE])
+
+    # body: [type][len][payload][chk]
+    body = bytes([msg_type, length]) + payload + bytes([chk])
+
+    # on-wire: COBS(body) + 0x00 delimiter
+    return cobs.encode(body) + COBS_DELIM
 
 
-def parse_frame(frame: bytes) -> Optional[List[float]]:
-    if len(frame) < 6:
-        return None
-    if frame[0] != START_BYTE or frame[-1] != END_BYTE:
-        return None
-    msg_type = frame[1]
-    if msg_type != MSG_TYPE_POSITION:
-        return None
-
-    length = frame[2]
-    if 3 + length + 2 != len(frame):
+def parse_body(body: bytes) -> Optional[Tuple[int, List[float]]]:
+    """
+    body: [type][len][payload][chk]
+    returns (msg_type, positions) on success
+    """
+    if len(body) < 3:
         return None
 
-    payload = frame[3:3 + length]
-    chk = frame[3 + length]
+    msg_type = body[0]
+    length = body[1]
+
+    if len(body) != 2 + length + 1:
+        return None
+
+    payload = body[2 : 2 + length]
+    chk = body[2 + length]
+
     if checksum(payload) != chk:
         return None
 
     if length % 4 != 0:
         return None
 
-    positions = [struct.unpack("<f", payload[i:i + 4])[0] for i in range(0, length, 4)]
-    return positions
+    positions = [struct.unpack("<f", payload[i : i + 4])[0] for i in range(0, length, 4)]
+    return (msg_type, positions)
 
 
 class SerialBridgeNode(Node):
@@ -62,7 +70,7 @@ class SerialBridgeNode(Node):
         self.declare_parameter("port", "/dev/ttyACM0")
         self.declare_parameter("baud", 115200)
         self.declare_parameter("timeout_s", 0.02)
-        self.declare_parameter("publish_rate_hz", 100.0)
+        self.declare_parameter("publish_rate_hz", 200.0)
         self.declare_parameter("joint_names", [f"joint_{i}" for i in range(8)])
 
         self.port = self.get_parameter("port").get_parameter_value().string_value
@@ -83,9 +91,8 @@ class SerialBridgeNode(Node):
         self.ser = serial.Serial(self.port, baudrate=self.baud, timeout=self.timeout_s)
         self.get_logger().info(f"Opened serial {self.port} @ {self.baud}")
 
-        # Buffers/state
+        # RX buffer (encoded bytes, delimiter-split)
         self._rx_buf = bytearray()
-        self._last_cmd: Optional[List[float]] = None
 
         # Timers
         period = 1.0 / self.publish_rate_hz
@@ -103,15 +110,16 @@ class SerialBridgeNode(Node):
         if len(msg.data) != 8:
             self.get_logger().warn(f"tx_positions must have 8 floats; got {len(msg.data)}")
             return
-        positions = [float(x) for x in msg.data]
-        self._last_cmd = positions
 
+        positions = [float(x) for x in msg.data]
         frame = build_frame(MSG_TYPE_POSITION, positions)
+
         try:
             self.ser.write(frame)
-            print("Written to serial")
-
-            self.ser.flush()
+            try:
+                self.ser.flush()
+            except Exception:
+                pass
         except Exception as e:
             self.get_logger().error(f"Serial write failed: {e}")
 
@@ -125,14 +133,26 @@ class SerialBridgeNode(Node):
             self.get_logger().error(f"Serial read failed: {e}")
             return
 
-        # Try extracting frames from stream
+        # Extract all complete COBS frames (split by 0x00)
         while True:
-            frame = self._extract_one_frame()
-            if frame is None:
+            enc = self._extract_one_cobs_encoded_frame()
+            if enc is None:
                 break
 
-            positions = parse_frame(frame)
-            if positions is None or len(positions) < 1:
+            # Decode COBS
+            try:
+                body = cobs.decode(enc)
+            except Exception:
+                # Bad frame; keep going (we already resynced by delimiter)
+                self.get_logger().warn(f"COBS decode failed (len={len(enc)}): {enc.hex()[:80]}...")
+                continue
+
+            parsed = parse_body(body)
+            if parsed is None:
+                continue
+
+            msg_type, positions = parsed
+            if msg_type != MSG_TYPE_POSITION:
                 continue
 
             # Publish as JointState (use first 8 if more)
@@ -142,44 +162,45 @@ class SerialBridgeNode(Node):
             js.position = positions[:8] + ([0.0] * max(0, 8 - len(positions)))
             self.pub_js.publish(js)
 
-    def _extract_one_frame(self) -> Optional[bytes]:
+    def _extract_one_cobs_encoded_frame(self) -> Optional[bytes]:
         """
-        Stream parser:
-        - find START_BYTE
-        - need at least 3 bytes for header
-        - use LEN to know total size: 3 + LEN + 2
-        - verify END_BYTE before returning
+        Returns one encoded COBS frame (without delimiter), or None if no complete frame.
+        Strategy:
+        - Look for delimiter 0x00 in rx buffer
+        - If found: take bytes before it as 'enc'
+        - Drop delimiter and consumed bytes
+        - Ignore empty frames (consecutive delimiters)
+        - Cap buffer size to avoid runaway on noise
         """
-        buf = self._rx_buf
-        if len(buf) < 3:
+        if not self._rx_buf:
             return None
 
-        # Find start
-        try:
-            start_idx = buf.index(START_BYTE)
-        except ValueError:
+        # Hard cap: if we somehow accumulate too much without a delimiter, drop + resync
+        if len(self._rx_buf) > (MAX_ENC_FRAME * 4):
+            self.get_logger().warn("RX buffer overflow; clearing to resync")
             self._rx_buf.clear()
             return None
 
-        if start_idx > 0:
-            del buf[:start_idx]
-
-        if len(buf) < 3:
+        try:
+            idx = self._rx_buf.index(0)  # delimiter position
+        except ValueError:
+            # No delimiter yet
             return None
 
-        length = buf[2]
-        total = 3 + length + 2
-        if len(buf) < total:
+        enc = bytes(self._rx_buf[:idx])
+        # Remove [0..idx] inclusive (delimiter)
+        del self._rx_buf[: idx + 1]
+
+        if len(enc) == 0:
+            # ignore empty frame (consecutive delimiters)
             return None
 
-        candidate = bytes(buf[:total])
-        del buf[:total]
-
-        # Quick end check; parse_frame will do full validation
-        if candidate[-1] != END_BYTE:
+        if len(enc) > MAX_ENC_FRAME:
+            # Drop garbage oversized frame
+            self.get_logger().warn(f"Oversized encoded frame ({len(enc)} bytes); dropping")
             return None
 
-        return candidate
+        return enc
 
 
 def main():
