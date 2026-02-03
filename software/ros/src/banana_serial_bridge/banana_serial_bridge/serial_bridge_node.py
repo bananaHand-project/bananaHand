@@ -6,7 +6,7 @@ import rclpy
 from rclpy.node import Node
 
 from sensor_msgs.msg import JointState
-from std_msgs.msg import Float32MultiArray
+from std_msgs.msg import UInt16MultiArray
 
 import serial
 from cobs import cobs  # pip install cobs
@@ -14,7 +14,7 @@ from cobs import cobs  # pip install cobs
 
 COBS_DELIM = b"\x00"
 MSG_TYPE_POSITION = 0x01
-LENGTH = 32  # 8 floats * 4 bytes each
+LENGTH = 16  # 8 ints * 2 bytes each
 
 MAX_ENC_FRAME = 512  # cap to avoid runaway buffer on noise
 
@@ -23,11 +23,11 @@ def checksum(data: bytes) -> int:
     return sum(data) & 0xFF
 
 
-def build_frame(msg_type: int, positions: List[float]) -> bytes:
+def build_frame(msg_type: int, positions: List[int]) -> bytes:
     if len(positions) != 8:
-        raise ValueError(f"expected 8 floats, got {len(positions)}")
+        raise ValueError(f"expected 8 uint16 values, got {len(positions)}")
 
-    payload = b"".join(struct.pack("<f", float(p)) for p in positions)
+    payload = b"".join(struct.pack("<H", int(p)) for p in positions)
     if len(payload) != LENGTH:
         raise ValueError(f"payload must be {LENGTH} bytes, got {len(payload)}")
 
@@ -39,7 +39,7 @@ def build_frame(msg_type: int, positions: List[float]) -> bytes:
     return cobs.encode(body) + COBS_DELIM
 
 
-def parse_body(body: bytes) -> Optional[Tuple[int, List[float]]]:
+def parse_body(body: bytes) -> Optional[Tuple[int, List[int]]]:
     # body: [type][payload][chk]
     if len(body) != 1 + LENGTH + 1:
         return None
@@ -51,7 +51,7 @@ def parse_body(body: bytes) -> Optional[Tuple[int, List[float]]]:
     if checksum(payload) != chk:
         return None
 
-    positions = [struct.unpack("<f", payload[i:i+4])[0] for i in range(0, LENGTH, 4)]
+    positions = [struct.unpack("<H", payload[i:i+2])[0] for i in range(0, LENGTH, 2)]
     return (msg_type, positions)
 
 
@@ -78,7 +78,7 @@ class SerialBridgeNode(Node):
 
         # ROS interfaces
         self.pub_js = self.create_publisher(JointState, "rx_positions", 10)
-        self.sub_cmd = self.create_subscription(Float32MultiArray, "tx_positions", self.on_cmd, 10)
+        self.sub_cmd = self.create_subscription(UInt16MultiArray, "tx_positions", self.on_cmd, 10)
 
         # Serial
         self.ser = serial.Serial(self.port, baudrate=self.baud, timeout=self.timeout_s)
@@ -99,12 +99,12 @@ class SerialBridgeNode(Node):
             pass
         super().destroy_node()
 
-    def on_cmd(self, msg: Float32MultiArray):
+    def on_cmd(self, msg: UInt16MultiArray):
         if len(msg.data) != 8:
-            self.get_logger().warn(f"tx_positions must have 8 floats; got {len(msg.data)}")
+            self.get_logger().warn(f"tx_positions must have 8 uint16 values; got {len(msg.data)}")
             return
 
-        positions = [float(x) for x in msg.data]
+        positions = [int(x) for x in msg.data]
         frame = build_frame(MSG_TYPE_POSITION, positions)
 
         try:
@@ -152,7 +152,7 @@ class SerialBridgeNode(Node):
             js = JointState()
             js.header.stamp = self.get_clock().now().to_msg()
             js.name = self.joint_names
-            js.position = positions[:8] + ([0.0] * max(0, 8 - len(positions)))
+            js.position = [float(p) for p in positions[:8]] + ([0.0] * max(0, 8 - len(positions)))
             self.pub_js.publish(js)
 
     def _extract_one_cobs_encoded_frame(self) -> Optional[bytes]:

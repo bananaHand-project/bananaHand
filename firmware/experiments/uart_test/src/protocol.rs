@@ -2,7 +2,7 @@ use cobs::{encode, decode};
 
 pub const COBS_DELIM: u8 = 0x00;
 pub const MAX_FRAME: usize = 128;
-pub const PAYLOAD_LEN: usize = 32;
+pub const PAYLOAD_LEN: usize = 16;
 
 // START/END no longer used with COBS framing (safe to delete)
 // pub const START_BYTE: u8 = 0xFF;
@@ -17,7 +17,7 @@ pub struct BuiltFrame {
     pub len: usize,
 }
 
-pub fn build_frame(msg_type: u8, positions: [f32; 8]) -> BuiltFrame {
+pub fn build_frame(msg_type: u8, positions: [u16; 8]) -> BuiltFrame {
     let mut body = [0u8; MAX_FRAME];
     let mut body_len = 0usize;
 
@@ -29,8 +29,8 @@ pub fn build_frame(msg_type: u8, positions: [f32; 8]) -> BuiltFrame {
 
     for p in positions {
         let bytes = p.to_le_bytes();
-        body[body_len..body_len + 4].copy_from_slice(&bytes);
-        body_len += 4;
+        body[body_len..body_len + 2].copy_from_slice(&bytes);
+        body_len += 2;
     }
 
     let chk = checksum(&body[payload_start..payload_start + PAYLOAD_LEN]);

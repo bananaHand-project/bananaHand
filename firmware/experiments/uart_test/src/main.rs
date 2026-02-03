@@ -2,11 +2,15 @@
 #![no_main]
 
 mod protocol;
+mod shared;
+mod command_reader;
+mod telemetry_sender;
 
 use embassy_executor::Spawner;
 use embassy_stm32::bind_interrupts;
 use embassy_stm32::usart::{Config, Uart};
-use protocol::{build_frame, FrameParser, MessageType};
+use embassy_time::Timer;
+use shared::{COMMANDS, POSITIONS};
 use {defmt_rtt as _, panic_probe as _};
 
 bind_interrupts!(struct Irqs {
@@ -20,7 +24,7 @@ async fn main(_spawner: Spawner) {
     let mut config = Config::default();
     config.baudrate = 115_200;
 
-    let mut uart = Uart::new(
+    let uart = Uart::new(
         p.USART2,
         p.PA3,       // RX pin
         p.PA2,       // TX pin
@@ -31,43 +35,22 @@ async fn main(_spawner: Spawner) {
     )
     .unwrap();
 
-    defmt::info!("UART2 initialized (COBS framing)!");
+    let (tx, rx) = uart.split();
 
-    // Raw bytes read from DMA
-    let mut rx_buf = [0u8; 64];
-
-    // COBS streaming parser
-    let mut parser = FrameParser::new();
+    _spawner.spawn(telemetry_sender::telemetry_sender_task(tx)).unwrap();
+    _spawner.spawn(command_reader::command_reader_task(rx)).unwrap();
 
     loop {
-        // Read a burst of bytes (until idle) into rx_buf
-        let n = uart.read_until_idle(&mut rx_buf).await.unwrap();
-
-        for &b in &rx_buf[..n] {
-            // parse_byte returns (msg_type, payload_slice)
-            if let Some((msg_type, payload)) = parser.parse_byte(b) {
-                if msg_type == MessageType::PositionUpdate as u8 {
-                    // Expect 8 f32 = 32 bytes
-                    if payload.len() != 32 {
-                        defmt::warn!("PositionUpdate payload wrong size: {}", payload.len());
-                        continue;
-                    }
-
-                    let mut positions = [0f32; 8];
-                    for i in 0..8 {
-                        let start = i * 4;
-                        let bytes: [u8; 4] = payload[start..start + 4].try_into().unwrap();
-                        positions[i] = f32::from_le_bytes(bytes);
-                        defmt::info!("pos[{}] = {}", i, positions[i]);
-                    }
-
-                    // Echo back using COBS framed builder (returns {buf, len})
-                    let frame = build_frame(MessageType::PositionUpdate as u8, positions);
-                    let _ = uart.write(&frame.buf[..frame.len]).await;
-                } else {
-                    defmt::info!("Unhandled message type {}", msg_type);
-                }
-            }
+        let positions = POSITIONS.read_snapshot();
+        for (idx, value) in positions.iter().enumerate() {
+            defmt::info!("positions[{}] = {}", idx, value);
         }
+
+        let commands = COMMANDS.read_snapshot();
+        for (idx, value) in commands.iter().enumerate() {
+            defmt::info!("commands[{}] = {}", idx, value);
+        }
+
+        Timer::after_millis(500).await;
     }
 }
