@@ -12,6 +12,7 @@ use panic_halt as _;
 use {defmt_rtt as _, panic_probe as _};
 
 use embassy_executor::Spawner;
+use embassy_stm32::bind_interrupts;
 use embassy_stm32::{
     Config,
     usart::Config as UartConfig,
@@ -20,6 +21,10 @@ use embassy_stm32::usart::UartRx;
 use embassy_time::{Duration, Timer};
 use fmt::info;
 use shared_force::SharedForceData;
+
+bind_interrupts!(struct Irqs {
+    USART1 => embassy_stm32::usart::InterruptHandler<embassy_stm32::peripherals::USART1>;
+});
 
 static SHARED_FORCE: SharedForceData = SharedForceData::new();
 
@@ -45,7 +50,7 @@ async fn main(_spawner: Spawner) {
 
     let mut uart_config = UartConfig::default();
     uart_config.baudrate = 115_200;
-    let uart_rx = UartRx::new_blocking(p.USART1, p.PA10, uart_config).unwrap();
+    let uart_rx = UartRx::new(p.USART1, Irqs, p.PA10, p.DMA1_CH1, uart_config).unwrap();
     _spawner
         .spawn(c0_reader::c0_reader_task(uart_rx, &SHARED_FORCE))
         .unwrap();
