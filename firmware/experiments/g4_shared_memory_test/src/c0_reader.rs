@@ -2,13 +2,13 @@ use embassy_stm32::mode::Async;
 use embassy_stm32::usart::UartRx;
 
 use crate::protocol::{FrameParser, MessageType};
-use crate::shared_force::SharedForceData;
+use crate::shared_data::SharedData;
 use defmt::info;
 
 #[embassy_executor::task]
 pub async fn c0_reader_task(
     mut rx: UartRx<'static, Async>,
-    shared: &'static SharedForceData,
+    shared: &'static SharedData<10>,
 ) {
     let mut parser = FrameParser::new();
     let mut readings = [0u16; 10];
