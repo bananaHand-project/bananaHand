@@ -2,4 +2,11 @@
 target = "thumbv6m-none-eabi"
 
 [target.thumbv6m-none-eabi]
-runner = "probe-rs run --chip STM32C071RBTx"
+runner = "probe-rs run --chip STM32C071RBTx --log-format '{s}'"
+
+[env]
+DEFMT_LOG = "info"
+
+[unstable]
+build-std = ["core"]
+build-std-features = ["panic_immediate_abort"]

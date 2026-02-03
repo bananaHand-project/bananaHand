@@ -1,2 +1,12 @@
 [build]
 target = "thumbv7em-none-eabihf"
+
+[target.thumbv7em-none-eabihf]
+runner = 'probe-rs run --chip STM32G474RETx'
+
+[env]
+DEFMT_LOG = "trace"
+
+[unstable]
+build-std = ["core"]
+build-std-features = ["panic_immediate_abort"]

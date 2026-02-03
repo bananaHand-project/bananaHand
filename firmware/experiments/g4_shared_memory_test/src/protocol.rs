@@ -1,12 +1,8 @@
-use cobs::{encode, decode};
+use cobs::{decode, encode};
 
 pub const COBS_DELIM: u8 = 0x00;
 pub const MAX_FRAME: usize = 128;
-pub const PAYLOAD_LEN: usize = 32;
-
-// START/END no longer used with COBS framing (safe to delete)
-// pub const START_BYTE: u8 = 0xFF;
-// pub const END_BYTE: u8 = 0xFE;
+pub const PAYLOAD_LEN: usize = 20;
 
 fn checksum(data: &[u8]) -> u8 {
     data.iter().fold(0u8, |acc, &b| acc.wrapping_add(b))
@@ -17,27 +13,25 @@ pub struct BuiltFrame {
     pub len: usize,
 }
 
-pub fn build_frame(msg_type: u8, positions: [f32; 8]) -> BuiltFrame {
+pub fn build_frame(msg_type: u8, readings: [u16; 10]) -> BuiltFrame {
     let mut body = [0u8; MAX_FRAME];
     let mut body_len = 0usize;
 
-    // body: [type][payload...][chk]
     body[body_len] = msg_type;
     body_len += 1;
 
     let payload_start = body_len;
 
-    for p in positions {
-        let bytes = p.to_le_bytes();
-        body[body_len..body_len + 4].copy_from_slice(&bytes);
-        body_len += 4;
+    for reading in readings {
+        let bytes = reading.to_le_bytes();
+        body[body_len..body_len + 2].copy_from_slice(&bytes);
+        body_len += 2;
     }
 
     let chk = checksum(&body[payload_start..payload_start + PAYLOAD_LEN]);
     body[body_len] = chk;
     body_len += 1;
 
-    // ---- COBS encode + delimiter ----
     let mut framed = BuiltFrame {
         buf: [0u8; MAX_FRAME],
         len: 0,
@@ -45,7 +39,6 @@ pub fn build_frame(msg_type: u8, positions: [f32; 8]) -> BuiltFrame {
 
     let enc_len = encode(&body[..body_len], &mut framed.buf);
 
-    // ensure space for delimiter
     if enc_len + 1 > MAX_FRAME {
         defmt::error!("COBS encode overflow: no room for delimiter");
         framed.len = 0;
@@ -59,7 +52,7 @@ pub fn build_frame(msg_type: u8, positions: [f32; 8]) -> BuiltFrame {
 }
 
 pub enum MessageType {
-    PositionUpdate = 0x01,
+    ForceReadings = 0x01,
 }
 
 pub struct FrameParser {
@@ -78,7 +71,6 @@ impl FrameParser {
     }
 
     pub fn parse_byte(&mut self, byte: u8) -> Option<(u8, &[u8])> {
-        // accumulate until delimiter
         if byte != COBS_DELIM {
             if self.enc_len < MAX_FRAME {
                 self.enc_buf[self.enc_len] = byte;
@@ -90,9 +82,8 @@ impl FrameParser {
             return None;
         }
 
-        // delimiter hit
         if self.enc_len == 0 {
-            return None; // ignore empty frame
+            return None;
         }
 
         let report = match decode(&self.enc_buf[..self.enc_len], &mut self.dec_buf) {
@@ -104,11 +95,9 @@ impl FrameParser {
             }
         };
 
-        // cobs 0.5.0: use method, not field
-        let dec_len = report.frame_size(); // :contentReference[oaicite:1]{index=1}
+        let dec_len = report.frame_size();
         self.enc_len = 0;
 
-        // decoded body: [type][payload...][chk]
         if dec_len < 3 {
             defmt::error!("Frame too short");
             return None;

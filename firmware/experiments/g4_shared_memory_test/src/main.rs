@@ -3,6 +3,7 @@
 
 mod fmt;
 mod c0_reader;
+mod protocol;
 mod shared_force;
 
 #[cfg(not(feature = "defmt"))]
@@ -38,6 +39,7 @@ async fn main(_spawner: Spawner) {
         });
         config.rcc.mux.adc12sel = mux::Adcsel::SYS;
         config.rcc.sys = Sysclk::PLL1_R;
+        config.rcc.ls = LsConfig::default_lsi();
     }
     let p = embassy_stm32::init(config);
 
@@ -49,9 +51,20 @@ async fn main(_spawner: Spawner) {
         .unwrap();
 
     let mut latest = [0u16; 10];
+    let mut read_count: u32 = 0;
     loop {
         if SHARED_FORCE.read_frame(&mut latest) {
-            info!("Force raw (ch0): {}", latest[0]);
+            read_count = read_count.wrapping_add(1);
+            if read_count == 1 || read_count % 10 == 0 {
+                info!(
+                    "Shared force read {}: ch0={} ch1={} ch2={} ch3={}",
+                    read_count,
+                    latest[0],
+                    latest[1],
+                    latest[2],
+                    latest[3]
+                );
+            }
         }
         Timer::after(Duration::from_millis(10)).await;
     }

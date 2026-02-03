@@ -3,6 +3,7 @@
 
 mod fmt;
 mod force_sensor;
+mod protocol;
 
 #[cfg(not(feature = "defmt"))]
 use panic_halt as _;
@@ -14,6 +15,7 @@ use embassy_stm32::adc::{Adc, AnyAdcChannel, AdcChannel, Resolution, SampleTime}
 use embassy_stm32::usart::{Config as UartConfig, Uart};
 use embassy_time::{Duration, Timer};
 use fmt::info;
+use protocol::{build_frame, MessageType};
 
 #[embassy_executor::main]
 async fn main(_spawner: Spawner) {
@@ -42,10 +44,6 @@ async fn main(_spawner: Spawner) {
     ];
 
     let mut readings: [u16; 10] = [0; 10];
-    let mut packet: [u8; 23] = [0; 23];
-
-    const HEADER: [u8; 2] = [0xAA, 0x55];
-
     loop {
         for (idx, channel) in channels.iter_mut().enumerate() {
             readings[idx] = if SENSOR_ENABLED[idx] {
@@ -55,21 +53,9 @@ async fn main(_spawner: Spawner) {
             };
         }
 
-        for (idx, value) in readings.iter().enumerate() {
-            let bytes = value.to_le_bytes();
-            packet[2 + idx * 2] = bytes[0];
-            packet[2 + idx * 2 + 1] = bytes[1];
-        }
-
-        packet[0] = HEADER[0];
-        packet[1] = HEADER[1];
-        let checksum: u8 = packet[2..22]
-            .iter()
-            .fold(0u8, |acc, &b| acc.wrapping_add(b));
-        packet[22] = checksum;
-
-        let _ = uart.blocking_write(&packet);
-        info!("ADC0 raw: {}", readings[0]);
+        let frame = build_frame(MessageType::ForceReadings as u8, readings);
+        let _ = uart.blocking_write(&frame.buf[..frame.len]);
+        info!("ADC array raw: {}", readings);
         Timer::after(Duration::from_millis(50)).await;
     }
 }

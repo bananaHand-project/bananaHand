@@ -18,6 +18,7 @@ embassy-time = { version = "0.5.0", features = ["tick-hz-32_768"] }
 heapless = "0.8.0"
 panic-halt = "1.0.0"
 panic-probe = { version = "1.0.0", features = ["print-defmt"], optional = true }
+cobs = { version = "0.5.0", default-features = false }
 
 [[bin]]
 name = "force_sensor_test"
@@ -52,3 +53,10 @@ debug = [
     "embassy-time/defmt-timestamp-uptime",
     "embassy-stm32/defmt",
 ]
+
+[patch.crates-io]
+embassy-stm32 = { git = "https://github.com/embassy-rs/embassy", rev = "4ff2b6f912619d6d5216cd2b3cd38129a7e9c49d" }
+embassy-time = { git = "https://github.com/embassy-rs/embassy", rev = "4ff2b6f912619d6d5216cd2b3cd38129a7e9c49d" }
+embassy-executor = { git = "https://github.com/embassy-rs/embassy", rev = "4ff2b6f912619d6d5216cd2b3cd38129a7e9c49d" }
+embassy-futures = { git = "https://github.com/embassy-rs/embassy", rev = "4ff2b6f912619d6d5216cd2b3cd38129a7e9c49d" }
+embassy-sync = { git = "https://github.com/embassy-rs/embassy", rev = "4ff2b6f912619d6d5216cd2b3cd38129a7e9c49d" }
