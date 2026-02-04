@@ -12,13 +12,26 @@ Packages added under `software/ros/src`:
 - `banana_hand_mapping` (placeholder)
 - `banana_interfaces` (custom messages)
 
-Run webcam node:
+Run vision teleop:
 ```
 cd software/ros
 source /opt/ros/humble/setup.bash
-colcon build --symlink-install --packages-select banana_hand_tracking
+pip install --user -r src/banana_hand_tracking/requirements.txt
+colcon build --symlink-install --packages-select banana_interfaces banana_hand_tracking
 source install/setup.bash
-ros2 launch banana_hand_tracking webcam.launch.py
+ros2 launch banana_hand_tracking vision_teleop.launch.py
+```
+
+Verify:
+```
+ros2 topic hz /camera/image_raw
+ros2 topic hz /hand/landmarks
+ros2 topic hz /hand/teleop_joint_trajectory
+```
+
+Calibrate:
+```
+ros2 service call /hand/calibrate std_srvs/srv/Trigger {}
 ```
 
 ### How to Run Serial Node

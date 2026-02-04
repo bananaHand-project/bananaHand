@@ -30,8 +30,10 @@ Run (combined)
 ros2 launch banana_hand_tracking vision_teleop.launch.py
 ```
 
-Landmarks topic
+Topics + service
 - `/hand/landmarks` (`banana_interfaces/msg/HandState`)
+- `/hand/teleop_joint_trajectory` (`trajectory_msgs/msg/JointTrajectory`)
+- `/hand/calibrate` (`std_srvs/srv/Trigger`)
 
 Non-ROS MVP (MediaPipe)
 ```
@@ -45,12 +47,29 @@ Parameters (launch)
 - `show_preview` (bool, default: true) — OpenCV live window
 - `use_v4l2` (bool, default: true) — force V4L2 backend on Linux
 
+Parameters (hand_tracking_node)
+- `alpha` (float, default: 0.2) — teleop smoothing
+- `mirror_handedness` (bool, default: true)
+- `process_width` (int, default: 640)
+- `process_height` (int, default: 480)
+- `preview_fps` (float, default: 15.0)
+- `process_fps` (float, default: 15.0; set 0.0 for no cap)
+
 Quick checks
 ```
 ros2 node info /webcam_node
 ros2 topic list
 ros2 topic hz /camera/image_raw
+ros2 topic hz /hand/landmarks
+ros2 topic hz /hand/teleop_joint_trajectory
 ```
+
+Calibration
+```
+ros2 service call /hand/calibrate std_srvs/srv/Trigger {}
+```
+Notes:
+- Until calibrated, teleop outputs are all zeros and a warning is logged.
 
 Troubleshooting
 - If the topic exists but `ros2 topic hz` hangs, the camera may be busy or using a bad index.
