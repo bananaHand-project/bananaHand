@@ -5,18 +5,34 @@ Webcam hand tracking package (Phase A: webcam capture + image publishing).
 Purpose
 - Capture frames from a laptop webcam.
 - Publish frames as `sensor_msgs/Image` on `/camera/image_raw`.
-- (Later) Run hand detection/landmarks (planned: MediaPipe or similar).
+- Run MediaPipe Hands to visualize landmarks (MVP).
 
 Build
 ```
 cd /home/dbhaumik/BananaHand/software/ros
+pip install --user -r src/banana_hand_tracking/requirements.txt
 colcon build --symlink-install --packages-select banana_hand_tracking
 source install/setup.bash
 ```
 
-Run
+Run (webcam publisher)
 ```
 ros2 launch banana_hand_tracking webcam.launch.py
+```
+
+Run (hand tracking node)
+```
+ros2 launch banana_hand_tracking hand_tracking.launch.py
+```
+
+Run (combined)
+```
+ros2 launch banana_hand_tracking vision_teleop.launch.py
+```
+
+Non-ROS MVP (MediaPipe)
+```
+python3 /home/dbhaumik/BananaHand/software/ros/src/banana_hand_tracking/scripts/mediapipe_preview.py
 ```
 
 Parameters (launch)
