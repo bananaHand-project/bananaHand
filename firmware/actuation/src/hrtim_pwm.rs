@@ -381,7 +381,3 @@ subtimer_interface_creator!(c);
 subtimer_interface_creator!(d);
 subtimer_interface_creator!(e);
 subtimer_interface_creator!(f);
-
-// TODO:
-// instead of where clause use separate impl blocks for generics P1, P2, first block if only P1 one is used, second block if only p2 is used, third block if both
-// the manager will also need separate impl blocks for each subtimer variant

@@ -47,12 +47,12 @@ async fn main(_spawner: Spawner) {
     let clock_prescaler = hrtim_pwm::Prescaler::DIV32;
     let period = 8500u16;
 
-    let hrtim_a_pwm = hrtim_pwm::Hrtim1APwm {
-        ch1_pin: Some(p.PA8),
-        ch2_pin: Some(p.PA9),
-        period,
-        clock_prescaler,
-    };
+    // let hrtim_a_pwm = hrtim_pwm::Hrtim1APwm {
+    //     ch1_pin: Some(p.PA8),
+    //     ch2_pin: Some(p.PA9),
+    //     period,
+    //     clock_prescaler,
+    // };
 
     let hrtim_b_pwm = hrtim_pwm::Hrtim1BPwm {
         ch1_pin: Some(p.PA10),
@@ -90,7 +90,7 @@ async fn main(_spawner: Spawner) {
     };
 
     let manager = unwrap!(hrtim_pwm::HrtimPwmManager::new(
-        Some(hrtim_a_pwm),
+        None::<hrtim_pwm::Hrtim1APwm<peripherals::PA8, peripherals::PA9>>,
         Some(hrtim_b_pwm),
         Some(hrtim_c_pwm),
         Some(hrtim_d_pwm),
@@ -99,30 +99,35 @@ async fn main(_spawner: Spawner) {
         None::<hrtim_pwm::Hrtim1FPwm<peripherals::PC6, peripherals::PC7>>,
     ));
 
-    unwrap!(manager.set_tima_ch1_dc(50));
-    unwrap!(manager.set_tima_ch2_dc(25));
-    unwrap!(manager.enable_tima_ch1());
-    unwrap!(manager.enable_tima_ch2());
+    // unwrap!(manager.set_tima_ch1_dc(50));
+    // unwrap!(manager.set_tima_ch2_dc(25));
+    // unwrap!(manager.enable_tima_ch1());
+    // unwrap!(manager.enable_tima_ch2());
 
-    unwrap!(manager.set_timb_ch1_dc(50));
-    unwrap!(manager.set_timb_ch2_dc(25));
+    unwrap!(manager.set_timb_ch1_dc(10));
+    unwrap!(manager.set_timb_ch2_dc(20));
     unwrap!(manager.enable_timb_ch1());
     unwrap!(manager.enable_timb_ch2());
 
-    unwrap!(manager.set_timc_ch1_dc(50));
-    unwrap!(manager.set_timc_ch2_dc(25));
+    unwrap!(manager.set_timc_ch1_dc(30));
+    unwrap!(manager.set_timc_ch2_dc(40));
     unwrap!(manager.enable_timc_ch1());
     unwrap!(manager.enable_timc_ch2());
 
     unwrap!(manager.set_timd_ch1_dc(50));
-    unwrap!(manager.set_timd_ch2_dc(25));
+    unwrap!(manager.set_timd_ch2_dc(60));
     unwrap!(manager.enable_timd_ch1());
     unwrap!(manager.enable_timd_ch2());
 
-    unwrap!(manager.set_time_ch1_dc(50));
-    unwrap!(manager.set_time_ch2_dc(25));
+    unwrap!(manager.set_time_ch1_dc(70));
+    unwrap!(manager.set_time_ch2_dc(80));
     unwrap!(manager.enable_time_ch1());
     unwrap!(manager.enable_time_ch2());
+
+    // unwrap!(manager.set_timf_ch1_dc(90));
+    // unwrap!(manager.set_timf_ch2_dc(100));
+    // unwrap!(manager.enable_timf_ch1());
+    // unwrap!(manager.enable_timf_ch2());
 
     loop {
         info!("Hello, World!");
