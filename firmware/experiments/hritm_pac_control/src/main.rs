@@ -15,7 +15,6 @@ use embassy_executor::Spawner;
 use embassy_stm32::{
     Config,
     gpio::{Level, Output, Speed},
-    peripherals,
 };
 use embassy_time::{Duration, Timer};
 use fmt::{info, unwrap};
@@ -39,116 +38,50 @@ async fn main(_spawner: Spawner) {
 
     let p = embassy_stm32::init(config);
 
-    // let p = embassy_stm32::init(Default::default());
     let mut led = Output::new(p.PA5, Level::High, Speed::Low);
 
-    // let ch1 = p.PA8;
-    // let ch2 = p.PA9;
-    let clock_prescaler = hrtim_pwm::Prescaler::DIV32;
     let period = 8500u16;
+    let prescaler = hrtim_pwm_v2::Prescaler::DIV32;
 
-    // let hrtim_a_pwm = hrtim_pwm::Hrtim1APwm {
-    //     ch1_pin: Some(p.PA8),
-    //     ch2_pin: Some(p.PA9),
-    //     period,
-    //     clock_prescaler,
-    // };
-
-    let hrtim_b_pwm = hrtim_pwm::Hrtim1BPwm {
-        ch1_pin: Some(p.PA10),
-        ch2_pin: Some(p.PA11),
-        period,
-        clock_prescaler,
-    };
-
-    let hrtim_c_pwm = hrtim_pwm::Hrtim1CPwm {
-        ch1_pin: Some(p.PB12),
-        ch2_pin: Some(p.PB13),
-        period,
-        clock_prescaler,
-    };
-
-    let hrtim_d_pwm = hrtim_pwm::Hrtim1DPwm {
-        ch1_pin: Some(p.PB14),
-        ch2_pin: Some(p.PB15),
-        period,
-        clock_prescaler,
-    };
-
-    let hrtim_e_pwm = hrtim_pwm::Hrtim1EPwm {
-        ch1_pin: Some(p.PC8),
-        ch2_pin: Some(p.PC9),
-        period,
-        clock_prescaler,
-    };
-
-    let hrtim_f_pwm = hrtim_pwm::Hrtim1FPwm {
-        ch1_pin: Some(p.PC6),
-        ch2_pin: Some(p.PC7),
-        period,
-        clock_prescaler,
-    };
-
-    let manager = unwrap!(hrtim_pwm::HrtimPwmManager::new(
-        None::<hrtim_pwm::Hrtim1APwm<peripherals::PA8, peripherals::PA9>>,
-        Some(hrtim_b_pwm),
-        Some(hrtim_c_pwm),
-        Some(hrtim_d_pwm),
-        Some(hrtim_e_pwm),
-        Some(hrtim_f_pwm),
-    ));
-
-    // unwrap!(manager.set_tima_ch1_dc(50));
-    // unwrap!(manager.set_tima_ch2_dc(25));
-    // unwrap!(manager.enable_tima_ch1());
-    // unwrap!(manager.enable_tima_ch2());
-
-    unwrap!(manager.set_timb_ch1_dc(10));
-    unwrap!(manager.set_timb_ch2_dc(20));
-    unwrap!(manager.enable_timb_ch1());
-    unwrap!(manager.enable_timb_ch2());
-
-    unwrap!(manager.set_timc_ch1_dc(30));
-    unwrap!(manager.set_timc_ch2_dc(40));
-    unwrap!(manager.enable_timc_ch1());
-    unwrap!(manager.enable_timc_ch2());
-
-    unwrap!(manager.set_timd_ch1_dc(50));
-    unwrap!(manager.set_timd_ch2_dc(60));
-    unwrap!(manager.enable_timd_ch1());
-    unwrap!(manager.enable_timd_ch2());
-
-    unwrap!(manager.set_time_ch1_dc(70));
-    unwrap!(manager.set_time_ch2_dc(80));
-    unwrap!(manager.enable_time_ch1());
-    unwrap!(manager.enable_time_ch2());
-
-    unwrap!(manager.set_timf_ch1_dc(90));
-    unwrap!(manager.set_timf_ch2_dc(100)); // 100% duty cycle doesn't work (output is 0%). Still trying to figure out why.
-    unwrap!(manager.enable_timf_ch1());
-    unwrap!(manager.enable_timf_ch2());
-
-    // let (tim_a, _b) = hrtim_pwm_v2::HrtimCore::new()
-    //     .add_tim_a_ch1_ch2(*p.PA8, *p.PA9, period, hrtim_pwm_v2::Prescaler::DIV32) // or with_tim_a_ch2 / with_tim_a_ch1_ch2
-    //     .split();
-
-    // let tim_a = tim_a.activate().unwrap();
-    // tim_a.ch1_set_dc_percent(20);
-    // tim_a.ch1_en();
-
-    // tim_a.ch2_set_dc_percent(50);
-    // tim_a.ch2_en();
-
-    // or
-
-    let (tim_a, tim_b) = hrtim_pwm_v2::HrtimCore::new()
-        .add_tim_a_ch1_ch2(*p.PA8, *p.PA9, period, hrtim_pwm_v2::Prescaler::DIV32) // or with_tim_a_ch2 / with_tim_a_ch1_ch2
+    let (tim_a, tim_b, tim_c, tim_d, tim_e, tim_f) = hrtim_pwm_v2::HrtimCore::new()
+        .add_tim_a_ch1_ch2(*p.PA8, *p.PA9, period, prescaler) // or with_tim_a_ch2 / with_tim_a_ch1_ch2
+        .add_tim_b_ch1_ch2(*p.PA10, *p.PA11, period, prescaler)
+        .add_tim_c_ch1_ch2(*p.PB12, *p.PB13, period, prescaler)
+        .add_tim_d_ch1_ch2(*p.PB14, *p.PB15, period, prescaler)
+        .add_tim_e_ch1_ch2(*p.PC8, *p.PC9, period, prescaler)
+        .add_tim_f_ch1_ch2(*p.PC6, *p.PC7, period, prescaler)
         .split_active()
         .unwrap();
-    tim_a.ch1_set_dc_percent(20);
-    tim_a.ch2_set_dc_percent(40);
+
+    tim_a.ch1_set_dc_percent(10);
+    tim_a.ch2_set_dc_percent(20);
     tim_a.ch1_en();
     tim_a.ch2_en();
+
+    tim_b.ch1_set_dc_percent(30);
+    tim_b.ch2_set_dc_percent(40);
+    tim_b.ch1_en();
+    tim_b.ch2_en();
+
+    tim_c.ch1_set_dc_percent(50);
+    tim_c.ch2_set_dc_percent(60);
+    tim_c.ch1_en();
+    tim_c.ch2_en();
+
+    tim_d.ch1_set_dc_percent(70);
+    tim_d.ch2_set_dc_percent(80);
+    tim_d.ch1_en();
+    tim_d.ch2_en();
+
+    tim_e.ch1_set_dc_percent(90);
+    tim_e.ch2_set_dc_percent(99);
+    tim_e.ch1_en();
+    tim_e.ch2_en();
+
+    tim_f.ch1_set_dc_percent(99);
+    tim_f.ch2_set_dc_percent(99);
+    tim_f.ch1_en();
+    tim_f.ch2_en();
 
     loop {
         info!("Hello, World!");
