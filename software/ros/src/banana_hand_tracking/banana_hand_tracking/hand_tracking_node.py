@@ -157,7 +157,7 @@ class HandTrackingNode(Node):
             "pinky": self._dist2d(landmarks[20], landmarks[17]) / hand_scale,
             "thumb": self._dist2d(landmarks[4], landmarks[2]) / hand_scale,
         }
-        thumb_opp = self._dist2d(landmarks[4], landmarks[5]) / hand_scale
+        thumb_opp = self._dist2d(landmarks[4], landmarks[17]) / hand_scale
         return metrics, thumb_opp
 
     def _compute_curl(self, d_norm: float, d_open: float, d_closed: float) -> float:

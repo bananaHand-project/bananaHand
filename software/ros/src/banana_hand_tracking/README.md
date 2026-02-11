@@ -11,7 +11,7 @@ Build
 ```
 cd /home/dbhaumik/BananaHand/software/ros
 pip install --user -r src/banana_hand_tracking/requirements.txt
-colcon build --symlink-install --packages-select banana_hand_tracking
+colcon build --symlink-install --packages-select banana_interfaces banana_hand_tracking
 source install/setup.bash
 ```
 
@@ -53,7 +53,8 @@ Parameters (hand_tracking_node)
 - `process_width` (int, default: 640)
 - `process_height` (int, default: 480)
 - `preview_fps` (float, default: 15.0)
-- `process_fps` (float, default: 15.0; set 0.0 for no cap)
+- `process_fps` (float, default: 0.0; set 0.0 for no cap)
+- `calibration_seconds` (float, default: 2.0)
 
 Quick checks
 ```
@@ -70,6 +71,7 @@ ros2 service call /hand/calibrate std_srvs/srv/Trigger {}
 ```
 Notes:
 - Until calibrated, teleop outputs are all zeros and a warning is logged.
+- Landmarks are published only when a hand is detected.
 
 Troubleshooting
 - If the topic exists but `ros2 topic hz` hangs, the camera may be busy or using a bad index.
