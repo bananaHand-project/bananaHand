@@ -1,11 +1,20 @@
 //! Expose *simple* **but unsafe** PWM interface for Hrtim
-use embassy_stm32::{self, hrtim, pac, peripherals::HRTIM1};
+use core::{fmt::Debug, ops::Div};
 
+use embassy_stm32::{
+    self, hrtim, pac,
+    peripherals::HRTIM1,
+    rcc::{APBPrescaler, Clocks},
+    time::Hertz,
+};
+
+use embassy_time::Duration;
 use paste::paste;
 #[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 #[derive(Debug, Copy, Clone)]
 pub enum HrtimError {
     GpioInitFailed,
+    ClocksIncorrectlyConfigured,
 }
 
 /// HRTIM Subtimer.
@@ -24,7 +33,7 @@ pub enum HrtimSubTimer {
 #[allow(unused)]
 #[repr(u8)]
 #[derive(Debug, Copy, Clone)]
-pub enum Prescaler {
+pub enum HrtimPrescaler {
     DIV1 = 0,
     DIV2 = 1,
     DIV4 = 2,
@@ -33,6 +42,36 @@ pub enum Prescaler {
     DIV32 = 5,
     DIV64 = 6,
     DIV128 = 7,
+}
+
+impl HrtimPrescaler {
+    /// Convert prescaler into its integer divisor for `Hertz / divisor`.
+    pub const fn divisor(self) -> u32 {
+        match self {
+            HrtimPrescaler::DIV1 => 1,
+            HrtimPrescaler::DIV2 => 2,
+            HrtimPrescaler::DIV4 => 4,
+            HrtimPrescaler::DIV8 => 8,
+            HrtimPrescaler::DIV16 => 16,
+            HrtimPrescaler::DIV32 => 32,
+            HrtimPrescaler::DIV64 => 64,
+            HrtimPrescaler::DIV128 => 128,
+        }
+    }
+}
+
+impl From<HrtimPrescaler> for u32 {
+    fn from(value: HrtimPrescaler) -> Self {
+        value.divisor()
+    }
+}
+
+impl Div<HrtimPrescaler> for Hertz {
+    type Output = Hertz;
+
+    fn div(self, rhs: HrtimPrescaler) -> Self::Output {
+        self / rhs.divisor()
+    }
 }
 
 /// Letter group of pin (e.g. A, B, C, ...)
@@ -77,27 +116,23 @@ pub enum HrtimXCompare {
     Cmp2 = 1,
 }
 
-macro_rules! gpio_x_setup {
-    ($port:ident, $pin:expr, $af:expr) => {{
-        paste! {
-            // Enable GPIO clock: set_gpioaen / set_gpioben / ...
-            pac::RCC.ahb2enr().modify(|w| w.[<set_gpio $port:lower en>](true));
+// TODO: Integrate this into new subtimer creation
 
-            // Pick GPIOA / GPIOB / ...
-            let gpio = pac::[<GPIO $port:upper>];
+/// Calculate the necessary value of subtimer period register for a given pwm frequency in hertz and clock configuration.
+pub fn period_reg_val(
+    clocks: &Clocks,
+    apb2_prescaler: APBPrescaler,
+    hrtim_prescaler: HrtimPrescaler,
+    desired_pwm_hz: f32,
+) -> Result<u16, HrtimError> {
+    let apparent_hrtim_clk = clocks
+        .hclk1
+        .to_hertz()
+        .ok_or(HrtimError::ClocksIncorrectlyConfigured)?
+        .div(apb2_prescaler)
+        .div(hrtim_prescaler);
 
-            gpio.moder().modify(|w| w.set_moder($pin, pac::gpio::vals::Moder::ALTERNATE));
-            gpio.pupdr().modify(|w| w.set_pupdr($pin, pac::gpio::vals::Pupdr::FLOATING));
-            gpio.ospeedr().modify(|w| w.set_ospeedr($pin, pac::gpio::vals::Ospeedr::VERY_HIGH_SPEED));
-
-            // Set appropriate alternate function. AFRL: pins 0..=7, AFRH: pins 8..=15
-            match $pin {
-                0..=7 => { gpio.afr(0).modify(|w| w.set_afr($pin, $af)); Ok(()) }
-                8..=15 => { gpio.afr(1).modify(|w| w.set_afr($pin - 8, $af)); Ok(()) }
-                _ => Err(HrtimError::GpioInitFailed),
-            }
-        }
-    }};
+    Ok(((1.0 / desired_pwm_hz) / (1.0 / apparent_hrtim_clk.0 as f32)) as u16)
 }
 
 pub struct NoTimer;
@@ -110,6 +145,13 @@ pub struct NoTimerActive;
 pub trait Activate {
     type Active;
     fn activate(self) -> Result<Self::Active, HrtimError>;
+}
+
+impl Activate for NoTimer {
+    type Active = NoTimerActive;
+    fn activate(self) -> Result<Self::Active, HrtimError> {
+        Ok(NoTimerActive)
+    }
 }
 
 #[derive(Debug)]
@@ -177,67 +219,27 @@ impl<A: Activate, B: Activate, C: Activate, D: Activate, E: Activate, F: Activat
     }
 }
 
-// Activate Impls
+macro_rules! gpio_x_setup {
+    ($port:ident, $pin:expr, $af:expr) => {{
+        paste! {
+            // Enable GPIO clock: set_gpioaen / set_gpioben / ...
+            pac::RCC.ahb2enr().modify(|w| w.[<set_gpio $port:lower en>](true));
 
-impl Activate for NoTimer {
-    type Active = NoTimerActive;
-    fn activate(self) -> Result<Self::Active, HrtimError> {
-        Ok(NoTimerActive)
-    }
-}
+            // Pick GPIOA / GPIOB / ...
+            let gpio = pac::[<GPIO $port:upper>];
 
-// PAC helpers used above
+            gpio.moder().modify(|w| w.set_moder($pin, pac::gpio::vals::Moder::ALTERNATE));
+            gpio.pupdr().modify(|w| w.set_pupdr($pin, pac::gpio::vals::Pupdr::FLOATING));
+            gpio.ospeedr().modify(|w| w.set_ospeedr($pin, pac::gpio::vals::Ospeedr::VERY_HIGH_SPEED));
 
-fn configure_timer(timer: HrtimSubTimer, prescaler: Prescaler, period: u16) {
-    pac::HRTIM1
-        .tim(timer as usize)
-        .cr()
-        .modify(|w| w.set_cont(true));
-
-    pac::HRTIM1
-        .tim(timer as usize)
-        .cr()
-        .modify(|w| w.set_ckpsc(prescaler as u8));
-
-    pac::HRTIM1
-        .tim(timer as usize)
-        .per()
-        .modify(|w| w.set_per(period));
-
-    pac::HRTIM1
-        .mcr()
-        .modify(|w| w.set_tcen(timer as usize, true));
-}
-
-fn configure_channel(timer: HrtimSubTimer, channel: HrtimXChannel, comparator: HrtimXCompare) {
-    pac::HRTIM1
-        .tim(timer as usize)
-        .setr(channel as usize)
-        .modify(|w| w.set_per(true));
-
-    pac::HRTIM1
-        .tim(timer as usize)
-        .rstr(channel as usize)
-        .modify(|w| w.set_cmp(comparator as usize, true));
-}
-
-fn enable_output(timer: HrtimSubTimer, channel: HrtimXChannel) {
-    match channel {
-        HrtimXChannel::Ch1 => pac::HRTIM1
-            .oenr()
-            .modify(|w| w.set_t1oen(timer as usize, true)),
-        HrtimXChannel::Ch2 => pac::HRTIM1
-            .oenr()
-            .modify(|w| w.set_t2oen(timer as usize, true)),
-    }
-}
-
-fn set_cmp_for_dc(timer: HrtimSubTimer, cmp: HrtimXCompare, period: u16, percent: u8) {
-    let cmp_set = (period as f32 * (percent as f32 / 100.0)) as u16;
-    pac::HRTIM1
-        .tim(timer as usize)
-        .cmp(cmp as usize)
-        .modify(|w| w.set_cmp(cmp_set));
+            // Set appropriate alternate function. AFRL: pins 0..=7, AFRH: pins 8..=15
+            match $pin {
+                0..=7 => { gpio.afr(0).modify(|w| w.set_afr($pin, $af)); Ok(()) }
+                8..=15 => { gpio.afr(1).modify(|w| w.set_afr($pin - 8, $af)); Ok(()) }
+                _ => Err(HrtimError::GpioInitFailed),
+            }
+        }
+    }};
 }
 
 macro_rules! define_subtimer {
@@ -318,11 +320,11 @@ macro_rules! define_subtimer {
                 ch1: Ch1,
                 ch2: Ch2,
                 period: u16,
-                clock_prescaler: Prescaler,
+                clock_prescaler: HrtimPrescaler,
             }
 
             impl [<SubTimer $letter:upper Config>]<NoChannel, NoChannel> {
-                pub fn new(period: u16, clock_prescaler: Prescaler) -> Self {
+                pub fn new(period: u16, clock_prescaler: HrtimPrescaler) -> Self {
                     Self {
                         ch1: NoChannel,
                         ch2: NoChannel,
@@ -363,7 +365,7 @@ macro_rules! define_subtimer {
                 ch1: Ch1,
                 ch2: Ch2,
                 period: u16,
-                clock_prescaler: Prescaler,
+                clock_prescaler: HrtimPrescaler,
             }
 
             impl<Ch1, Ch2> [<SubTimer $letter:upper Config>]<Ch1, Ch2>
@@ -425,7 +427,7 @@ macro_rules! define_subtimer {
                     self.period
                 }
 
-                pub fn get_clock_prescaler(&self) -> Prescaler {
+                pub fn get_clock_prescaler(&self) -> HrtimPrescaler {
                     self.clock_prescaler
                 }
 
@@ -433,7 +435,7 @@ macro_rules! define_subtimer {
                     configure_timer(HrtimSubTimer::[<Tim $letter:upper>], self.clock_prescaler, period);
                 }
 
-                pub fn set_clock_prescaler(&self, prescaler: Prescaler) {
+                pub fn set_clock_prescaler(&self, prescaler: HrtimPrescaler) {
                     configure_timer(HrtimSubTimer::[<Tim $letter:upper>], prescaler, self.period);
                 }
             }
@@ -489,7 +491,7 @@ impl<B, C, D, E, F> HrtimCore<NoTimer, B, C, D, E, F> {
         self,
         ch1: P1,
         period: u16,
-        clock_prescaler: Prescaler,
+        clock_prescaler: HrtimPrescaler,
     ) -> HrtimCore<SubTimerAConfig<P1, NoChannel>, B, C, D, E, F>
     where
         P1: hrtim::ChannelAPin<HRTIM1>,
@@ -502,7 +504,7 @@ impl<B, C, D, E, F> HrtimCore<NoTimer, B, C, D, E, F> {
         self,
         ch2: P2,
         period: u16,
-        clock_prescaler: Prescaler,
+        clock_prescaler: HrtimPrescaler,
     ) -> HrtimCore<SubTimerAConfig<NoChannel, P2>, B, C, D, E, F>
     where
         P2: hrtim::ChannelAComplementaryPin<HRTIM1>,
@@ -516,7 +518,7 @@ impl<B, C, D, E, F> HrtimCore<NoTimer, B, C, D, E, F> {
         ch1: P1,
         ch2: P2,
         period: u16,
-        clock_prescaler: Prescaler,
+        clock_prescaler: HrtimPrescaler,
     ) -> HrtimCore<SubTimerAConfig<P1, P2>, B, C, D, E, F>
     where
         P1: hrtim::ChannelAPin<HRTIM1>,
@@ -549,7 +551,7 @@ impl<A, C, D, E, F> HrtimCore<A, NoTimer, C, D, E, F> {
         self,
         ch1: P1,
         period: u16,
-        clock_prescaler: Prescaler,
+        clock_prescaler: HrtimPrescaler,
     ) -> HrtimCore<A, SubTimerBConfig<P1, NoChannel>, C, D, E, F>
     where
         P1: hrtim::ChannelBPin<HRTIM1>,
@@ -562,7 +564,7 @@ impl<A, C, D, E, F> HrtimCore<A, NoTimer, C, D, E, F> {
         self,
         ch2: P2,
         period: u16,
-        clock_prescaler: Prescaler,
+        clock_prescaler: HrtimPrescaler,
     ) -> HrtimCore<A, SubTimerBConfig<NoChannel, P2>, C, D, E, F>
     where
         P2: hrtim::ChannelBComplementaryPin<HRTIM1>,
@@ -576,7 +578,7 @@ impl<A, C, D, E, F> HrtimCore<A, NoTimer, C, D, E, F> {
         ch1: P1,
         ch2: P2,
         period: u16,
-        clock_prescaler: Prescaler,
+        clock_prescaler: HrtimPrescaler,
     ) -> HrtimCore<A, SubTimerBConfig<P1, P2>, C, D, E, F>
     where
         P1: hrtim::ChannelBPin<HRTIM1>,
@@ -608,7 +610,7 @@ impl<A, B, D, E, F> HrtimCore<A, B, NoTimer, D, E, F> {
         self,
         ch1: P1,
         period: u16,
-        clock_prescaler: Prescaler,
+        clock_prescaler: HrtimPrescaler,
     ) -> HrtimCore<A, B, SubTimerCConfig<P1, NoChannel>, D, E, F>
     where
         P1: hrtim::ChannelCPin<HRTIM1>,
@@ -620,7 +622,7 @@ impl<A, B, D, E, F> HrtimCore<A, B, NoTimer, D, E, F> {
         self,
         ch2: P2,
         period: u16,
-        clock_prescaler: Prescaler,
+        clock_prescaler: HrtimPrescaler,
     ) -> HrtimCore<A, B, SubTimerCConfig<NoChannel, P2>, D, E, F>
     where
         P2: hrtim::ChannelCComplementaryPin<HRTIM1>,
@@ -633,7 +635,7 @@ impl<A, B, D, E, F> HrtimCore<A, B, NoTimer, D, E, F> {
         ch1: P1,
         ch2: P2,
         period: u16,
-        clock_prescaler: Prescaler,
+        clock_prescaler: HrtimPrescaler,
     ) -> HrtimCore<A, B, SubTimerCConfig<P1, P2>, D, E, F>
     where
         P1: hrtim::ChannelCPin<HRTIM1>,
@@ -665,7 +667,7 @@ impl<A, B, C, E, F> HrtimCore<A, B, C, NoTimer, E, F> {
         self,
         ch1: P1,
         period: u16,
-        clock_prescaler: Prescaler,
+        clock_prescaler: HrtimPrescaler,
     ) -> HrtimCore<A, B, C, SubTimerDConfig<P1, NoChannel>, E, F>
     where
         P1: hrtim::ChannelDPin<HRTIM1>,
@@ -677,7 +679,7 @@ impl<A, B, C, E, F> HrtimCore<A, B, C, NoTimer, E, F> {
         self,
         ch2: P2,
         period: u16,
-        clock_prescaler: Prescaler,
+        clock_prescaler: HrtimPrescaler,
     ) -> HrtimCore<A, B, C, SubTimerDConfig<NoChannel, P2>, E, F>
     where
         P2: hrtim::ChannelDComplementaryPin<HRTIM1>,
@@ -690,7 +692,7 @@ impl<A, B, C, E, F> HrtimCore<A, B, C, NoTimer, E, F> {
         ch1: P1,
         ch2: P2,
         period: u16,
-        clock_prescaler: Prescaler,
+        clock_prescaler: HrtimPrescaler,
     ) -> HrtimCore<A, B, C, SubTimerDConfig<P1, P2>, E, F>
     where
         P1: hrtim::ChannelDPin<HRTIM1>,
@@ -722,7 +724,7 @@ impl<A, B, C, D, F> HrtimCore<A, B, C, D, NoTimer, F> {
         self,
         ch1: P1,
         period: u16,
-        clock_prescaler: Prescaler,
+        clock_prescaler: HrtimPrescaler,
     ) -> HrtimCore<A, B, C, D, SubTimerEConfig<P1, NoChannel>, F>
     where
         P1: hrtim::ChannelEPin<HRTIM1>,
@@ -734,7 +736,7 @@ impl<A, B, C, D, F> HrtimCore<A, B, C, D, NoTimer, F> {
         self,
         ch2: P2,
         period: u16,
-        clock_prescaler: Prescaler,
+        clock_prescaler: HrtimPrescaler,
     ) -> HrtimCore<A, B, C, D, SubTimerEConfig<NoChannel, P2>, F>
     where
         P2: hrtim::ChannelEComplementaryPin<HRTIM1>,
@@ -747,7 +749,7 @@ impl<A, B, C, D, F> HrtimCore<A, B, C, D, NoTimer, F> {
         ch1: P1,
         ch2: P2,
         period: u16,
-        clock_prescaler: Prescaler,
+        clock_prescaler: HrtimPrescaler,
     ) -> HrtimCore<A, B, C, D, SubTimerEConfig<P1, P2>, F>
     where
         P1: hrtim::ChannelEPin<HRTIM1>,
@@ -779,7 +781,7 @@ impl<A, B, C, D, E> HrtimCore<A, B, C, D, E, NoTimer> {
         self,
         ch1: P1,
         period: u16,
-        clock_prescaler: Prescaler,
+        clock_prescaler: HrtimPrescaler,
     ) -> HrtimCore<A, B, C, D, E, SubTimerFConfig<P1, NoChannel>>
     where
         P1: hrtim::ChannelFPin<HRTIM1>,
@@ -791,7 +793,7 @@ impl<A, B, C, D, E> HrtimCore<A, B, C, D, E, NoTimer> {
         self,
         ch2: P2,
         period: u16,
-        clock_prescaler: Prescaler,
+        clock_prescaler: HrtimPrescaler,
     ) -> HrtimCore<A, B, C, D, E, SubTimerFConfig<NoChannel, P2>>
     where
         P2: hrtim::ChannelFComplementaryPin<HRTIM1>,
@@ -804,7 +806,7 @@ impl<A, B, C, D, E> HrtimCore<A, B, C, D, E, NoTimer> {
         ch1: P1,
         ch2: P2,
         period: u16,
-        clock_prescaler: Prescaler,
+        clock_prescaler: HrtimPrescaler,
     ) -> HrtimCore<A, B, C, D, E, SubTimerFConfig<P1, P2>>
     where
         P1: hrtim::ChannelFPin<HRTIM1>,
@@ -816,4 +818,57 @@ impl<A, B, C, D, E> HrtimCore<A, B, C, D, E, NoTimer> {
                 .with_ch2(ch2),
         )
     }
+}
+
+// PAC helpers used above
+fn configure_timer(timer: HrtimSubTimer, prescaler: HrtimPrescaler, period: u16) {
+    pac::HRTIM1
+        .tim(timer as usize)
+        .cr()
+        .modify(|w| w.set_cont(true));
+
+    pac::HRTIM1
+        .tim(timer as usize)
+        .cr()
+        .modify(|w| w.set_ckpsc(prescaler as u8));
+
+    pac::HRTIM1
+        .tim(timer as usize)
+        .per()
+        .modify(|w| w.set_per(period));
+
+    pac::HRTIM1
+        .mcr()
+        .modify(|w| w.set_tcen(timer as usize, true));
+}
+
+fn configure_channel(timer: HrtimSubTimer, channel: HrtimXChannel, comparator: HrtimXCompare) {
+    pac::HRTIM1
+        .tim(timer as usize)
+        .setr(channel as usize)
+        .modify(|w| w.set_per(true));
+
+    pac::HRTIM1
+        .tim(timer as usize)
+        .rstr(channel as usize)
+        .modify(|w| w.set_cmp(comparator as usize, true));
+}
+
+fn enable_output(timer: HrtimSubTimer, channel: HrtimXChannel) {
+    match channel {
+        HrtimXChannel::Ch1 => pac::HRTIM1
+            .oenr()
+            .modify(|w| w.set_t1oen(timer as usize, true)),
+        HrtimXChannel::Ch2 => pac::HRTIM1
+            .oenr()
+            .modify(|w| w.set_t2oen(timer as usize, true)),
+    }
+}
+
+fn set_cmp_for_dc(timer: HrtimSubTimer, cmp: HrtimXCompare, period: u16, percent: u8) {
+    let cmp_set = (period as f32 * (percent as f32 / 100.0)) as u16;
+    pac::HRTIM1
+        .tim(timer as usize)
+        .cmp(cmp as usize)
+        .modify(|w| w.set_cmp(cmp_set));
 }

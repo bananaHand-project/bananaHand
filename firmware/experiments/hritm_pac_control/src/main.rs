@@ -15,9 +15,13 @@ use embassy_executor::Spawner;
 use embassy_stm32::{
     Config,
     gpio::{Level, Output, Speed},
+    rcc::{APBPrescaler, clocks},
 };
 use embassy_time::{Duration, Timer};
 use fmt::{info, unwrap};
+use hrtim_pwm_v2::{HrtimCore, HrtimPrescaler, period_reg_val};
+
+const PWM_FREQ: f32 = 20_0000.0;
 
 #[embassy_executor::main]
 async fn main(_spawner: Spawner) {
@@ -40,10 +44,15 @@ async fn main(_spawner: Spawner) {
 
     let mut led = Output::new(p.PA5, Level::High, Speed::Low);
 
-    let period = 8500u16;
-    let prescaler = hrtim_pwm_v2::Prescaler::DIV32;
+    let period = unwrap!(period_reg_val(
+        clocks(&p.RCC),
+        APBPrescaler::DIV1,
+        HrtimPrescaler::DIV1,
+        PWM_FREQ,
+    ));
+    let prescaler = HrtimPrescaler::DIV32;
 
-    let (tim_a, tim_b, tim_c, tim_d, tim_e, tim_f) = hrtim_pwm_v2::HrtimCore::new()
+    let (tim_a, tim_b, tim_c, tim_d, tim_e, tim_f) = HrtimCore::new()
         .add_tim_a_ch1_ch2(*p.PA8, *p.PA9, period, prescaler) // or with_tim_a_ch2 / with_tim_a_ch1_ch2
         .add_tim_b_ch1_ch2(*p.PA10, *p.PA11, period, prescaler)
         .add_tim_c_ch1_ch2(*p.PB12, *p.PB13, period, prescaler)
