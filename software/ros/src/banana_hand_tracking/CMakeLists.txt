@@ -8,6 +8,7 @@ ament_python_install_package(${PROJECT_NAME})
 
 install(PROGRAMS
   scripts/webcam_preview.py
+  scripts/mediapipe_preview.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
