@@ -1,0 +1,5 @@
+reconstruction_node:
+  ros__parameters:
+    input_image_topic: "/camera/image_raw"
+    output_pointcloud_topic: "/reconstruction/point_cloud"
+    output_metadata_topic: "/reconstruction/metadata"

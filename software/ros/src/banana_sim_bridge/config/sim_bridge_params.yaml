@@ -1,0 +1,5 @@
+sim_bridge_node:
+  ros__parameters:
+    requested_grip_topic: "/sim/requested_grip_type"
+    success_metric_topic: "/sim/success_rate"
+    artifact_path_topic: "/sim/artifact_path"

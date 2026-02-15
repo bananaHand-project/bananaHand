@@ -1,0 +1,7 @@
+# Runtime dependencies for RL workflows.
+# Keep these separate from build-time dependencies so colcon build remains light.
+mujoco>=3.2.0
+gymnasium>=0.29.1
+gymnasium-robotics>=1.3.1
+stable-baselines3>=2.3.2
+shimmy>=1.3.0

@@ -11,6 +11,10 @@ Packages added under `software/ros/src`:
 - `banana_hand_tracking` (webcam capture + `/camera/image_raw`)
 - `banana_hand_mapping` (placeholder)
 - `banana_interfaces` (custom messages)
+- `banana_sfm_reconstruction` (SfM / 3D reconstruction scaffold)
+- `banana_grasp_strategy` (grip type prediction scaffold)
+- `banana_rl` (MuJoCo + Gymnasium-Robotics + SB3 PPO scaffold)
+- `banana_sim_bridge` (simulation rollout + ROS bridge scaffold)
 
 Run vision teleop:
 ```
@@ -46,6 +50,39 @@ Current data flow:
 
 #### 2) Build and launch ROS serial bridge
 ```bash
+### SfM + Grasp + RL + Sim Scaffolds
+Build scaffold packages:
+```
+cd software/ros
+source /opt/ros/humble/setup.bash
+colcon build --symlink-install --packages-select \
+  banana_sfm_reconstruction \
+  banana_grasp_strategy \
+  banana_rl \
+  banana_sim_bridge
+source install/setup.bash
+```
+
+Optional runtime Python deps for MuJoCo/Gymnasium/SB3 workflows:
+```
+pip install --user -r src/banana_rl/requirements.txt
+pip install --user -r src/banana_sim_bridge/requirements.txt
+```
+
+Run placeholders:
+```
+ros2 launch banana_sfm_reconstruction reconstruction.launch.py
+ros2 launch banana_grasp_strategy grasp_strategy.launch.py
+ros2 launch banana_sim_bridge sim_bridge.launch.py
+ros2 run banana_rl train_rl --help
+ros2 run banana_rl eval_rl --help
+ros2 run banana_sim_bridge rollout_policy --help
+```
+
+### How to Run Serial Node
+- Start mcu code: `cargo run -p uart_test`
+- Start ros code:
+```
 cd software/ros
 source /opt/ros/humble/setup.bash
 colcon build --packages-select banana_serial_bridge banana_bringup

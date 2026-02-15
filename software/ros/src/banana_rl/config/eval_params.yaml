@@ -1,0 +1,6 @@
+eval:
+  env_id: "TODO_ENV_ID"
+  episodes: 10
+  render: false
+  model_path: "artifacts/rl/latest_model.zip"
+  output_dir: "artifacts/eval"

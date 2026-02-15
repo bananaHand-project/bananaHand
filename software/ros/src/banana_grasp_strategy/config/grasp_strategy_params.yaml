@@ -1,0 +1,5 @@
+grasp_strategy_node:
+  ros__parameters:
+    input_object_topic: "/object/point_cloud"
+    output_grip_type_topic: "/grasp/grip_type"
+    output_confidence_topic: "/grasp/grip_confidence"

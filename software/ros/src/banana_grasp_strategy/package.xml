@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>banana_grasp_strategy</name>
+  <version>0.0.0</version>
+  <description>Grasp strategy prediction package scaffold for BananaHand.</description>
+  <maintainer email="dew.bhaumik8@gmail.com">TODO</maintainer>
+  <license>TODO</license>
+
+  <buildtool_depend>ament_python</buildtool_depend>
+
+  <exec_depend>rclpy</exec_depend>
+  <exec_depend>sensor_msgs</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
+  <exec_depend>launch</exec_depend>
+  <exec_depend>launch_ros</exec_depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>
