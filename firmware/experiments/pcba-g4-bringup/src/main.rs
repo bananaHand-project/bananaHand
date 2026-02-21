@@ -8,15 +8,20 @@ use panic_halt as _;
 #[cfg(feature = "defmt")]
 use {defmt_rtt as _, panic_probe as _};
 
-use core::str;
+use core::{default, str};
 
 use embassy_executor::{Spawner, task};
-use embassy_stm32::bind_interrupts;
-use embassy_stm32::gpio::{Level, Output, Speed};
 use embassy_stm32::mode::Async;
 use embassy_stm32::usart::{Config as UartConfig, UartRx};
+use embassy_stm32::{
+    adc::{AdcChannel, AnyAdcChannel},
+    gpio::{Level, Output, Speed},
+    peripherals::{ADC1, ADC2},
+};
+use embassy_stm32::{bind_interrupts, gpio::OutputType, time::khz, timer::simple_pwm};
 use embassy_time::{Duration, Timer};
 use fmt::{Bytes, info};
+use pq12p_actuator;
 
 bind_interrupts!(struct Irqs {
     USART2 => embassy_stm32::usart::InterruptHandler<embassy_stm32::peripherals::USART2>;
@@ -70,6 +75,33 @@ async fn main(spawner: Spawner) {
     uart_config.baudrate = 115_200;
     let uart_rx = UartRx::new(p.USART2, Irqs, p.PA15, p.DMA1_CH5, uart_config).unwrap();
     spawner.spawn(uart_reader_task(uart_rx)).unwrap();
+
+    let ch3 = simple_pwm::PwmPin::new(p.PC8, OutputType::PushPull);
+    let ch4 = simple_pwm::PwmPin::new(p.PC9, OutputType::PushPull);
+    let mut pwm = simple_pwm::SimplePwm::new(
+        p.TIM8,
+        None,
+        None,
+        Some(ch3),
+        Some(ch4),
+        khz(20),
+        Default::default(),
+    );
+
+    let mut pwm_channels = pwm.split();
+    pwm_channels.ch3.enable();
+    pwm_channels.ch4.enable();
+
+    // pwm_channels.ch3.set_duty_cycle_fully_on();
+    // pwm_channels.ch4.set_duty_cycle_percent(50);
+
+    let pos_adc: AnyAdcChannel<'_, ADC1> = p.PB1.degrade_adc();
+    let i_adc: AnyAdcChannel<'_, ADC2> = p.PC5.degrade_adc();
+
+    let mut actuator =
+        pq12p_actuator::Pq12P::new(pwm_channels.ch4, pwm_channels.ch3, pos_adc, i_adc);
+
+    actuator.move_in(50);
 
     loop {
         led1.set_high();

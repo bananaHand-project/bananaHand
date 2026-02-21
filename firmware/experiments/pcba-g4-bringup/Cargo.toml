@@ -30,6 +30,7 @@ embassy-sync = "0.7.2"
 embassy-time = { version = "0.5.0", features = ["tick-hz-32_768"] }
 panic-halt = "1.0.0"
 panic-probe = { version = "1.0.0", features = ["print-defmt"], optional = true }
+pq12p_actuator = { path = "../../primary-g474/pq12p_actuator" }
 
 [[bin]]
 name = "pcba-g4-bringup"
