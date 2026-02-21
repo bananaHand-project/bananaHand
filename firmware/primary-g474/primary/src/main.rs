@@ -13,12 +13,13 @@ use embassy_stm32::{
     Config,
     gpio::{Level, Output, Speed},
     rcc::{APBPrescaler, clocks},
+    time::Hertz,
 };
 use embassy_time::{Duration, Timer};
 use fmt::{info, unwrap};
 use hrtim_pwm_hal::{HrtimCore, HrtimPrescaler, period_reg_val};
 
-const PWM_FREQ: f32 = 20_0000.0;
+const PWM_FREQ: Hertz = Hertz(20_000);
 
 #[embassy_executor::main]
 async fn main(_spawner: Spawner) {
@@ -39,7 +40,7 @@ async fn main(_spawner: Spawner) {
 
     let p = embassy_stm32::init(config);
 
-    let mut led = Output::new(p.PA5, Level::High, Speed::Low);
+    let mut led1 = Output::new(p.PC13, Level::High, Speed::Low);
 
     let period = period_reg_val(
         clocks(&p.RCC),
@@ -48,6 +49,7 @@ async fn main(_spawner: Spawner) {
         PWM_FREQ,
     )
     .unwrap();
+    info!("{}", period);
     let prescaler = HrtimPrescaler::DIV32;
 
     let (_, _, _, _, _, tim_f) = HrtimCore::new()
@@ -62,9 +64,9 @@ async fn main(_spawner: Spawner) {
 
     loop {
         info!("Hello, World!");
-        led.set_high();
+        led1.set_high();
         Timer::after(Duration::from_millis(500)).await;
-        led.set_low();
+        led1.set_low();
         Timer::after(Duration::from_millis(500)).await;
     }
 }
