@@ -53,7 +53,7 @@ async fn main(_spawner: Spawner) {
     let prescaler = HrtimPrescaler::DIV32;
 
     let (_, _, _, _, _, tim_f) = HrtimCore::new()
-        .add_tim_f_ch1_ch2(*p.PC6, *p.PC7, period, prescaler)
+        .add_tim_f_ch1_ch2(p.PC6, p.PC7, period, prescaler)
         .split_active()
         .unwrap();
 

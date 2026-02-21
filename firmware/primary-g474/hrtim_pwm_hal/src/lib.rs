@@ -8,7 +8,7 @@ use core::{
 };
 
 use embassy_stm32::{
-    self, hrtim, pac,
+    self, Peri, hrtim, pac,
     peripherals::HRTIM1,
     rcc::{APBPrescaler, Clocks},
     time::Hertz,
@@ -291,7 +291,7 @@ macro_rules! define_subtimer {
                         Ok(PinPort::C) => gpio_x_setup!(c, pin_num, alt_func_num)?,
                         Ok(PinPort::D) => gpio_x_setup!(d, pin_num, alt_func_num)?,
                         Ok(PinPort::E) => gpio_x_setup!(e, pin_num, alt_func_num)?,
-                        Err(v) => return Err(HrtimError::InvalidGpioPin),
+                        Err(_v) => return Err(HrtimError::InvalidGpioPin),
                     }
                     Ok(())
                 }
@@ -312,7 +312,7 @@ macro_rules! define_subtimer {
                         Ok(PinPort::C) => gpio_x_setup!(c, pin_num, alt_func_num)?,
                         Ok(PinPort::D) => gpio_x_setup!(d, pin_num, alt_func_num)?,
                         Ok(PinPort::E) => gpio_x_setup!(e, pin_num, alt_func_num)?,
-                        Err(v) => return Err(HrtimError::InvalidGpioPin),
+                        Err(_v) => return Err(HrtimError::InvalidGpioPin),
                     }
                     Ok(())
                 }
@@ -494,36 +494,36 @@ impl<B, C, D, E, F> HrtimCore<NoTimer, B, C, D, E, F> {
     }
 
     /// Add subtimer config with channel 1 present.
-    pub fn add_tim_a_ch1<P1>(
+    pub fn add_tim_a_ch1<'d, P1>(
         self,
-        ch1: P1,
+        ch1: Peri<'d, P1>,
         period: u16,
         clock_prescaler: HrtimPrescaler,
     ) -> HrtimCore<SubTimerAConfig<P1, NoChannel>, B, C, D, E, F>
     where
         P1: hrtim::ChannelAPin<HRTIM1>,
     {
-        self.add_tim_a(SubTimerAConfig::new(period, clock_prescaler).with_ch1(ch1))
+        self.add_tim_a(SubTimerAConfig::new(period, clock_prescaler).with_ch1(*ch1))
     }
 
     /// Add subtimer config with channel 2 present.
-    pub fn add_tim_a_ch2<P2>(
+    pub fn add_tim_a_ch2<'d, P2>(
         self,
-        ch2: P2,
+        ch2: Peri<'d, P2>,
         period: u16,
         clock_prescaler: HrtimPrescaler,
     ) -> HrtimCore<SubTimerAConfig<NoChannel, P2>, B, C, D, E, F>
     where
         P2: hrtim::ChannelAComplementaryPin<HRTIM1>,
     {
-        self.add_tim_a(SubTimerAConfig::new(period, clock_prescaler).with_ch2(ch2))
+        self.add_tim_a(SubTimerAConfig::new(period, clock_prescaler).with_ch2(*ch2))
     }
 
     /// Add subtimer config with channel 1 and channel 2 present.
-    pub fn add_tim_a_ch1_ch2<P1, P2>(
+    pub fn add_tim_a_ch1_ch2<'d1, 'd2, P1, P2>(
         self,
-        ch1: P1,
-        ch2: P2,
+        ch1: Peri<'d1, P1>,
+        ch2: Peri<'d2, P2>,
         period: u16,
         clock_prescaler: HrtimPrescaler,
     ) -> HrtimCore<SubTimerAConfig<P1, P2>, B, C, D, E, F>
@@ -533,8 +533,8 @@ impl<B, C, D, E, F> HrtimCore<NoTimer, B, C, D, E, F> {
     {
         self.add_tim_a(
             SubTimerAConfig::new(period, clock_prescaler)
-                .with_ch1(ch1)
-                .with_ch2(ch2),
+                .with_ch1(*ch1)
+                .with_ch2(*ch2),
         )
     }
 }
@@ -554,36 +554,36 @@ impl<A, C, D, E, F> HrtimCore<A, NoTimer, C, D, E, F> {
     }
 
     /// Add subtimer config with channel 1 present.
-    pub fn add_tim_b_ch1<P1>(
+    pub fn add_tim_b_ch1<'d, P1>(
         self,
-        ch1: P1,
+        ch1: Peri<'d, P1>,
         period: u16,
         clock_prescaler: HrtimPrescaler,
     ) -> HrtimCore<A, SubTimerBConfig<P1, NoChannel>, C, D, E, F>
     where
         P1: hrtim::ChannelBPin<HRTIM1>,
     {
-        self.add_tim_b(SubTimerBConfig::new(period, clock_prescaler).with_ch1(ch1))
+        self.add_tim_b(SubTimerBConfig::new(period, clock_prescaler).with_ch1(*ch1))
     }
 
     /// Add subtimer config with channel 2 present.
-    pub fn add_tim_b_ch2<P2>(
+    pub fn add_tim_b_ch2<'d, P2>(
         self,
-        ch2: P2,
+        ch2: Peri<'d, P2>,
         period: u16,
         clock_prescaler: HrtimPrescaler,
     ) -> HrtimCore<A, SubTimerBConfig<NoChannel, P2>, C, D, E, F>
     where
         P2: hrtim::ChannelBComplementaryPin<HRTIM1>,
     {
-        self.add_tim_b(SubTimerBConfig::new(period, clock_prescaler).with_ch2(ch2))
+        self.add_tim_b(SubTimerBConfig::new(period, clock_prescaler).with_ch2(*ch2))
     }
 
     /// Add subtimer config with channel 1 and channel 2 present.
-    pub fn add_tim_b_ch1_ch2<P1, P2>(
+    pub fn add_tim_b_ch1_ch2<'d1, 'd2, P1, P2>(
         self,
-        ch1: P1,
-        ch2: P2,
+        ch1: Peri<'d1, P1>,
+        ch2: Peri<'d2, P2>,
         period: u16,
         clock_prescaler: HrtimPrescaler,
     ) -> HrtimCore<A, SubTimerBConfig<P1, P2>, C, D, E, F>
@@ -593,8 +593,8 @@ impl<A, C, D, E, F> HrtimCore<A, NoTimer, C, D, E, F> {
     {
         self.add_tim_b(
             SubTimerBConfig::new(period, clock_prescaler)
-                .with_ch1(ch1)
-                .with_ch2(ch2),
+                .with_ch1(*ch1)
+                .with_ch2(*ch2),
         )
     }
 }
@@ -613,34 +613,34 @@ impl<A, B, D, E, F> HrtimCore<A, B, NoTimer, D, E, F> {
         }
     }
 
-    pub fn add_tim_c_ch1<P1>(
+    pub fn add_tim_c_ch1<'d, P1>(
         self,
-        ch1: P1,
+        ch1: Peri<'d, P1>,
         period: u16,
         clock_prescaler: HrtimPrescaler,
     ) -> HrtimCore<A, B, SubTimerCConfig<P1, NoChannel>, D, E, F>
     where
         P1: hrtim::ChannelCPin<HRTIM1>,
     {
-        self.add_tim_c(SubTimerCConfig::new(period, clock_prescaler).with_ch1(ch1))
+        self.add_tim_c(SubTimerCConfig::new(period, clock_prescaler).with_ch1(*ch1))
     }
 
-    pub fn add_tim_c_ch2<P2>(
+    pub fn add_tim_c_ch2<'d, P2>(
         self,
-        ch2: P2,
+        ch2: Peri<'d, P2>,
         period: u16,
         clock_prescaler: HrtimPrescaler,
     ) -> HrtimCore<A, B, SubTimerCConfig<NoChannel, P2>, D, E, F>
     where
         P2: hrtim::ChannelCComplementaryPin<HRTIM1>,
     {
-        self.add_tim_c(SubTimerCConfig::new(period, clock_prescaler).with_ch2(ch2))
+        self.add_tim_c(SubTimerCConfig::new(period, clock_prescaler).with_ch2(*ch2))
     }
 
-    pub fn add_tim_c_ch1_ch2<P1, P2>(
+    pub fn add_tim_c_ch1_ch2<'d1, 'd2, P1, P2>(
         self,
-        ch1: P1,
-        ch2: P2,
+        ch1: Peri<'d1, P1>,
+        ch2: Peri<'d2, P2>,
         period: u16,
         clock_prescaler: HrtimPrescaler,
     ) -> HrtimCore<A, B, SubTimerCConfig<P1, P2>, D, E, F>
@@ -650,8 +650,8 @@ impl<A, B, D, E, F> HrtimCore<A, B, NoTimer, D, E, F> {
     {
         self.add_tim_c(
             SubTimerCConfig::new(period, clock_prescaler)
-                .with_ch1(ch1)
-                .with_ch2(ch2),
+                .with_ch1(*ch1)
+                .with_ch2(*ch2),
         )
     }
 }
@@ -670,34 +670,34 @@ impl<A, B, C, E, F> HrtimCore<A, B, C, NoTimer, E, F> {
         }
     }
 
-    pub fn add_tim_d_ch1<P1>(
+    pub fn add_tim_d_ch1<'d, P1>(
         self,
-        ch1: P1,
+        ch1: Peri<'d, P1>,
         period: u16,
         clock_prescaler: HrtimPrescaler,
     ) -> HrtimCore<A, B, C, SubTimerDConfig<P1, NoChannel>, E, F>
     where
         P1: hrtim::ChannelDPin<HRTIM1>,
     {
-        self.add_tim_d(SubTimerDConfig::new(period, clock_prescaler).with_ch1(ch1))
+        self.add_tim_d(SubTimerDConfig::new(period, clock_prescaler).with_ch1(*ch1))
     }
 
-    pub fn add_tim_d_ch2<P2>(
+    pub fn add_tim_d_ch2<'d, P2>(
         self,
-        ch2: P2,
+        ch2: Peri<'d, P2>,
         period: u16,
         clock_prescaler: HrtimPrescaler,
     ) -> HrtimCore<A, B, C, SubTimerDConfig<NoChannel, P2>, E, F>
     where
         P2: hrtim::ChannelDComplementaryPin<HRTIM1>,
     {
-        self.add_tim_d(SubTimerDConfig::new(period, clock_prescaler).with_ch2(ch2))
+        self.add_tim_d(SubTimerDConfig::new(period, clock_prescaler).with_ch2(*ch2))
     }
 
-    pub fn add_tim_d_ch1_ch2<P1, P2>(
+    pub fn add_tim_d_ch1_ch2<'d1, 'd2, P1, P2>(
         self,
-        ch1: P1,
-        ch2: P2,
+        ch1: Peri<'d1, P1>,
+        ch2: Peri<'d2, P2>,
         period: u16,
         clock_prescaler: HrtimPrescaler,
     ) -> HrtimCore<A, B, C, SubTimerDConfig<P1, P2>, E, F>
@@ -707,8 +707,8 @@ impl<A, B, C, E, F> HrtimCore<A, B, C, NoTimer, E, F> {
     {
         self.add_tim_d(
             SubTimerDConfig::new(period, clock_prescaler)
-                .with_ch1(ch1)
-                .with_ch2(ch2),
+                .with_ch1(*ch1)
+                .with_ch2(*ch2),
         )
     }
 }
@@ -727,34 +727,34 @@ impl<A, B, C, D, F> HrtimCore<A, B, C, D, NoTimer, F> {
         }
     }
 
-    pub fn add_tim_e_ch1<P1>(
+    pub fn add_tim_e_ch1<'d, P1>(
         self,
-        ch1: P1,
+        ch1: Peri<'d, P1>,
         period: u16,
         clock_prescaler: HrtimPrescaler,
     ) -> HrtimCore<A, B, C, D, SubTimerEConfig<P1, NoChannel>, F>
     where
         P1: hrtim::ChannelEPin<HRTIM1>,
     {
-        self.add_tim_e(SubTimerEConfig::new(period, clock_prescaler).with_ch1(ch1))
+        self.add_tim_e(SubTimerEConfig::new(period, clock_prescaler).with_ch1(*ch1))
     }
 
-    pub fn add_tim_e_ch2<P2>(
+    pub fn add_tim_e_ch2<'d, P2>(
         self,
-        ch2: P2,
+        ch2: Peri<'d, P2>,
         period: u16,
         clock_prescaler: HrtimPrescaler,
     ) -> HrtimCore<A, B, C, D, SubTimerEConfig<NoChannel, P2>, F>
     where
         P2: hrtim::ChannelEComplementaryPin<HRTIM1>,
     {
-        self.add_tim_e(SubTimerEConfig::new(period, clock_prescaler).with_ch2(ch2))
+        self.add_tim_e(SubTimerEConfig::new(period, clock_prescaler).with_ch2(*ch2))
     }
 
-    pub fn add_tim_e_ch1_ch2<P1, P2>(
+    pub fn add_tim_e_ch1_ch2<'d1, 'd2, P1, P2>(
         self,
-        ch1: P1,
-        ch2: P2,
+        ch1: Peri<'d1, P1>,
+        ch2: Peri<'d2, P2>,
         period: u16,
         clock_prescaler: HrtimPrescaler,
     ) -> HrtimCore<A, B, C, D, SubTimerEConfig<P1, P2>, F>
@@ -764,8 +764,8 @@ impl<A, B, C, D, F> HrtimCore<A, B, C, D, NoTimer, F> {
     {
         self.add_tim_e(
             SubTimerEConfig::new(period, clock_prescaler)
-                .with_ch1(ch1)
-                .with_ch2(ch2),
+                .with_ch1(*ch1)
+                .with_ch2(*ch2),
         )
     }
 }
@@ -784,34 +784,34 @@ impl<A, B, C, D, E> HrtimCore<A, B, C, D, E, NoTimer> {
         }
     }
 
-    pub fn add_tim_f_ch1<P1>(
+    pub fn add_tim_f_ch1<'d, P1>(
         self,
-        ch1: P1,
+        ch1: Peri<'d, P1>,
         period: u16,
         clock_prescaler: HrtimPrescaler,
     ) -> HrtimCore<A, B, C, D, E, SubTimerFConfig<P1, NoChannel>>
     where
         P1: hrtim::ChannelFPin<HRTIM1>,
     {
-        self.add_tim_f(SubTimerFConfig::new(period, clock_prescaler).with_ch1(ch1))
+        self.add_tim_f(SubTimerFConfig::new(period, clock_prescaler).with_ch1(*ch1))
     }
 
-    pub fn add_tim_f_ch2<P2>(
+    pub fn add_tim_f_ch2<'d, P2>(
         self,
-        ch2: P2,
+        ch2: Peri<'d, P2>,
         period: u16,
         clock_prescaler: HrtimPrescaler,
     ) -> HrtimCore<A, B, C, D, E, SubTimerFConfig<NoChannel, P2>>
     where
         P2: hrtim::ChannelFComplementaryPin<HRTIM1>,
     {
-        self.add_tim_f(SubTimerFConfig::new(period, clock_prescaler).with_ch2(ch2))
+        self.add_tim_f(SubTimerFConfig::new(period, clock_prescaler).with_ch2(*ch2))
     }
 
-    pub fn add_tim_f_ch1_ch2<P1, P2>(
+    pub fn add_tim_f_ch1_ch2<'d1, 'd2, P1, P2>(
         self,
-        ch1: P1,
-        ch2: P2,
+        ch1: Peri<'d1, P1>,
+        ch2: Peri<'d2, P2>,
         period: u16,
         clock_prescaler: HrtimPrescaler,
     ) -> HrtimCore<A, B, C, D, E, SubTimerFConfig<P1, P2>>
@@ -821,8 +821,8 @@ impl<A, B, C, D, E> HrtimCore<A, B, C, D, E, NoTimer> {
     {
         self.add_tim_f(
             SubTimerFConfig::new(period, clock_prescaler)
-                .with_ch1(ch1)
-                .with_ch2(ch2),
+                .with_ch1(*ch1)
+                .with_ch2(*ch2),
         )
     }
 }
