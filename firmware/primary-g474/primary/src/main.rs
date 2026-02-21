@@ -16,7 +16,7 @@ use embassy_stm32::{
     time::Hertz,
 };
 use embassy_time::{Duration, Timer};
-use fmt::{info};
+use fmt::info;
 use hrtim_pwm_hal::{HrtimCore, HrtimPrescaler, period_reg_val};
 
 const PWM_FREQ: Hertz = Hertz(20_000);
@@ -45,7 +45,7 @@ async fn main(_spawner: Spawner) {
     let period = period_reg_val(
         clocks(&p.RCC),
         APBPrescaler::DIV1,
-        HrtimPrescaler::DIV1,
+        HrtimPrescaler::DIV32,
         PWM_FREQ,
     )
     .unwrap();

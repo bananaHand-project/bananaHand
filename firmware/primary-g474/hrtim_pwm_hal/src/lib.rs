@@ -2,7 +2,10 @@
 
 #![no_std]
 
-use core::{fmt::Debug, ops::Div};
+use core::{
+    fmt::Debug,
+    ops::{Div, Mul},
+};
 
 use embassy_stm32::{
     self, hrtim, pac,
@@ -17,6 +20,7 @@ use paste::paste;
 pub enum HrtimError {
     GpioInitFailed,
     ClocksIncorrectlyConfigured,
+    InvalidGpioPin,
 }
 
 /// HRTIM Subtimer.
@@ -32,7 +36,6 @@ pub enum HrtimSubTimer {
 }
 
 /// Prescaler applied from HRTIM clock frequency to sub timer.
-#[allow(unused)]
 #[repr(u8)]
 #[derive(Debug, Copy, Clone)]
 pub enum HrtimPrescaler {
@@ -131,6 +134,7 @@ pub fn period_reg_val(
         .hclk1
         .to_hertz()
         .ok_or(HrtimError::ClocksIncorrectlyConfigured)?
+        .mul(32u8) // Clock source is multiplied by 32 see Cook AN4539 pg. 13
         .div(apb2_prescaler)
         .div(hrtim_prescaler)
         .div(desired_pwm_hz) as u16)
@@ -287,7 +291,7 @@ macro_rules! define_subtimer {
                         Ok(PinPort::C) => gpio_x_setup!(c, pin_num, alt_func_num)?,
                         Ok(PinPort::D) => gpio_x_setup!(d, pin_num, alt_func_num)?,
                         Ok(PinPort::E) => gpio_x_setup!(e, pin_num, alt_func_num)?,
-                        Err(v) => panic!("Invalid port value: {v}"),
+                        Err(v) => return Err(HrtimError::InvalidGpioPin),
                     }
                     Ok(())
                 }
@@ -308,7 +312,7 @@ macro_rules! define_subtimer {
                         Ok(PinPort::C) => gpio_x_setup!(c, pin_num, alt_func_num)?,
                         Ok(PinPort::D) => gpio_x_setup!(d, pin_num, alt_func_num)?,
                         Ok(PinPort::E) => gpio_x_setup!(e, pin_num, alt_func_num)?,
-                        Err(v) => panic!("Invalid port value: {v}"),
+                        Err(v) => return Err(HrtimError::InvalidGpioPin),
                     }
                     Ok(())
                 }
@@ -432,11 +436,13 @@ macro_rules! define_subtimer {
                     self.clock_prescaler
                 }
 
-                pub fn set_period(&self, period: u16) {
+                pub fn set_period(&mut self, period: u16) {
+                    self.period = period;
                     configure_timer(HrtimSubTimer::[<Tim $letter:upper>], self.clock_prescaler, period);
                 }
 
-                pub fn set_clock_prescaler(&self, prescaler: HrtimPrescaler) {
+                pub fn set_clock_prescaler(&mut self, prescaler: HrtimPrescaler) {
+                    self.clock_prescaler = prescaler;
                     configure_timer(HrtimSubTimer::[<Tim $letter:upper>], prescaler, self.period);
                 }
             }
