@@ -123,16 +123,15 @@ pub fn period_reg_val(
     clocks: &Clocks,
     apb2_prescaler: APBPrescaler,
     hrtim_prescaler: HrtimPrescaler,
-    desired_pwm_hz: f32,
+    desired_pwm_hz: Hertz,
 ) -> Result<u16, HrtimError> {
-    let apparent_hrtim_clk = clocks
+    Ok(clocks
         .hclk1
         .to_hertz()
         .ok_or(HrtimError::ClocksIncorrectlyConfigured)?
         .div(apb2_prescaler)
-        .div(hrtim_prescaler);
-
-    Ok(((1.0 / desired_pwm_hz) / (1.0 / apparent_hrtim_clk.0 as f32)) as u16)
+        .div(hrtim_prescaler)
+        .div(desired_pwm_hz) as u16)
 }
 
 pub struct NoTimer;

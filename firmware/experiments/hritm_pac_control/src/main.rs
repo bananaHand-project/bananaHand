@@ -16,12 +16,13 @@ use embassy_stm32::{
     Config,
     gpio::{Level, Output, Speed},
     rcc::{APBPrescaler, clocks},
+    time::Hertz,
 };
 use embassy_time::{Duration, Timer};
 use fmt::{info, unwrap};
 use hrtim_pwm_v2::{HrtimCore, HrtimPrescaler, period_reg_val};
 
-const PWM_FREQ: f32 = 20_0000.0;
+const PWM_FREQ: Hertz = Hertz(20_000);
 
 #[embassy_executor::main]
 async fn main(_spawner: Spawner) {
@@ -50,6 +51,7 @@ async fn main(_spawner: Spawner) {
         HrtimPrescaler::DIV1,
         PWM_FREQ,
     ));
+    info!("Period: {}", period);
     let prescaler = HrtimPrescaler::DIV32;
 
     let (tim_a, tim_b, tim_c, tim_d, tim_e, tim_f) = HrtimCore::new()
