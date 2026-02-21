@@ -363,12 +363,12 @@ macro_rules! define_subtimer {
             // Subtimer PWM Handle
 
             pub struct [<Subtimer $letter:upper Pwm>]<Ch1, Ch2> {
-                ch1: Ch1,
-                ch2: Ch2,
+                _ch1: Ch1,
+                _ch2: Ch2,
                 period: u16,
                 clock_prescaler: HrtimPrescaler,
             }
-
+            #[allow(private_bounds)]
             impl<Ch1, Ch2> [<SubTimer $letter:upper Config>]<Ch1, Ch2>
             where
                 Ch1: [<Ch1Marker $letter:upper>],
@@ -389,8 +389,8 @@ macro_rules! define_subtimer {
                     configure_timer(HrtimSubTimer::[<Tim $letter:upper>], self.clock_prescaler, self.period);
 
                     Ok([<Subtimer $letter:upper Pwm>] {
-                        ch1: self.ch1,
-                        ch2: self.ch2,
+                        _ch1: self.ch1,
+                        _ch2: self.ch2,
                         period: self.period,
                         clock_prescaler: self.clock_prescaler,
                     })
@@ -462,8 +462,8 @@ macro_rules! define_subtimer {
                     configure_timer(HrtimSubTimer::[<Tim $letter:upper>], self.clock_prescaler, self.period);
 
                     Ok([<Subtimer $letter:upper Pwm>] {
-                        ch1: self.ch1,
-                        ch2: self.ch2,
+                        _ch1: self.ch1,
+                        _ch2: self.ch2,
                         period: self.period,
                         clock_prescaler: self.clock_prescaler,
                     })

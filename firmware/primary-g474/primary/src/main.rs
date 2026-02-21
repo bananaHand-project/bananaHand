@@ -16,7 +16,7 @@ use embassy_stm32::{
     time::Hertz,
 };
 use embassy_time::{Duration, Timer};
-use fmt::{info, unwrap};
+use fmt::{info};
 use hrtim_pwm_hal::{HrtimCore, HrtimPrescaler, period_reg_val};
 
 const PWM_FREQ: Hertz = Hertz(20_000);
