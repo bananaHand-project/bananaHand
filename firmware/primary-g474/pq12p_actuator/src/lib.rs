@@ -34,7 +34,7 @@
 
 use embassy_stm32::{
     Peri,
-    adc::{Adc, AnyAdcChannel, Instance, RxDma, SampleTime},
+    adc::{Adc, AnyAdcChannel, BasicAdcRegs, BasicInstance, Instance, RxDma, SampleTime},
     timer::{GeneralInstance4Channel, simple_pwm::SimplePwmChannel},
 };
 use embassy_time::{Duration, Ticker};
@@ -54,14 +54,18 @@ use embassy_time::{Duration, Ticker};
 /// | 0   | 1   |  L   |  H   | Reverse drive (Plunger In)           |
 /// | 1   | 0   |  H   |  L   | Forward drive (Plunger Out)          |
 /// | 1   | 1   |  L   |  L   | Brake (slow-decay, both low-side on) |
-pub struct Pq12P<'a, T: GeneralInstance4Channel, C: Instance> {
+pub struct Pq12P<'a, T: GeneralInstance4Channel, CPos: Instance, CCurrent: Instance = CPos> {
     pwm_1: SimplePwmChannel<'a, T>,
     pwm_2: SimplePwmChannel<'a, T>,
-    pos_adc: AnyAdcChannel<C>,
-    i_adc: AnyAdcChannel<C>,
+    pos_adc: AnyAdcChannel<'a, CPos>,
+    i_adc: AnyAdcChannel<'a, CCurrent>,
 }
 
-impl<'a, T: GeneralInstance4Channel, C: Instance> Pq12P<'a, T, C> {
+impl<'a, T: GeneralInstance4Channel, CPos: Instance, CCurrent: Instance> Pq12P<'a, T, CPos, CCurrent>
+where
+    <CPos as BasicInstance>::Regs: BasicAdcRegs<SampleTime = SampleTime>,
+    <CCurrent as BasicInstance>::Regs: BasicAdcRegs<SampleTime = SampleTime>,
+{
     pub const STROKE_LENGTH: f32 = 20.0;
     pub const PQ_POT_VREF: f32 = 3.3;
     pub const ADC_MAX_RAW: u16 = 4095;
@@ -72,8 +76,8 @@ impl<'a, T: GeneralInstance4Channel, C: Instance> Pq12P<'a, T, C> {
     pub fn new(
         pwm_1: SimplePwmChannel<'a, T>,
         pwm_2: SimplePwmChannel<'a, T>,
-        pos_adc: AnyAdcChannel<C>,
-        i_adc: AnyAdcChannel<C>,
+        pos_adc: AnyAdcChannel<'a, CPos>,
+        i_adc: AnyAdcChannel<'a, CCurrent>,
     ) -> Self {
         Pq12P {
             pwm_1,
@@ -117,8 +121,8 @@ impl<'a, T: GeneralInstance4Channel, C: Instance> Pq12P<'a, T, C> {
     /// Read plunger position raw ADC value asynchronously.   
     pub async fn read_position_raw_async(
         &mut self,
-        adc: &mut Adc<'_, C>,
-        dma: &mut Peri<'_, impl RxDma<C>>,
+        adc: &mut Adc<'_, CPos>,
+        dma: &mut Peri<'_, impl RxDma<CPos>>,
     ) -> u16 {
         let mut reading = [0u16];
         adc.read(
@@ -134,8 +138,8 @@ impl<'a, T: GeneralInstance4Channel, C: Instance> Pq12P<'a, T, C> {
     /// Read plunger position as voltage asynchronously.
     pub async fn read_position_V_async(
         &mut self,
-        adc: &mut Adc<'_, C>,
-        dma: &mut Peri<'_, impl RxDma<C>>,
+        adc: &mut Adc<'_, CPos>,
+        dma: &mut Peri<'_, impl RxDma<CPos>>,
     ) -> f32 {
         let raw = self.read_position_raw_async(adc, dma).await;
         (raw as f32 / Self::ADC_MAX_RAW as f32) * Self::PQ_POT_VREF
@@ -144,8 +148,8 @@ impl<'a, T: GeneralInstance4Channel, C: Instance> Pq12P<'a, T, C> {
     /// Read plunger position in millimeters asynchronously.
     pub async fn read_position_mm_async(
         &mut self,
-        adc: &mut Adc<'_, C>,
-        dma: &mut Peri<'_, impl RxDma<C>>,
+        adc: &mut Adc<'_, CPos>,
+        dma: &mut Peri<'_, impl RxDma<CPos>>,
     ) -> f32 {
         let raw = self.read_position_raw_async(adc, dma).await;
         (raw as f32) / (Self::ADC_MAX_RAW as f32) * Self::STROKE_LENGTH
@@ -159,8 +163,8 @@ impl<'a, T: GeneralInstance4Channel, C: Instance> Pq12P<'a, T, C> {
     /// No filtering is done by the function*    
     pub async fn read_current_raw_async(
         &mut self,
-        adc: &mut Adc<'_, C>,
-        dma: &mut Peri<'_, impl RxDma<C>>,
+        adc: &mut Adc<'_, CCurrent>,
+        dma: &mut Peri<'_, impl RxDma<CCurrent>>,
     ) -> u16 {
         let mut reading = [0u16];
         adc.read(
@@ -181,8 +185,8 @@ impl<'a, T: GeneralInstance4Channel, C: Instance> Pq12P<'a, T, C> {
     #[allow(non_snake_case)]
     pub async fn read_current_mA_async(
         &mut self,
-        adc: &mut Adc<'_, C>,
-        dma: &mut Peri<'_, impl RxDma<C>>,
+        adc: &mut Adc<'_, CCurrent>,
+        dma: &mut Peri<'_, impl RxDma<CCurrent>>,
     ) -> f32 {
         let raw = self.read_current_raw_async(adc, dma).await;
         let volts = (raw as f32 / Self::ADC_MAX_RAW as f32) * Self::ADC_VREF;
@@ -197,8 +201,8 @@ impl<'a, T: GeneralInstance4Channel, C: Instance> Pq12P<'a, T, C> {
         target_position_mm: f32,
         duty_cycle_percent: u8,
         end_in_brake: bool,
-        adc: &mut Adc<'_, C>,
-        dma: &mut Peri<'_, impl RxDma<C>>,
+        adc: &mut Adc<'_, CPos>,
+        dma: &mut Peri<'_, impl RxDma<CPos>>,
     ) {
         const TOLERANCE_MM: f32 = 0.1;
         const CONTROL_LOOP_HZ: u64 = 200;
@@ -235,19 +239,19 @@ impl<'a, T: GeneralInstance4Channel, C: Instance> Pq12P<'a, T, C> {
     // === Blocking Sensor Reading Methods ===
 
     /// Read plunger position raw ADC value blocking.     
-    pub fn read_position_raw_blocking(&mut self, adc: &mut Adc<'_, C>) -> u16 {
-        adc.blocking_read(&mut self.pos_adc)
+    pub fn read_position_raw_blocking(&mut self, adc: &mut Adc<'_, CPos>) -> u16 {
+        adc.blocking_read(&mut self.pos_adc, SampleTime::CYCLES12_5)
     }
 
     #[allow(non_snake_case)]
     /// Read plunger position as voltage blocking.
-    pub fn read_position_V_blocking(&mut self, adc: &mut Adc<'_, C>) -> f32 {
+    pub fn read_position_V_blocking(&mut self, adc: &mut Adc<'_, CPos>) -> f32 {
         let raw = self.read_position_raw_blocking(adc);
         (raw as f32 / Self::ADC_MAX_RAW as f32) * Self::ADC_VREF
     }
 
     /// Read plunger position in millimeters blocking.
-    pub fn read_position_mm_blocking(&mut self, adc: &mut Adc<'_, C>) -> f32 {
+    pub fn read_position_mm_blocking(&mut self, adc: &mut Adc<'_, CPos>) -> f32 {
         let raw = self.read_position_raw_blocking(adc);
         (raw as f32) / (Self::ADC_MAX_RAW as f32) * Self::STROKE_LENGTH
     }
@@ -258,8 +262,8 @@ impl<'a, T: GeneralInstance4Channel, C: Instance> Pq12P<'a, T, C> {
     /// As far as I am aware there is no way within embassy to synchronize ADC reads with a PWM timer.
     /// This leads to readings littered with 0s from when the PWM signal is low.
     /// No filtering is done by the function*
-    pub fn read_current_raw_blocking(&mut self, adc: &mut Adc<'_, C>) -> u16 {
-        adc.blocking_read(&mut self.i_adc)
+    pub fn read_current_raw_blocking(&mut self, adc: &mut Adc<'_, CCurrent>) -> u16 {
+        adc.blocking_read(&mut self.i_adc, SampleTime::CYCLES640_5)
     }
 
     /// Read current sense pin of DRV8876 as a mA value blocking.
@@ -269,7 +273,7 @@ impl<'a, T: GeneralInstance4Channel, C: Instance> Pq12P<'a, T, C> {
     /// This leads to readings littered with 0s from when the PWM signal is low.
     /// No filtering is done by the function*
     #[allow(non_snake_case)]
-    pub fn read_current_mA_blocking(&mut self, adc: &mut Adc<'_, C>) -> f32 {
+    pub fn read_current_mA_blocking(&mut self, adc: &mut Adc<'_, CCurrent>) -> f32 {
         let raw = self.read_current_raw_blocking(adc);
         let volts = (raw as f32 / Self::ADC_MAX_RAW as f32) * Self::ADC_VREF;
         (volts / Self::R_IPROPI) * 1e6
