@@ -58,7 +58,7 @@ async fn main(_spawner: Spawner) {
         .unwrap();
 
     tim_f.ch1_set_dc_percent(50);
-    tim_f.ch2_set_dc_percent(75);
+    tim_f.ch2_set_dc_percent(100);
     tim_f.ch1_en();
     tim_f.ch2_en();
 
