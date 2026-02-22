@@ -2,10 +2,7 @@
 
 #![no_std]
 
-use core::{
-    fmt::Debug,
-    ops::Div,
-};
+use core::{fmt::Debug, ops::Div};
 
 use embassy_stm32::{
     self, Peri, hrtim, pac,
@@ -149,7 +146,8 @@ pub fn period_reg_val(
         .to_hertz()
         .ok_or(HrtimError::ClocksIncorrectlyConfigured)?
         .0 as u64;
-    let apb_div = apb_divisor(apb2_prescaler).ok_or(HrtimError::ClocksIncorrectlyConfigured)? as u64;
+    let apb_div =
+        apb_divisor(apb2_prescaler).ok_or(HrtimError::ClocksIncorrectlyConfigured)? as u64;
     let hrtim_div = hrtim_prescaler.divisor() as u64;
     let desired_pwm_hz = desired_pwm_hz.0 as u64;
 
