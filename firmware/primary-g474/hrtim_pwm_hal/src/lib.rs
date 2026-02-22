@@ -4,7 +4,7 @@
 
 use core::{
     fmt::Debug,
-    ops::{Div, Mul},
+    ops::Div,
 };
 
 use embassy_stm32::{
@@ -21,6 +21,9 @@ pub enum HrtimError {
     GpioInitFailed,
     ClocksIncorrectlyConfigured,
     InvalidGpioPin,
+    InvalidPwmFrequency,
+    PeriodOutOfRange,
+    ArithmeticOverflow,
 }
 
 /// HRTIM Subtimer.
@@ -130,14 +133,42 @@ pub fn period_reg_val(
     hrtim_prescaler: HrtimPrescaler,
     desired_pwm_hz: Hertz,
 ) -> Result<u16, HrtimError> {
-    Ok(clocks
+    fn apb_divisor(apb_prescaler: APBPrescaler) -> Option<u32> {
+        match apb_prescaler {
+            APBPrescaler::DIV1 => Some(1),
+            APBPrescaler::DIV2 => Some(2),
+            APBPrescaler::DIV4 => Some(4),
+            APBPrescaler::DIV8 => Some(8),
+            APBPrescaler::DIV16 => Some(16),
+            _ => None,
+        }
+    }
+
+    let hclk_hz = clocks
         .hclk1
         .to_hertz()
         .ok_or(HrtimError::ClocksIncorrectlyConfigured)?
-        .mul(32u8) // Clock source is multiplied by 32 see Cook AN4539 pg. 13
-        .div(apb2_prescaler)
-        .div(hrtim_prescaler)
-        .div(desired_pwm_hz) as u16)
+        .0 as u64;
+    let apb_div = apb_divisor(apb2_prescaler).ok_or(HrtimError::ClocksIncorrectlyConfigured)? as u64;
+    let hrtim_div = hrtim_prescaler.divisor() as u64;
+    let desired_pwm_hz = desired_pwm_hz.0 as u64;
+
+    if desired_pwm_hz == 0 {
+        return Err(HrtimError::InvalidPwmFrequency);
+    }
+
+    // HRTIM input clock is APB2 clock multiplied by 32 (RM/AN4539).
+    let period = hclk_hz
+        .checked_div(apb_div)
+        .ok_or(HrtimError::ArithmeticOverflow)?
+        .checked_mul(32)
+        .ok_or(HrtimError::ArithmeticOverflow)?
+        .checked_div(hrtim_div)
+        .ok_or(HrtimError::ArithmeticOverflow)?
+        .checked_div(desired_pwm_hz)
+        .ok_or(HrtimError::ArithmeticOverflow)?;
+
+    u16::try_from(period).map_err(|_| HrtimError::PeriodOutOfRange)
 }
 
 pub struct NoTimer;
