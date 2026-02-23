@@ -24,7 +24,7 @@ pub async fn c0_reader_task(
         for &b in &rx_buf[..n] {
             if let Some((msg_type, payload)) = parser.parse_byte(b) {
                 if msg_type != MessageType::ForceReadings as u8 {
-                    info!("Received COBS frame type {} not ForceReadings", msg_type);
+                    // info!("Received COBS frame type {} not ForceReadings", msg_type);
                     continue;
                 }
                 for idx in 0..FORCE_COUNT {
