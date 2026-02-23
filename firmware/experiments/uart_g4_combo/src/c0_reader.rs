@@ -24,7 +24,7 @@ pub async fn c0_reader_task(
         for &b in &rx_buf[..n] {
             if let Some((msg_type, payload)) = parser.parse_byte(b) {
                 if msg_type != MessageType::ForceReadings as u8 {
-                    info!("Received COBS frame type {} not ForceReadings", msg_type);
+                    // info!("Received COBS frame type {} not ForceReadings", msg_type);
                     continue;
                 }
                 for idx in 0..FORCE_COUNT {
@@ -34,16 +34,16 @@ pub async fn c0_reader_task(
                 }
                 shared.write_frame(&readings);
                 frame_count = frame_count.wrapping_add(1);
-                if frame_count % 1 == 0 {
-                    info!(
-                        "COBS frame {}: ch0={} ch1={} ch2={} ch3={}",
-                        frame_count,
-                        readings[0],
-                        readings[1],
-                        readings[2],
-                        readings[3]
-                    );
-                }
+                // if frame_count % 1 == 0 {
+                //     info!(
+                //         "COBS frame {}: ch0={} ch1={} ch2={} ch3={}",
+                //         frame_count,
+                //         readings[0],
+                //         readings[1],
+                //         readings[2],
+                //         readings[3]
+                //     );
+                // }
             }
         }
     }

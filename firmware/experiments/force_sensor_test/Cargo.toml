@@ -60,3 +60,4 @@ embassy-time = { git = "https://github.com/embassy-rs/embassy", rev = "4ff2b6f91
 embassy-executor = { git = "https://github.com/embassy-rs/embassy", rev = "4ff2b6f912619d6d5216cd2b3cd38129a7e9c49d" }
 embassy-futures = { git = "https://github.com/embassy-rs/embassy", rev = "4ff2b6f912619d6d5216cd2b3cd38129a7e9c49d" }
 embassy-sync = { git = "https://github.com/embassy-rs/embassy", rev = "4ff2b6f912619d6d5216cd2b3cd38129a7e9c49d" }
+embassy-time-driver = { git = "https://github.com/embassy-rs/embassy", rev = "4ff2b6f912619d6d5216cd2b3cd38129a7e9c49d" }

@@ -6,6 +6,7 @@ pub const MAX_FRAME: usize = 128;
 pub enum MessageType {
     PositionUpdate = 0x01,
     ForceReadings = 0x02,
+    TelemetryCombined = 0x03,
 }
 
 fn checksum(data: &[u8]) -> u8 {
@@ -61,6 +62,54 @@ pub fn build_frame<const N: usize>(msg_type: u8, values: [u16; N]) -> BuiltFrame
     framed.buf[enc_len] = COBS_DELIM;
     framed.len = enc_len + 1;
 
+    framed
+}
+
+pub fn build_telemetry_frame<const P: usize, const F: usize>(
+    positions: [u16; P],
+    forces: [u16; F],
+) -> BuiltFrame {
+    let payload_len = (P + F) * 2;
+
+    let mut body = [0u8; MAX_FRAME];
+    let mut body_len = 0usize;
+
+    // body: [type][positions...][forces...][chk]
+    body[body_len] = MessageType::TelemetryCombined as u8;
+    body_len += 1;
+
+    let payload_start = body_len;
+
+    for v in positions {
+        let bytes = v.to_le_bytes();
+        body[body_len..body_len + 2].copy_from_slice(&bytes);
+        body_len += 2;
+    }
+
+    for v in forces {
+        let bytes = v.to_le_bytes();
+        body[body_len..body_len + 2].copy_from_slice(&bytes);
+        body_len += 2;
+    }
+
+    let chk = checksum(&body[payload_start..payload_start + payload_len]);
+    body[body_len] = chk;
+    body_len += 1;
+
+    let mut framed = BuiltFrame {
+        buf: [0u8; MAX_FRAME],
+        len: 0,
+    };
+
+    let enc_len = encode(&body[..body_len], &mut framed.buf);
+    if enc_len + 1 > MAX_FRAME {
+        defmt::error!("COBS encode overflow: no room for delimiter");
+        framed.len = 0;
+        return framed;
+    }
+
+    framed.buf[enc_len] = COBS_DELIM;
+    framed.len = enc_len + 1;
     framed
 }
 

@@ -12,8 +12,7 @@ use {defmt_rtt as _, panic_probe as _};
 
 use embassy_executor::Spawner;
 use embassy_stm32::adc::{Adc, AnyAdcChannel, AdcChannel, Resolution, SampleTime};
-use embassy_stm32::usart::{Config as UartConfig, Uart};
-use embassy_time::{Duration, Timer};
+use embassy_stm32::usart::{Config as UartConfig, UartTx};
 use fmt::info;
 use protocol::{build_frame, MessageType};
 
@@ -22,25 +21,27 @@ async fn main(_spawner: Spawner) {
     let p = embassy_stm32::init(Default::default());
     let mut adc = Adc::new(p.ADC1, SampleTime::CYCLES247_5, Resolution::BITS12);
 
-    let mut uart_config = UartConfig::default();
-    uart_config.baudrate = 115_200;
-    let mut uart = Uart::new_blocking(p.USART1, p.PB7, p.PB6, uart_config).unwrap();
+    // C0 -> G4 force stream.
+    let mut g4_uart_config = UartConfig::default();
+    g4_uart_config.baudrate = 115_200;
+    let mut g4_uart = UartTx::new_blocking(p.USART1, p.PB6, g4_uart_config).unwrap();
 
     // Enable/disable sensors here. Disabled sensors transmit 0.
     const SENSOR_ENABLED: [bool; 10] = [true, true, true, true, true, true, true, true, true, true];
 
-    // Update pins to match your wiring. These are 10 distinct ADC channels.
+    // C071RB board-aware ADC pinout:
+    // avoid PA2/PA3 (USART2 VCP default on MB2046) and PA5 (user LED).
     let mut channels: [AnyAdcChannel<_>; 10] = [
         p.PA0.degrade_adc(),
         p.PA1.degrade_adc(),
-        p.PA2.degrade_adc(),
-        p.PA3.degrade_adc(),
         p.PA4.degrade_adc(),
-        p.PA5.degrade_adc(),
         p.PA6.degrade_adc(),
         p.PA7.degrade_adc(),
+        p.PA8.degrade_adc(),
         p.PB0.degrade_adc(),
         p.PB1.degrade_adc(),
+        p.PB10.degrade_adc(),
+        p.PB11.degrade_adc(),
     ];
 
     let mut readings: [u16; 10] = [0; 10];
@@ -54,8 +55,7 @@ async fn main(_spawner: Spawner) {
         }
 
         let frame = build_frame(MessageType::ForceReadings as u8, readings);
-        let _ = uart.blocking_write(&frame.buf[..frame.len]);
+        let _ = g4_uart.blocking_write(&frame.buf[..frame.len]);
         info!("ADC array raw: {}", readings);
-        // Timer::after(Duration::from_millis(50)).await;
     }
 }

@@ -34,7 +34,7 @@ ros2 launch banana_bringup bringup.launch.py port:=/dev/ttyACM0 baud:=115200
 ```
 - Test ros code:
 ```
-ros2 topic pub --once /tx_positions std_msgs/msg/Float32MultiArray \
+ros2 topic pub --once /tx_positions std_msgs/msg/UInt16MultiArray \
 "{data: [1,2,3,4,5,6,7,8]}"
 ```
 - Echo topic for verification: `ros2 topic echo /rx_positions`

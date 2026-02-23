@@ -14,7 +14,11 @@ from cobs import cobs  # pip install cobs
 
 COBS_DELIM = b"\x00"
 MSG_TYPE_POSITION = 0x01
-LENGTH = 16  # 8 ints * 2 bytes each
+MSG_TYPE_TELEMETRY = 0x03
+POSITION_COUNT = 8
+FORCE_COUNT = 10
+POSITION_LEN = POSITION_COUNT * 2
+FORCE_LEN = FORCE_COUNT * 2
 
 MAX_ENC_FRAME = 512  # cap to avoid runaway buffer on noise
 
@@ -24,12 +28,12 @@ def checksum(data: bytes) -> int:
 
 
 def build_frame(msg_type: int, positions: List[int]) -> bytes:
-    if len(positions) != 8:
-        raise ValueError(f"expected 8 uint16 values, got {len(positions)}")
+    if len(positions) != POSITION_COUNT:
+        raise ValueError(f"expected {POSITION_COUNT} uint16 values, got {len(positions)}")
 
     payload = b"".join(struct.pack("<H", int(p)) for p in positions)
-    if len(payload) != LENGTH:
-        raise ValueError(f"payload must be {LENGTH} bytes, got {len(payload)}")
+    if len(payload) != POSITION_LEN:
+        raise ValueError(f"payload must be {POSITION_LEN} bytes, got {len(payload)}")
 
     chk = checksum(payload)
 
@@ -39,20 +43,36 @@ def build_frame(msg_type: int, positions: List[int]) -> bytes:
     return cobs.encode(body) + COBS_DELIM
 
 
-def parse_body(body: bytes) -> Optional[Tuple[int, List[int]]]:
+def parse_u16_le(payload: bytes) -> List[int]:
+    return [struct.unpack("<H", payload[i : i + 2])[0] for i in range(0, len(payload), 2)]
+
+
+def parse_body(body: bytes) -> Optional[Tuple[int, List[int], List[int]]]:
     # body: [type][payload][chk]
-    if len(body) != 1 + LENGTH + 1:
+    if len(body) < 3:
         return None
 
     msg_type = body[0]
-    payload = body[1 : 1 + LENGTH]
-    chk = body[1 + LENGTH]
+    payload = body[1:-1]
+    chk = body[-1]
 
     if checksum(payload) != chk:
         return None
 
-    positions = [struct.unpack("<H", payload[i:i+2])[0] for i in range(0, LENGTH, 2)]
-    return (msg_type, positions)
+    if msg_type == MSG_TYPE_POSITION:
+        if len(payload) != POSITION_LEN:
+            return None
+        positions = parse_u16_le(payload)
+        return (msg_type, positions, [])
+
+    if msg_type == MSG_TYPE_TELEMETRY:
+        if len(payload) != POSITION_LEN + FORCE_LEN:
+            return None
+        positions = parse_u16_le(payload[:POSITION_LEN])
+        forces = parse_u16_le(payload[POSITION_LEN:])
+        return (msg_type, positions, forces)
+
+    return None
 
 
 class SerialBridgeNode(Node):
@@ -78,6 +98,7 @@ class SerialBridgeNode(Node):
 
         # ROS interfaces
         self.pub_js = self.create_publisher(JointState, "rx_positions", 10)
+        self.pub_force = self.create_publisher(UInt16MultiArray, "rx_force", 10)
         self.sub_cmd = self.create_subscription(UInt16MultiArray, "tx_positions", self.on_cmd, 10)
 
         # Serial
@@ -99,22 +120,25 @@ class SerialBridgeNode(Node):
             pass
         super().destroy_node()
 
-    def on_cmd(self, msg: UInt16MultiArray):
-        if len(msg.data) != 8:
-            self.get_logger().warn(f"tx_positions must have 8 uint16 values; got {len(msg.data)}")
+    def _send_positions(self, positions: List[int]):
+        if len(positions) != 8:
+            self.get_logger().warn(f"tx_positions must have 8 values; got {len(positions)}")
             return
 
-        positions = [int(x) for x in msg.data]
         frame = build_frame(MSG_TYPE_POSITION, positions)
 
         try:
             self.ser.write(frame)
+            self.get_logger().info(f"Sent tx_positions: {positions}")
             try:
                 self.ser.flush()
             except Exception:
                 pass
         except Exception as e:
             self.get_logger().error(f"Serial write failed: {e}")
+
+    def on_cmd(self, msg: UInt16MultiArray):
+        self._send_positions([int(x) for x in msg.data])
 
     def poll_serial(self):
         # Read whatever is available, append to buffer
@@ -144,16 +168,19 @@ class SerialBridgeNode(Node):
             if parsed is None:
                 continue
 
-            msg_type, positions = parsed
-            if msg_type != MSG_TYPE_POSITION:
-                continue
+            msg_type, positions, forces = parsed
 
-            # Publish as JointState (use first 8 if more)
-            js = JointState()
-            js.header.stamp = self.get_clock().now().to_msg()
-            js.name = self.joint_names
-            js.position = [float(p) for p in positions[:8]] + ([0.0] * max(0, 8 - len(positions)))
-            self.pub_js.publish(js)
+            if msg_type == MSG_TYPE_POSITION or msg_type == MSG_TYPE_TELEMETRY:
+                js = JointState()
+                js.header.stamp = self.get_clock().now().to_msg()
+                js.name = self.joint_names
+                js.position = [float(p) for p in positions[:POSITION_COUNT]]
+                self.pub_js.publish(js)
+
+            if msg_type == MSG_TYPE_TELEMETRY:
+                force_msg = UInt16MultiArray()
+                force_msg.data = [int(v) for v in forces]
+                self.pub_force.publish(force_msg)
 
     def _extract_one_cobs_encoded_frame(self) -> Optional[bytes]:
         """
