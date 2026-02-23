@@ -1,11 +1,10 @@
 use embassy_stm32::mode::Async;
 use embassy_stm32::usart::UartRx;
 
-use crate::config::FORCE_COUNT;
 use crate::protocol::{FrameParser, MessageType};
+use crate::config::FORCE_COUNT;
 use crate::shared::SharedData;
 use defmt::info;
-
 #[embassy_executor::task]
 pub async fn c0_reader_task(
     mut rx: UartRx<'static, Async>,
@@ -25,6 +24,7 @@ pub async fn c0_reader_task(
         for &b in &rx_buf[..n] {
             if let Some((msg_type, payload)) = parser.parse_byte(b) {
                 if msg_type != MessageType::ForceReadings as u8 {
+                    info!("Received COBS frame type {} not ForceReadings", msg_type);
                     continue;
                 }
                 for idx in 0..FORCE_COUNT {

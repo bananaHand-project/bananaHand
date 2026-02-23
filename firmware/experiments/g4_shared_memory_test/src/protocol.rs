@@ -52,7 +52,7 @@ pub fn build_frame(msg_type: u8, readings: [u16; 10]) -> BuiltFrame {
 }
 
 pub enum MessageType {
-    ForceReadings = 0x01,
+    ForceReadings = 0x02,
 }
 
 pub struct FrameParser {

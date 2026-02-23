@@ -24,7 +24,7 @@ async fn main(_spawner: Spawner) {
 
     let mut uart_config = UartConfig::default();
     uart_config.baudrate = 115_200;
-    let mut uart = Uart::new_blocking(p.USART1, p.PA10, p.PA9, uart_config).unwrap();
+    let mut uart = Uart::new_blocking(p.USART1, p.PB7, p.PB6, uart_config).unwrap();
 
     // Enable/disable sensors here. Disabled sensors transmit 0.
     const SENSOR_ENABLED: [bool; 10] = [true, true, true, true, true, true, true, true, true, true];
@@ -56,6 +56,6 @@ async fn main(_spawner: Spawner) {
         let frame = build_frame(MessageType::ForceReadings as u8, readings);
         let _ = uart.blocking_write(&frame.buf[..frame.len]);
         info!("ADC array raw: {}", readings);
-        Timer::after(Duration::from_millis(50)).await;
+        // Timer::after(Duration::from_millis(50)).await;
     }
 }

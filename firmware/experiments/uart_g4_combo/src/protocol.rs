@@ -3,6 +3,11 @@ use cobs::{decode, encode};
 pub const COBS_DELIM: u8 = 0x00;
 pub const MAX_FRAME: usize = 128;
 
+pub enum MessageType {
+    PositionUpdate = 0x01,
+    ForceReadings = 0x02,
+}
+
 fn checksum(data: &[u8]) -> u8 {
     data.iter().fold(0u8, |acc, &b| acc.wrapping_add(b))
 }
@@ -22,6 +27,7 @@ pub fn build_frame<const N: usize>(msg_type: u8, values: [u16; N]) -> BuiltFrame
     let mut body = [0u8; MAX_FRAME];
     let mut body_len = 0usize;
 
+    // body: [type][payload...][chk]
     body[body_len] = msg_type;
     body_len += 1;
 
@@ -37,6 +43,7 @@ pub fn build_frame<const N: usize>(msg_type: u8, values: [u16; N]) -> BuiltFrame
     body[body_len] = chk;
     body_len += 1;
 
+    // ---- COBS encode + delimiter ----
     let mut framed = BuiltFrame {
         buf: [0u8; MAX_FRAME],
         len: 0,
@@ -44,6 +51,7 @@ pub fn build_frame<const N: usize>(msg_type: u8, values: [u16; N]) -> BuiltFrame
 
     let enc_len = encode(&body[..body_len], &mut framed.buf);
 
+    // ensure space for delimiter
     if enc_len + 1 > MAX_FRAME {
         defmt::error!("COBS encode overflow: no room for delimiter");
         framed.len = 0;
@@ -54,11 +62,6 @@ pub fn build_frame<const N: usize>(msg_type: u8, values: [u16; N]) -> BuiltFrame
     framed.len = enc_len + 1;
 
     framed
-}
-
-pub enum MessageType {
-    PositionUpdate = 0x01,
-    ForceReadings = 0x02,
 }
 
 pub struct FrameParser<const N: usize> {
@@ -83,6 +86,7 @@ impl<const N: usize> FrameParser<N> {
 
         let payload_len = payload_len(N);
 
+        // accumulate until delimiter
         if byte != COBS_DELIM {
             if self.enc_len < MAX_FRAME {
                 self.enc_buf[self.enc_len] = byte;
@@ -94,8 +98,9 @@ impl<const N: usize> FrameParser<N> {
             return None;
         }
 
+        // delimiter hit
         if self.enc_len == 0 {
-            return None;
+            return None; // ignore empty frame
         }
 
         let report = match decode(&self.enc_buf[..self.enc_len], &mut self.dec_buf) {
@@ -107,20 +112,22 @@ impl<const N: usize> FrameParser<N> {
             }
         };
 
+        // cobs 0.5.0: use method, not field
         let dec_len = report.frame_size();
         self.enc_len = 0;
 
+        // decoded body: [type][payload...][chk]
         if dec_len < 3 {
             defmt::error!("Frame too short");
             return None;
         }
 
+        let msg_type = self.dec_buf[0];
+
         if dec_len != 1 + payload_len + 1 {
             defmt::error!("Length mismatch");
             return None;
         }
-
-        let msg_type = self.dec_buf[0];
 
         let payload_start = 1;
         let payload_end = payload_start + payload_len;

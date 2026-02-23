@@ -2,7 +2,6 @@ use embassy_executor::task;
 use embassy_stm32::mode::Async;
 use embassy_stm32::usart::UartRx;
 
-use crate::config::COMMAND_COUNT;
 use crate::protocol::{FrameParser, MessageType};
 use crate::shared::SharedData;
 
@@ -13,7 +12,6 @@ pub async fn command_reader_task(
 ) {
     let mut rx_buf = [0u8; 64];
     let mut parser = FrameParser::<COMMAND_COUNT>::new();
-    let mut commands = [0u16; COMMAND_COUNT];
 
     loop {
         let n = match rx.read_until_idle(&mut rx_buf).await {
@@ -23,19 +21,25 @@ pub async fn command_reader_task(
 
         for &b in &rx_buf[..n] {
             if let Some((msg_type, payload)) = parser.parse_byte(b) {
-                if msg_type != MessageType::PositionUpdate as u8 {
+                if msg_type == MessageType::PositionUpdate as u8 {
+                    if payload.len() != 16 {
+                        defmt::warn!("PositionUpdate payload wrong size: {}", payload.len());
+                        continue;
+                    }
+
+                    let mut commands = [0u16; COMMAND_COUNT];
+                    for i in 0..COMMAND_COUNT {
+                        let start = i * 2;
+                        let bytes: [u8; 2] = payload[start..start + 2].try_into().unwrap();
+                        commands[i] = u16::from_le_bytes(bytes);
+                    }
+
+                    shared.write_frame(&commands);
+                } else {
                     defmt::info!("Unhandled message type {}", msg_type);
-                    continue;
                 }
-
-                for i in 0..COMMAND_COUNT {
-                    let start = i * 2;
-                    let bytes: [u8; 2] = payload[start..start + 2].try_into().unwrap();
-                    commands[i] = u16::from_le_bytes(bytes);
-                }
-
-                shared.write_frame(&commands);
             }
         }
     }
 }
+use crate::config::COMMAND_COUNT;
