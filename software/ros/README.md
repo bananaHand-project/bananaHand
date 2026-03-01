@@ -16,6 +16,35 @@ Packages added under `software/ros/src`:
 - `banana_rl` (MuJoCo + Gymnasium-Robotics + SB3 PPO scaffold)
 - `banana_sim_bridge` (simulation rollout + ROS bridge scaffold)
 
+### RealSense Camera + COLMAP 3D Reconstruction
+
+See [banana_sfm_reconstruction](src/banana_sfm_reconstruction/README.md) for full details.
+
+Quick start:
+```bash
+cd software/ros
+source /opt/ros/humble/setup.bash
+pip install --user -r src/banana_sfm_reconstruction/requirements.txt
+colcon build --packages-select banana_sfm_reconstruction
+source install/setup.bash
+ros2 run banana_sfm_reconstruction reconstruction_node
+```
+
+In another terminal, monitor frames:
+```bash
+ros2 topic hz /camera/image_raw
+ls -lh src/banana_sfm_reconstruction/banana_sfm_reconstruction/frames/
+```
+
+Once you have frames, process with COLMAP:
+```bash
+colmap automatic_reconstructor \
+  --workspace_path /tmp/colmap_ws \
+  --image_path software/ros/src/banana_sfm_reconstruction/banana_sfm_reconstruction/frames
+```
+
+### Vision Teleop
+
 Run vision teleop:
 ```
 cd software/ros
