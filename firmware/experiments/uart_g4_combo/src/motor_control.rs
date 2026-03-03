@@ -1,8 +1,9 @@
 use crate::config::{COMMAND_COUNT, FORCE_COUNT, POSITION_COUNT};
 use crate::control_config::{
-    CONTROL_DT_S, CONTROL_MODE, FORCE_MAPS, FORCE_PID_GAINS, MAX_MOTORS, OUTPUT_DEADBAND_PERCENT,
-    POSITION_MAPS, POSITION_PID_GAINS, ControlMode, command_raw_to_force_units,
-    command_raw_to_position_mm, force_raw_to_units,
+    CONTROL_DT_S, CONTROL_MODE, ControlMode, FORCE_MAPS, FORCE_PID_GAINS,
+    HYBRID_DESIRED_FORCE_UNITS, HYBRID_FORCE_POSITION_GAINS, HYBRID_MAX_POSITION_OFFSET_MM,
+    MAX_MOTORS, OUTPUT_DEADBAND_PERCENT, POSITION_MAPS, POSITION_PID_GAINS,
+    command_raw_to_force_units, command_raw_to_position_mm, force_raw_to_units,
 };
 use crate::pid::Pid;
 
@@ -70,12 +71,14 @@ impl Controller {
         match self.mode {
             ControlMode::Position => {
                 for map in POSITION_MAPS {
-                    
                     active[map.motor_idx] = true;
                     let setpoint_mm = command_raw_to_position_mm(commands[map.cmd_idx]);
                     let feedback_mm = command_raw_to_position_mm(positions[map.pos_idx]);
-                    let u =
-                        self.position_pids[map.motor_idx].update(setpoint_mm, feedback_mm, CONTROL_DT_S);
+                    let u = self.position_pids[map.motor_idx].update(
+                        setpoint_mm,
+                        feedback_mm,
+                        CONTROL_DT_S,
+                    );
                     outputs[map.motor_idx] = motor_command_from_output(u);
                 }
                 apply_inactive_policy(&mut outputs, &active, ControlMode::Position);
@@ -89,6 +92,36 @@ impl Controller {
                     outputs[map.motor_idx] = motor_command_from_output(u);
                 }
                 apply_inactive_policy(&mut outputs, &active, ControlMode::Force);
+            }
+            ControlMode::HybridForcePosition => {
+                for map in POSITION_MAPS {
+                    active[map.motor_idx] = true;
+
+                    let base_setpoint_mm = command_raw_to_position_mm(commands[map.cmd_idx]);
+                    let feedback_mm = command_raw_to_position_mm(positions[map.pos_idx]);
+
+                    let force_feedback = FORCE_MAPS
+                        .iter()
+                        .find(|force_map| force_map.motor_idx == map.motor_idx)
+                        .map(|force_map| force_raw_to_units(forces[force_map.force_idx]))
+                        .unwrap_or(0.0);
+
+                    let force_err = HYBRID_DESIRED_FORCE_UNITS[map.motor_idx] - force_feedback;
+                    let position_offset_mm =
+                        (HYBRID_FORCE_POSITION_GAINS[map.motor_idx] * force_err).clamp(
+                            -HYBRID_MAX_POSITION_OFFSET_MM,
+                            HYBRID_MAX_POSITION_OFFSET_MM,
+                        );
+                    let hybrid_setpoint_mm = base_setpoint_mm - position_offset_mm;
+
+                    let u = self.position_pids[map.motor_idx].update(
+                        hybrid_setpoint_mm,
+                        feedback_mm,
+                        CONTROL_DT_S,
+                    );
+                    outputs[map.motor_idx] = motor_command_from_output(u);
+                }
+                apply_inactive_policy(&mut outputs, &active, ControlMode::HybridForcePosition);
             }
         }
 
@@ -120,6 +153,7 @@ fn apply_inactive_policy(
         outputs[i] = match mode {
             ControlMode::Position => MotorCommand::Coast,
             ControlMode::Force => MotorCommand::Brake,
+            ControlMode::HybridForcePosition => MotorCommand::Coast,
         };
     }
 }
@@ -140,7 +174,7 @@ pub fn pwm_command_from_motor_command(cmd: MotorCommand) -> MotorPwmCommand {
             ch2_percent: 101 - duty, // MUST BE 101 SO CH2 WILL NEVER BE 0, OR ELSE MOTOR JUST COASTS
         },
         MotorCommand::MoveIn(duty) => MotorPwmCommand {
-            ch1_percent: 101 - duty,  // MUST BE 101 SO CH1 WILL NEVER BE 0, OR ELSE MOTOR JUST COASTS (maybe)
+            ch1_percent: 101 - duty, // MUST BE 101 SO CH1 WILL NEVER BE 0, OR ELSE MOTOR JUST COASTS (maybe)
             ch2_percent: 100,
         },
     }

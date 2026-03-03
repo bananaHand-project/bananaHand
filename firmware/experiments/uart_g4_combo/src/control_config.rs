@@ -58,10 +58,11 @@ pub const MOTOR_PWM_SWAP: [bool; MAX_MOTORS] = [
 pub enum ControlMode {
     Position,
     Force,
+    HybridForcePosition,
 }
 
 // Flip this to switch the controller behavior.
-pub const CONTROL_MODE: ControlMode = ControlMode::Position;
+pub const CONTROL_MODE: ControlMode = ControlMode::HybridForcePosition;
 
 #[derive(Clone, Copy)]
 pub struct PositionMap {
@@ -145,6 +146,12 @@ pub const FORCE_MAPS: [ForceMap; MAX_MOTORS] = [
 
 pub const POSITION_PID_GAINS: (f32, f32, f32) = (40.0, 0.0, 0.0);
 pub const FORCE_PID_GAINS: (f32, f32, f32) = (0.08, 0.0, 0.0);
+// Converts force error into a position offset before the position PID runs.
+// Units should be interpreted as mm / force-unit once FSR calibration is finalized.
+pub const HYBRID_FORCE_POSITION_GAINS: [f32; MAX_MOTORS] = [0.0; MAX_MOTORS];
+// Desired contact force per motor in calibrated force units.
+pub const HYBRID_DESIRED_FORCE_UNITS: [f32; MAX_MOTORS] = [0.0; MAX_MOTORS];
+pub const HYBRID_MAX_POSITION_OFFSET_MM: f32 = 5.0;
 
 pub fn command_raw_to_position_mm(raw: u16) -> f32 {
     const STROKE_MM: f32 = 20.0;
