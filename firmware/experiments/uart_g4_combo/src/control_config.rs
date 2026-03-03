@@ -5,6 +5,55 @@ pub const CONTROL_HZ: u64 = 200;
 pub const CONTROL_DT_S: f32 = 1.0 / CONTROL_HZ as f32;
 pub const OUTPUT_DEADBAND_PERCENT: u8 = 3;
 
+// Logical motor indices (HRTIM A..F).
+pub const MOTOR_RING: usize = 0; // HRTIM A
+pub const MOTOR_PINKY: usize = 1; // HRTIM B
+pub const MOTOR_THUMB: usize = 2; // HRTIM C
+pub const MOTOR_INDEX_1: usize = 3; // HRTIM D
+pub const MOTOR_MIDDLE: usize = 4; // HRTIM E
+pub const MOTOR_INDEX_2: usize = 5; // HRTIM F
+
+// Position channel indices.
+pub const POS_RING: usize = 0; // PB0
+pub const POS_PINKY: usize = 1; // PF0
+pub const POS_THUMB_1: usize = 2; // PA2
+pub const POS_INDEX_1: usize = 3; // PA3
+pub const POS_MIDDLE: usize = 4; // PB1
+pub const POS_INDEX_2: usize = 5; // PB11
+pub const POS_THUMB_2: usize = 6; // PC2
+pub const POS_THUMB_3: usize = 7; // PC3
+
+pub const MOTOR_NAMES: [&str; MAX_MOTORS] = [
+    "ring",
+    "pinky",
+    "thumb-related",
+    "index-1",
+    "middle",
+    "index-2",
+];
+
+pub const POSITION_NAMES: [&str; POSITION_COUNT] = [
+    "ring-pot",
+    "pinky-pot",
+    "thumb-pot-1",
+    "index-1-pot",
+    "middle-pot",
+    "index-2-pot",
+    "thumb-pot-2",
+    "thumb-pot-3",
+];
+
+// Per-motor output polarity compensation.
+// If true, ch1/ch2 duty values are swapped before writing to hardware.
+pub const MOTOR_PWM_SWAP: [bool; MAX_MOTORS] = [
+    false, // ring
+    false, // pinky
+    false, // thumb-related
+    true,  // index-1
+    false, // middle
+    false, // index-2
+];
+
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub enum ControlMode {
     Position,
@@ -28,32 +77,79 @@ pub struct ForceMap {
     pub force_idx: usize,
 }
 
-// TODO: Factor this into more readable format with joint names
-
 pub const POSITION_MAPS: [PositionMap; MAX_MOTORS] = [
-    PositionMap { motor_idx: 0, cmd_idx: 0, pos_idx: 0 },
-    PositionMap { motor_idx: 1, cmd_idx: 1, pos_idx: 1 },
-    PositionMap { motor_idx: 2, cmd_idx: 2, pos_idx: 2 },
-    PositionMap { motor_idx: 3, cmd_idx: 3, pos_idx: 3 },
-    PositionMap { motor_idx: 4, cmd_idx: 4, pos_idx: 4 },
-    PositionMap { motor_idx: 5, cmd_idx: 5, pos_idx: 5 },
+    PositionMap {
+        motor_idx: MOTOR_RING,
+        cmd_idx: MOTOR_RING,
+        pos_idx: POS_RING,
+    },
+    PositionMap {
+        motor_idx: MOTOR_PINKY,
+        cmd_idx: MOTOR_PINKY,
+        pos_idx: POS_PINKY,
+    },
+    PositionMap {
+        motor_idx: MOTOR_THUMB,
+        cmd_idx: MOTOR_THUMB,
+        pos_idx: POS_THUMB_1,
+    },
+    PositionMap {
+        motor_idx: MOTOR_INDEX_1,
+        cmd_idx: MOTOR_INDEX_1,
+        pos_idx: POS_INDEX_1,
+    },
+    PositionMap {
+        motor_idx: MOTOR_MIDDLE,
+        cmd_idx: MOTOR_MIDDLE,
+        pos_idx: POS_MIDDLE,
+    },
+    PositionMap {
+        motor_idx: MOTOR_INDEX_2,
+        cmd_idx: MOTOR_INDEX_2,
+        pos_idx: POS_INDEX_2,
+    },
 ];
 
 pub const FORCE_MAPS: [ForceMap; MAX_MOTORS] = [
-    ForceMap { motor_idx: 0, cmd_idx: 0, force_idx: 0 },
-    ForceMap { motor_idx: 1, cmd_idx: 1, force_idx: 1 },
-    ForceMap { motor_idx: 2, cmd_idx: 2, force_idx: 2 },
-    ForceMap { motor_idx: 3, cmd_idx: 3, force_idx: 3 },
-    ForceMap { motor_idx: 4, cmd_idx: 4, force_idx: 4 },
-    ForceMap { motor_idx: 5, cmd_idx: 5, force_idx: 5 },
+    ForceMap {
+        motor_idx: MOTOR_RING,
+        cmd_idx: MOTOR_RING,
+        force_idx: MOTOR_RING,
+    },
+    ForceMap {
+        motor_idx: MOTOR_PINKY,
+        cmd_idx: MOTOR_PINKY,
+        force_idx: MOTOR_PINKY,
+    },
+    ForceMap {
+        motor_idx: MOTOR_THUMB,
+        cmd_idx: MOTOR_THUMB,
+        force_idx: MOTOR_THUMB,
+    },
+    ForceMap {
+        motor_idx: MOTOR_INDEX_1,
+        cmd_idx: MOTOR_INDEX_1,
+        force_idx: MOTOR_INDEX_1,
+    },
+    ForceMap {
+        motor_idx: MOTOR_MIDDLE,
+        cmd_idx: MOTOR_MIDDLE,
+        force_idx: MOTOR_MIDDLE,
+    },
+    ForceMap {
+        motor_idx: MOTOR_INDEX_2,
+        cmd_idx: MOTOR_INDEX_2,
+        force_idx: MOTOR_INDEX_2,
+    },
 ];
 
 pub const POSITION_PID_GAINS: (f32, f32, f32) = (40.0, 0.0, 0.0);
 pub const FORCE_PID_GAINS: (f32, f32, f32) = (0.08, 0.0, 0.0);
 
 pub fn command_raw_to_position_mm(raw: u16) -> f32 {
-    // Map full 16-bit command space to 0..20 mm stroke.
-    20.0 * (raw as f32) / (u16::MAX as f32)
+    const STROKE_MM: f32 = 20.0;
+    const ADC_MAX_RAW: f32 = 4095.0;
+    (raw as f32) * (STROKE_MM / ADC_MAX_RAW)
 }
 
 pub fn command_raw_to_force_units(raw: u16) -> f32 {

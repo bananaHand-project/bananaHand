@@ -31,8 +31,12 @@ use embassy_time::{Duration, Ticker};
 use hrtim_pwm_hal::{HrtimCore, HrtimPrescaler, period_reg_val};
 
 use config::{COMMAND_COUNT, FORCE_COUNT, POSITION_COUNT};
-use control_config::{CONTROL_HZ, is_valid_config};
-use motor_control::{Controller, pwm_command_from_motor_command};
+use control_config::{
+    CONTROL_HZ, MAX_MOTORS, MOTOR_INDEX_1, MOTOR_INDEX_2, MOTOR_MIDDLE, MOTOR_NAMES,
+    MOTOR_PINKY, MOTOR_RING, MOTOR_THUMB, POS_THUMB_2, POS_THUMB_3, POSITION_NAMES,
+    is_valid_config,
+};
+use motor_control::{Controller, MotorPwmCommand, pwm_command_from_motor_command};
 use shared::SharedData;
 
 bind_interrupts!(struct Irqs {
@@ -45,16 +49,19 @@ static SHARED_COMMANDS: SharedData<COMMAND_COUNT> = SharedData::new();
 static SHARED_FORCE: SharedData<FORCE_COUNT> = SharedData::new();
 const PWM_FREQ: Hertz = Hertz(20_000);
 
-fn control_mode_label() -> &'static str {
-    match control_config::CONTROL_MODE {
-        control_config::ControlMode::Position => "position",
-        control_config::ControlMode::Force => "force",
+fn swap_pwm_channels_if_req(motor_idx: usize, mut cmd: MotorPwmCommand) -> MotorPwmCommand {
+    if control_config::MOTOR_PWM_SWAP[motor_idx] {
+        core::mem::swap(&mut cmd.ch1_percent, &mut cmd.ch2_percent);
     }
+    cmd
 }
 
 #[embassy_executor::main]
 async fn main(_spawner: Spawner) {
     debug_assert!(is_valid_config());
+    debug_assert!(MOTOR_NAMES.len() == MAX_MOTORS);
+    debug_assert!(POSITION_NAMES.len() == POSITION_COUNT);
+    debug_assert!(POS_THUMB_2 == 6 && POS_THUMB_3 == 7);
 
     let mut config = Config::default();
     {
@@ -105,24 +112,25 @@ async fn main(_spawner: Spawner) {
     uart1_config.baudrate = 115_200;
 
     // RX on PA15 from C0 USART1_TX (PB6).
-    let uart1_rx = UartRx::new(p.USART2, Irqs, p.PA15, p.DMA1_CH1, uart1_config).unwrap();
+    let _uart1_rx = UartRx::new(p.USART2, Irqs, p.PA15, p.DMA1_CH1, uart1_config).unwrap();
+    
     _spawner
-        .spawn(c0_reader::c0_reader_task(uart1_rx, &SHARED_FORCE))
+        .spawn(c0_reader::c0_reader_task(_uart1_rx, &SHARED_FORCE))
         .unwrap();
 
     // ADC + position reader (G4 pots).
     let dma = p.DMA1_CH2;
     let adc = Adc::new(p.ADC1, AdcConfig::default());
-    // Position channels in motor order for the first six motors:
+    // Keep ADC channel order aligned with control_config::POS_* constants.
     let pos_ch = [
-        p.PB0.degrade_adc(),
-        p.PF0.degrade_adc(),
-        p.PA2.degrade_adc(), // should be smth else?
-        p.PA3.degrade_adc(), // INDEX 1 !!
-        p.PB1.degrade_adc(),
-        p.PB11.degrade_adc(), // INDEX 2!!
-        p.PC2.degrade_adc(), // should be pa1 or pa2?
-        p.PC3.degrade_adc(), // should be pa1 or pa2?
+        p.PB0.degrade_adc(),  // POS_RING
+        p.PF0.degrade_adc(),  // POS_PINKY
+        p.PA2.degrade_adc(),  // POS_THUMB_1?
+        p.PA3.degrade_adc(),  // POS_INDEX_1
+        p.PB1.degrade_adc(),  // POS_MIDDLE
+        p.PB11.degrade_adc(), // POS_INDEX_2
+        p.PC2.degrade_adc(),  // POS_THUMB_2?
+        p.PC3.degrade_adc(),  // POS_THUMB_3?
     ];
     _spawner
         .spawn(position_reader::position_reader_task(adc, dma, pos_ch, &SHARED_POSITIONS))
@@ -131,11 +139,11 @@ async fn main(_spawner: Spawner) {
     let prescaler = HrtimPrescaler::DIV32;
     let period = period_reg_val(clocks(&p.RCC), APBPrescaler::DIV1, prescaler, PWM_FREQ).unwrap();
     let (tim_a, tim_b, tim_c, tim_d, tim_e, tim_f) = HrtimCore::new()
-        .add_tim_a_ch1_ch2(p.PA8, p.PA9, period, prescaler)
-        .add_tim_b_ch1_ch2(p.PA10, p.PA11, period, prescaler)
-        .add_tim_c_ch1_ch2(p.PB12, p.PB13, period, prescaler)
+        .add_tim_a_ch1_ch2(p.PA8, p.PA9, period, prescaler) // RING
+        .add_tim_b_ch1_ch2(p.PA10, p.PA11, period, prescaler) // PINKY
+        .add_tim_c_ch1_ch2(p.PB12, p.PB13, period, prescaler) // thumb related
         .add_tim_d_ch1_ch2(p.PB14, p.PB15, period, prescaler) // INDEX 1 !!
-        .add_tim_e_ch1_ch2(p.PC8, p.PC9, period, prescaler)
+        .add_tim_e_ch1_ch2(p.PC8, p.PC9, period, prescaler) // MIDDLE
         .add_tim_f_ch1_ch2(p.PC6, p.PC7, period, prescaler) // INDEX 2!!
         .split_active()
         .unwrap();
@@ -157,54 +165,74 @@ async fn main(_spawner: Spawner) {
     let mut status_tick: u32 = 0;
 
     // MAIN PID LOOP //
+    // let mut command_toggle = false;
 
     loop {
         let mut latest_cmd = SHARED_COMMANDS.read_snapshot();
 
-        latest_cmd = [
-            0,
-            0,
-            0,
-            0,
-            0,
-            4000,
-            0,
-            0
-        ];
+        // status_tick = status_tick.wrapping_add(1);
+        // if status_tick % 200 == 0 {
+
+        //     command_toggle = !command_toggle;
+        // }
+        // latest_cmd = if command_toggle {
+        //     [
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0
+        //     ]
+        // } else {
+        //     [
+        //         4000,
+        //         4000,
+        //         4000,
+        //         4000,
+        //         4000,
+        //         4000,
+        //         4000,
+        //         4000
+        //     ]
+        // };
 
         
         let latest_force = SHARED_FORCE.read_snapshot();
         let latest_positions = SHARED_POSITIONS.read_snapshot();
 
-        // defmt::info!("position: {}",latest_positions);
+        defmt::info!("command: {}, position: {}", latest_cmd[0], latest_positions);
 
         controller.set_mode(control_config::CONTROL_MODE);
         let outputs = controller.step(&latest_cmd, &latest_positions, &latest_force);
-        let m0 = pwm_command_from_motor_command(outputs[0]);
-        let m1 = pwm_command_from_motor_command(outputs[1]);
-        let m2 = pwm_command_from_motor_command(outputs[2]);
-        let m3 = pwm_command_from_motor_command(outputs[3]);
-        let m4 = pwm_command_from_motor_command(outputs[4]);
-        let m5 = pwm_command_from_motor_command(outputs[5]);
-        defmt::info!("position: {}, 3Dch1: {}, 3Dch2: {}, 5Fch1: {}, 5Fch2: {}", latest_positions, m3.ch1_percent, m3.ch2_percent, m5.ch1_percent, m5.ch2_percent);
+        let m_ring = pwm_command_from_motor_command(outputs[MOTOR_RING]);
+        let m_pinky = pwm_command_from_motor_command(outputs[MOTOR_PINKY]);
+        let m_thumb = pwm_command_from_motor_command(outputs[MOTOR_THUMB]);
+        let m_index_1 = pwm_command_from_motor_command(outputs[MOTOR_INDEX_1]);
+        let m_middle = pwm_command_from_motor_command(outputs[MOTOR_MIDDLE]);
+        let m_index_2 = pwm_command_from_motor_command(outputs[MOTOR_INDEX_2]);
 
-        tim_a.ch1_set_dc_percent(m0.ch1_percent);
-        tim_a.ch2_set_dc_percent(m0.ch2_percent);
-        tim_b.ch1_set_dc_percent(m1.ch1_percent);
-        tim_b.ch2_set_dc_percent(m1.ch2_percent);
-        tim_c.ch1_set_dc_percent(m2.ch1_percent);
-        tim_c.ch2_set_dc_percent(m2.ch2_percent);
+        let m_ring = swap_pwm_channels_if_req(MOTOR_RING, m_ring);
+        let m_pinky = swap_pwm_channels_if_req(MOTOR_PINKY, m_pinky);
+        let m_thumb = swap_pwm_channels_if_req(MOTOR_THUMB, m_thumb);
+        let m_index_1 = swap_pwm_channels_if_req(MOTOR_INDEX_1, m_index_1);
+        let m_middle = swap_pwm_channels_if_req(MOTOR_MIDDLE, m_middle);
+        let m_index_2 = swap_pwm_channels_if_req(MOTOR_INDEX_2, m_index_2);
 
-        // changed from m3
-        tim_d.ch1_set_dc_percent(m3.ch2_percent); // OPPOSITE!! (index 1)
-        tim_d.ch2_set_dc_percent(m3.ch1_percent); // OPPOSITE!! (index 1)
-
-        tim_e.ch1_set_dc_percent(m4.ch1_percent);
-        tim_e.ch2_set_dc_percent(m4.ch2_percent);
-
-        // changed from m5
-        tim_f.ch1_set_dc_percent(m5.ch1_percent);
-        tim_f.ch2_set_dc_percent(m5.ch2_percent);
+        tim_a.ch1_set_dc_percent(m_ring.ch1_percent);
+        tim_a.ch2_set_dc_percent(m_ring.ch2_percent);
+        tim_b.ch1_set_dc_percent(m_pinky.ch1_percent);
+        tim_b.ch2_set_dc_percent(m_pinky.ch2_percent);
+        tim_c.ch1_set_dc_percent(m_thumb.ch1_percent);
+        tim_c.ch2_set_dc_percent(m_thumb.ch2_percent);
+        tim_d.ch1_set_dc_percent(m_index_1.ch1_percent);
+        tim_d.ch2_set_dc_percent(m_index_1.ch2_percent);
+        tim_e.ch1_set_dc_percent(m_middle.ch1_percent);
+        tim_e.ch2_set_dc_percent(m_middle.ch2_percent);
+        tim_f.ch1_set_dc_percent(m_index_2.ch1_percent);
+        tim_f.ch2_set_dc_percent(m_index_2.ch2_percent);
 
         // status_tick = status_tick.wrapping_add(1);
         // if status_tick % 40 == 0 {

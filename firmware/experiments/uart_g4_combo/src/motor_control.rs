@@ -6,8 +6,6 @@ use crate::control_config::{
 };
 use crate::pid::Pid;
 
-use defmt;
-
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub enum MotorCommand {
     Coast,
@@ -74,8 +72,8 @@ impl Controller {
                 for map in POSITION_MAPS {
                     
                     active[map.motor_idx] = true;
-                    let setpoint_mm = raw_position_to_mm(commands[map.cmd_idx]);
-                    let feedback_mm = raw_position_to_mm(positions[map.pos_idx]);
+                    let setpoint_mm = command_raw_to_position_mm(commands[map.cmd_idx]);
+                    let feedback_mm = command_raw_to_position_mm(positions[map.pos_idx]);
                     let u =
                         self.position_pids[map.motor_idx].update(setpoint_mm, feedback_mm, CONTROL_DT_S);
                     outputs[map.motor_idx] = motor_command_from_output(u);
@@ -146,10 +144,4 @@ pub fn pwm_command_from_motor_command(cmd: MotorCommand) -> MotorPwmCommand {
             ch2_percent: 100,
         },
     }
-}
-
-fn raw_position_to_mm(raw: u16) -> f32 {
-    const STROKE_MM: f32 = 20.0;
-    const ADC_MAX_RAW: f32 = 4095.0;
-    (raw as f32) * (STROKE_MM / ADC_MAX_RAW)
 }
