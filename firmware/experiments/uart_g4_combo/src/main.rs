@@ -91,8 +91,8 @@ async fn main(_spawner: Spawner) {
         p.PC11, // RX pin (PC -> MCU)
         p.PB10, // TX pin (MCU -> PC)
         Irqs,
-        p.DMA1_CH6,  // TX DMA channel
-        p.DMA1_CH5,  // RX DMA channel
+        p.DMA1_CH6, // TX DMA channel
+        p.DMA1_CH5, // RX DMA channel
         uart3_config,
     )
     .unwrap();
@@ -115,7 +115,7 @@ async fn main(_spawner: Spawner) {
 
     // RX on PA15 from C0 USART1_TX (PB6).
     let _uart1_rx = UartRx::new(p.USART2, Irqs, p.PA15, p.DMA1_CH1, uart1_config).unwrap();
-    
+
     _spawner
         .spawn(c0_reader::c0_reader_task(_uart1_rx, &SHARED_FORCE))
         .unwrap();
@@ -135,7 +135,12 @@ async fn main(_spawner: Spawner) {
         p.PA1.degrade_adc(),  // POS_THUMB_3 (USELESS)
     ];
     _spawner
-        .spawn(position_reader::position_reader_task(adc, dma, pos_ch, &SHARED_POSITIONS))
+        .spawn(position_reader::position_reader_task(
+            adc,
+            dma,
+            pos_ch,
+            &SHARED_POSITIONS,
+        ))
         .unwrap();
 
     // OTHER PWM TIMERS
@@ -222,7 +227,6 @@ async fn main(_spawner: Spawner) {
         //     ]
         // };
 
-        
         let latest_force = SHARED_FORCE.read_snapshot();
         let latest_positions = SHARED_POSITIONS.read_snapshot();
 
