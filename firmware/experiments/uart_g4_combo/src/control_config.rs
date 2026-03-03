@@ -61,7 +61,7 @@ pub enum ControlMode {
 }
 
 // Flip this to switch the controller behavior.
-pub const CONTROL_MODE: ControlMode = ControlMode::Position;
+pub const CONTROL_MODE: ControlMode = ControlMode::Force;
 
 #[derive(Clone, Copy)]
 pub struct PositionMap {
@@ -144,22 +144,18 @@ pub const FORCE_MAPS: [ForceMap; MAX_MOTORS] = [
 ];
 
 pub const POSITION_PID_GAINS: (f32, f32, f32) = (40.0, 0.0, 0.0);
-pub const FORCE_PID_GAINS: (f32, f32, f32) = (0.08, 0.0, 0.0);
+pub const FORCE_PID_GAINS: (f32, f32, f32) = (10.0, 0.0, 0.0);
 
-pub fn command_raw_to_position_mm(raw: u16) -> f32 {
+pub fn position_bits_to_mm(raw: u16) -> f32 {
     const STROKE_MM: f32 = 20.0;
     const ADC_MAX_RAW: f32 = 4095.0;
     (raw as f32) * (STROKE_MM / ADC_MAX_RAW)
 }
 
-pub fn command_raw_to_force_units(raw: u16) -> f32 {
-    // Placeholder until force command units are finalized.
-    raw as f32
-}
-
-pub fn force_raw_to_units(raw: u16) -> f32 {
-    // Placeholder calibration for force mode; replace with sensor calibration.
-    raw as f32
+pub fn force_bits_to_newtons(raw: u16) -> f32 {
+    const MAX_FORCE: f32 = 4.9;
+    const ADC_MAX_RAW: f32 = 4095.0;
+    (raw as f32) * (MAX_FORCE / ADC_MAX_RAW)
 }
 
 pub const fn is_valid_config() -> bool {

@@ -2,7 +2,7 @@
 #![no_main]
 
 mod fmt;
-mod force_sensor;
+// mod force_sensor;
 mod protocol;
 
 #[cfg(not(feature = "defmt"))]
@@ -19,12 +19,12 @@ use protocol::{build_frame, MessageType};
 #[embassy_executor::main]
 async fn main(_spawner: Spawner) {
     let p = embassy_stm32::init(Default::default());
-    let mut adc = Adc::new(p.ADC1, SampleTime::CYCLES247_5, Resolution::BITS12);
+    let mut adc = Adc::new(p.ADC1, SampleTime::CYCLES2_5, Resolution::BITS12);
 
     // C0 -> G4 force stream.
     let mut g4_uart_config = UartConfig::default();
     g4_uart_config.baudrate = 115_200;
-    let mut g4_uart = UartTx::new_blocking(p.USART1, p.PB6, g4_uart_config).unwrap();
+    let mut g4_uart = UartTx::new_blocking(p.USART1, p.PC14, g4_uart_config).unwrap();
 
     // Enable/disable sensors here. Disabled sensors transmit 0.
     const SENSOR_ENABLED: [bool; 10] = [true, true, true, true, true, true, true, true, true, true];
@@ -40,8 +40,8 @@ async fn main(_spawner: Spawner) {
         p.PA8.degrade_adc(),
         p.PB0.degrade_adc(),
         p.PB1.degrade_adc(),
-        p.PB10.degrade_adc(),
-        p.PB11.degrade_adc(),
+        p.PA3.degrade_adc(),
+        p.PA2.degrade_adc(),
     ];
 
     let mut readings: [u16; 10] = [0; 10];
@@ -53,6 +53,21 @@ async fn main(_spawner: Spawner) {
                 0
             };
         }
+
+        // Simulated force readings
+        // readings = [
+        //     4000,
+        //     4000,
+        //     4000,
+        //     4000,
+        //     4000,
+        //     4000,
+        //     4000,
+        //     4000,
+        //     4000,
+        //     4000
+        // ];
+
 
         let frame = build_frame(MessageType::ForceReadings as u8, readings);
         let _ = g4_uart.blocking_write(&frame.buf[..frame.len]);
