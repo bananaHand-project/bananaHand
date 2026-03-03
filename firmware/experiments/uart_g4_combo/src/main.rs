@@ -165,45 +165,45 @@ async fn main(_spawner: Spawner) {
     let mut status_tick: u32 = 0;
 
     // MAIN PID LOOP //
-    // let mut command_toggle = false;
+    let mut command_toggle = true;
 
     loop {
         let mut latest_cmd = SHARED_COMMANDS.read_snapshot();
 
-        // status_tick = status_tick.wrapping_add(1);
-        // if status_tick % 200 == 0 {
+        status_tick = status_tick.wrapping_add(1);
+        if status_tick % 200 == 0 {
 
-        //     command_toggle = !command_toggle;
-        // }
-        // latest_cmd = if command_toggle {
-        //     [
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0
-        //     ]
-        // } else {
-        //     [
-        //         4000,
-        //         4000,
-        //         4000,
-        //         4000,
-        //         4000,
-        //         4000,
-        //         4000,
-        //         4000
-        //     ]
-        // };
+            command_toggle = !command_toggle;
+        }
+        latest_cmd = if command_toggle {
+            [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+            ]
+        } else {
+            [
+                4000,
+                4000,
+                4000,
+                4000,
+                4000,
+                4000,
+                4000,
+                4000
+            ]
+        };
 
         
         let latest_force = SHARED_FORCE.read_snapshot();
         let latest_positions = SHARED_POSITIONS.read_snapshot();
 
-        defmt::info!("command: {}, position: {}", latest_cmd[0], latest_positions);
+        defmt::info!("command: {}, forces: {}", latest_cmd[0], latest_force);
 
         controller.set_mode(control_config::CONTROL_MODE);
         let outputs = controller.step(&latest_cmd, &latest_positions, &latest_force);

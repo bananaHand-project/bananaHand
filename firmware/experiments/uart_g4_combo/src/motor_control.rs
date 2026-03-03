@@ -1,8 +1,8 @@
 use crate::config::{COMMAND_COUNT, FORCE_COUNT, POSITION_COUNT};
 use crate::control_config::{
     CONTROL_DT_S, CONTROL_MODE, FORCE_MAPS, FORCE_PID_GAINS, MAX_MOTORS, OUTPUT_DEADBAND_PERCENT,
-    POSITION_MAPS, POSITION_PID_GAINS, ControlMode, command_raw_to_force_units,
-    command_raw_to_position_mm, force_raw_to_units,
+    POSITION_MAPS, POSITION_PID_GAINS, ControlMode, force_bits_to_newtons,
+    position_bits_to_mm
 };
 use crate::pid::Pid;
 
@@ -72,8 +72,8 @@ impl Controller {
                 for map in POSITION_MAPS {
                     
                     active[map.motor_idx] = true;
-                    let setpoint_mm = command_raw_to_position_mm(commands[map.cmd_idx]);
-                    let feedback_mm = command_raw_to_position_mm(positions[map.pos_idx]);
+                    let setpoint_mm = position_bits_to_mm(commands[map.cmd_idx]);
+                    let feedback_mm = position_bits_to_mm(positions[map.pos_idx]);
                     let u =
                         self.position_pids[map.motor_idx].update(setpoint_mm, feedback_mm, CONTROL_DT_S);
                     outputs[map.motor_idx] = motor_command_from_output(u);
@@ -83,8 +83,8 @@ impl Controller {
             ControlMode::Force => {
                 for map in FORCE_MAPS {
                     active[map.motor_idx] = true;
-                    let setpoint = command_raw_to_force_units(commands[map.cmd_idx]);
-                    let feedback = force_raw_to_units(forces[map.force_idx]);
+                    let setpoint = force_bits_to_newtons(commands[map.cmd_idx]);
+                    let feedback = force_bits_to_newtons(forces[map.force_idx]);
                     let u = self.force_pids[map.motor_idx].update(setpoint, feedback, CONTROL_DT_S);
                     outputs[map.motor_idx] = motor_command_from_output(u);
                 }
