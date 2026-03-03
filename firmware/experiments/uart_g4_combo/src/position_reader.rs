@@ -13,7 +13,7 @@ pub const POT_ENABLED: [bool; POSITION_COUNT] = [true; POSITION_COUNT];
 pub async fn position_reader_task(
     mut adc: Adc<'static, ADC1>,
     mut dma: Peri<'static, DMA1_CH2>,
-    mut pos_ch: [AnyAdcChannel<ADC1>; POSITION_COUNT],
+    mut pos_ch: [AnyAdcChannel<'static, ADC1>; POSITION_COUNT],
     shared: &'static SharedData<POSITION_COUNT>,
 ) -> ! {
     let mut buf = [0u16; POSITION_COUNT];

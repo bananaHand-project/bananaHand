@@ -10,10 +10,7 @@ use {defmt_rtt as _, panic_probe as _};
 
 use embassy_executor::Spawner;
 use embassy_stm32::{
-    Config,
-    gpio::{Level, Output, Speed},
-    rcc::{APBPrescaler, clocks},
-    time::Hertz,
+    Config, gpio::{Level, Output, Speed}, peripherals::PB14, rcc::{APBPrescaler, clocks}, time::Hertz
 };
 use embassy_time::{Duration, Timer};
 use fmt::info;
@@ -41,21 +38,27 @@ async fn main(_spawner: Spawner) {
     let p = embassy_stm32::init(config);
 
     let mut led1 = Output::new(p.PC13, Level::High, Speed::Low);
-
+    let prescaler = HrtimPrescaler::DIV32;
     let period = period_reg_val(
         clocks(&p.RCC),
         APBPrescaler::DIV1,
-        HrtimPrescaler::DIV32,
+        prescaler,
         PWM_FREQ,
     )
     .unwrap();
     info!("{}", period);
-    let prescaler = HrtimPrescaler::DIV32;
 
-    let (_, _, _, _, _, tim_f) = HrtimCore::new()
+    let (tim_a, tim_b, tim_c, tim_d, tim_e, tim_f) = HrtimCore::new()
+        .add_tim_a_ch1_ch2(p.PA8, p.PA9, period, prescaler)
+        .add_tim_b_ch1_ch2(p.PA10, p.PA11, period, prescaler)
+        .add_tim_c_ch1_ch2(p.PB12, p.PB13, period, prescaler)
+        .add_tim_d_ch1_ch2(p.PB14, p.PB15, period, prescaler)
+        .add_tim_e_ch1_ch2(p.PC8, p.PC9, period, prescaler)
         .add_tim_f_ch1_ch2(p.PC6, p.PC7, period, prescaler)
         .split_active()
         .unwrap();
+
+    // 
 
     tim_f.ch1_set_dc_percent(50);
     tim_f.ch2_set_dc_percent(100);
