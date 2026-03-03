@@ -12,7 +12,7 @@ embassy-executor = { version = "0.9.1", features = ["arch-cortex-m", "executor-t
 embassy-futures = "0.1.2"
 embassy-sync = "0.7.2"
 embassy-time = { version = "0.5.0", features = ["tick-hz-32_768"] }
-embassy-stm32 = { version = "0.4.0", features = [
+embassy-stm32 = { version = "0.5.0", features = [
     "memory-x",
     "stm32g474re",
     "time-driver-any",
@@ -23,6 +23,12 @@ embassy-stm32 = { version = "0.4.0", features = [
 panic-halt = "1.0.0"
 panic-probe = { version = "1.0.0", features = ["print-defmt"], optional = true }
 cobs = { version = "0.5.0", default-features = false }
+hrtim_pwm_hal = { path = "../../primary-g474/hrtim_pwm_hal" }
+
+[patch.crates-io]
+stm32-metapac = { git = "https://github.com/embassy-rs/stm32-data-generated", rev = "c92fe5b8e441876b4bcaf29e6fd2ebb04c5b058e", features = [
+    "stm32g474re",
+] }
 
 [[bin]]
 name = "uart_g4_combo"
