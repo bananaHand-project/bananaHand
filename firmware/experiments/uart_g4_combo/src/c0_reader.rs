@@ -33,7 +33,6 @@ pub async fn c0_reader_task(
                     readings[idx] = u16::from_le_bytes([lo, hi]);
                 }
                 shared.write_frame(&readings);
-                _frame_count = _frame_count.wrapping_add(1);
                 // if frame_count % 1 == 0 {
                 //     info!(
                 //         "COBS frame {}: ch0={} ch1={} ch2={} ch3={}",
