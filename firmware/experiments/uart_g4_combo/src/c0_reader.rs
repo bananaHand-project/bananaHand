@@ -12,7 +12,6 @@ pub async fn c0_reader_task(
 ) {
     let mut parser = FrameParser::<FORCE_COUNT>::new();
     let mut readings = [0u16; FORCE_COUNT];
-    let mut _frame_count: u32 = 0;
     let mut rx_buf = [0u8; 64];
 
     loop {
