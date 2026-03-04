@@ -144,7 +144,7 @@ pub const FORCE_MAPS: [ForceMap; MAX_MOTORS] = [
 ];
 
 pub const POSITION_PID_GAINS: (f32, f32, f32) = (40.0, 0.0, 0.0);
-pub const FORCE_PID_GAINS: (f32, f32, f32) = (10.0, 0.0, 0.0);
+pub const FORCE_PID_GAINS: (f32, f32, f32) = (100.0, 0.0, 0.0);
 
 pub fn position_bits_to_mm(raw: u16) -> f32 {
     const STROKE_MM: f32 = 20.0;

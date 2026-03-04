@@ -86,6 +86,7 @@ impl Controller {
                     let setpoint = force_bits_to_newtons(commands[map.cmd_idx]);
                     let feedback = force_bits_to_newtons(forces[map.force_idx]);
                     let u = self.force_pids[map.motor_idx].update(setpoint, feedback, CONTROL_DT_S);
+                    // defmt::info!("setpoint: {}, force: {}, u: {}, idx: {}", setpoint, feedback, u, map.motor_idx);
                     outputs[map.motor_idx] = motor_command_from_output(u);
                 }
                 apply_inactive_policy(&mut outputs, &active, ControlMode::Force);
