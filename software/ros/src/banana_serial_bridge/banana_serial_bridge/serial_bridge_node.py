@@ -129,7 +129,7 @@ class SerialBridgeNode(Node):
 
         try:
             self.ser.write(frame)
-            self.get_logger().info(f"Sent tx_positions: {positions}")
+            # self.get_logger().info(f"Sent tx_positions: {positions}")
             try:
                 self.ser.flush()
             except Exception:

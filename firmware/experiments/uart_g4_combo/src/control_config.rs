@@ -13,12 +13,13 @@ pub const MOTOR_INDEX_1: usize = 3; // HRTIM D
 pub const MOTOR_MIDDLE: usize = 4; // HRTIM E
 pub const MOTOR_INDEX_2: usize = 5; // HRTIM F
 
-// Position channel indices.
-pub const POS_RING: usize = 0; // PB0
-pub const POS_PINKY: usize = 1; // PF0
-pub const POS_THUMB_1: usize = 2; // PA2
-pub const POS_INDEX_1: usize = 3; // PA3
-pub const POS_MIDDLE: usize = 4; // PB1
+// Position/command index order:
+// 0 index-1, 1 middle, 2 ring, 3 pinky, 4 thumb, 5 index-2, 6 thumb-2, 7 thumb-3.
+pub const POS_INDEX_1: usize = 0; // PA3
+pub const POS_MIDDLE: usize = 1; // PB1
+pub const POS_RING: usize = 2; // PB0
+pub const POS_PINKY: usize = 3; // PF0
+pub const POS_THUMB_1: usize = 4; // PA2
 pub const POS_INDEX_2: usize = 5; // PB11
 pub const POS_THUMB_2: usize = 6; // PC2
 pub const POS_THUMB_3: usize = 7; // PC3
@@ -33,15 +34,22 @@ pub const MOTOR_NAMES: [&str; MAX_MOTORS] = [
 ];
 
 pub const POSITION_NAMES: [&str; POSITION_COUNT] = [
+    "index-1-pot",
+    "middle-pot",
     "ring-pot",
     "pinky-pot",
     "thumb-pot-1",
-    "index-1-pot",
-    "middle-pot",
     "index-2-pot",
     "thumb-pot-2",
     "thumb-pot-3",
 ];
+
+pub const CMD_INDEX_1: usize = 0;
+pub const CMD_MIDDLE: usize = 1;
+pub const CMD_RING: usize = 2;
+pub const CMD_PINKY: usize = 3;
+pub const CMD_THUMB: usize = 4;
+pub const CMD_INDEX_2: usize = 5;
 
 // Per-motor output polarity compensation.
 // If true, ch1/ch2 duty values are swapped before writing to hardware.
@@ -61,7 +69,7 @@ pub enum ControlMode {
 }
 
 // Flip this to switch the controller behavior.
-pub const CONTROL_MODE: ControlMode = ControlMode::Force;
+pub const CONTROL_MODE: ControlMode = ControlMode::Position;
 
 #[derive(Clone, Copy)]
 pub struct PositionMap {
@@ -80,32 +88,32 @@ pub struct ForceMap {
 pub const POSITION_MAPS: [PositionMap; MAX_MOTORS] = [
     PositionMap {
         motor_idx: MOTOR_RING,
-        cmd_idx: MOTOR_RING,
+        cmd_idx: CMD_RING,
         pos_idx: POS_RING,
     },
     PositionMap {
         motor_idx: MOTOR_PINKY,
-        cmd_idx: MOTOR_PINKY,
+        cmd_idx: CMD_PINKY,
         pos_idx: POS_PINKY,
     },
     PositionMap {
         motor_idx: MOTOR_THUMB,
-        cmd_idx: MOTOR_THUMB,
+        cmd_idx: CMD_THUMB,
         pos_idx: POS_THUMB_1,
     },
     PositionMap {
         motor_idx: MOTOR_INDEX_1,
-        cmd_idx: MOTOR_INDEX_1,
+        cmd_idx: CMD_INDEX_1,
         pos_idx: POS_INDEX_1,
     },
     PositionMap {
         motor_idx: MOTOR_MIDDLE,
-        cmd_idx: MOTOR_MIDDLE,
+        cmd_idx: CMD_MIDDLE,
         pos_idx: POS_MIDDLE,
     },
     PositionMap {
         motor_idx: MOTOR_INDEX_2,
-        cmd_idx: MOTOR_INDEX_2,
+        cmd_idx: CMD_INDEX_2,
         pos_idx: POS_INDEX_2,
     },
 ];
@@ -113,32 +121,32 @@ pub const POSITION_MAPS: [PositionMap; MAX_MOTORS] = [
 pub const FORCE_MAPS: [ForceMap; MAX_MOTORS] = [
     ForceMap {
         motor_idx: MOTOR_RING,
-        cmd_idx: MOTOR_RING,
+        cmd_idx: CMD_RING,
         force_idx: MOTOR_RING,
     },
     ForceMap {
         motor_idx: MOTOR_PINKY,
-        cmd_idx: MOTOR_PINKY,
+        cmd_idx: CMD_PINKY,
         force_idx: MOTOR_PINKY,
     },
     ForceMap {
         motor_idx: MOTOR_THUMB,
-        cmd_idx: MOTOR_THUMB,
+        cmd_idx: CMD_THUMB,
         force_idx: MOTOR_THUMB,
     },
     ForceMap {
         motor_idx: MOTOR_INDEX_1,
-        cmd_idx: MOTOR_INDEX_1,
+        cmd_idx: CMD_INDEX_1,
         force_idx: MOTOR_INDEX_1,
     },
     ForceMap {
         motor_idx: MOTOR_MIDDLE,
-        cmd_idx: MOTOR_MIDDLE,
+        cmd_idx: CMD_MIDDLE,
         force_idx: MOTOR_MIDDLE,
     },
     ForceMap {
         motor_idx: MOTOR_INDEX_2,
-        cmd_idx: MOTOR_INDEX_2,
+        cmd_idx: CMD_INDEX_2,
         force_idx: MOTOR_INDEX_2,
     },
 ];
