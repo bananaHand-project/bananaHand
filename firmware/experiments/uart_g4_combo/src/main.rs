@@ -114,6 +114,7 @@ async fn main(_spawner: Spawner) {
     // RX on PA15 from C0 USART1_TX (PB6).
     let _uart1_rx = UartRx::new(p.USART2, Irqs, p.PA15, p.DMA1_CH1, uart1_config).unwrap();
     
+    // COMMENT IF NEEDED
     _spawner
         .spawn(c0_reader::c0_reader_task(_uart1_rx, &SHARED_FORCE))
         .unwrap();
@@ -123,14 +124,14 @@ async fn main(_spawner: Spawner) {
     let adc = Adc::new(p.ADC1, AdcConfig::default());
     // Keep ADC channel order aligned with control_config::POS_* constants.
     let pos_ch = [
-        p.PB0.degrade_adc(),  // POS_RING
-        p.PF0.degrade_adc(),  // POS_PINKY
-        p.PA2.degrade_adc(),  // POS_THUMB_1?
         p.PA3.degrade_adc(),  // POS_INDEX_1
         p.PB1.degrade_adc(),  // POS_MIDDLE
+        p.PB0.degrade_adc(),  // POS_RING
+        p.PF0.degrade_adc(),  // POS_PINKY
+        p.PA2.degrade_adc(),  // POS_THUMB_1
         p.PB11.degrade_adc(), // POS_INDEX_2
-        p.PC2.degrade_adc(),  // POS_THUMB_2?
-        p.PC3.degrade_adc(),  // POS_THUMB_3?
+        p.PC2.degrade_adc(),  // POS_THUMB_2
+        p.PC3.degrade_adc(),  // POS_THUMB_3
     ];
     _spawner
         .spawn(position_reader::position_reader_task(adc, dma, pos_ch, &SHARED_POSITIONS))
@@ -165,7 +166,7 @@ async fn main(_spawner: Spawner) {
     let mut status_tick: u32 = 0;
 
     // MAIN PID LOOP //
-    let mut command_toggle = true;
+    // let mut command_toggle = true;
 
     loop {
         let mut latest_cmd = SHARED_COMMANDS.read_snapshot();
@@ -203,7 +204,7 @@ async fn main(_spawner: Spawner) {
         let latest_force = SHARED_FORCE.read_snapshot();
         let latest_positions = SHARED_POSITIONS.read_snapshot();
 
-        // defmt::info!("command: {}, forces: {}", latest_cmd[0], latest_force);
+        defmt::info!("command: {}", latest_cmd);
 
         controller.set_mode(control_config::CONTROL_MODE);
         let outputs = controller.step(&latest_cmd, &latest_positions, &latest_force);
