@@ -115,9 +115,9 @@ async fn main(_spawner: Spawner) {
     let _uart1_rx = UartRx::new(p.USART2, Irqs, p.PA15, p.DMA1_CH1, uart1_config).unwrap();
     
     // COMMENT IF NEEDED
-    _spawner
-        .spawn(c0_reader::c0_reader_task(_uart1_rx, &SHARED_FORCE))
-        .unwrap();
+    // _spawner
+    //     .spawn(c0_reader::c0_reader_task(_uart1_rx, &SHARED_FORCE))
+    //     .unwrap();
 
     // ADC + position reader (G4 pots).
     let dma = p.DMA1_CH2;
