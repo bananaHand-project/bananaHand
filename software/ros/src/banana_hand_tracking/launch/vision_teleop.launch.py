@@ -1,10 +1,15 @@
 from launch import LaunchDescription
+from launch.actions import DeclareLaunchArgument
+from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 
 
 def generate_launch_description() -> LaunchDescription:
+    show_preview = LaunchConfiguration("show_preview")
+
     return LaunchDescription(
         [
+            DeclareLaunchArgument("show_preview", default_value="true"),
             Node(
                 package="banana_hand_tracking",
                 executable="webcam_node",
@@ -26,7 +31,7 @@ def generate_launch_description() -> LaunchDescription:
                 parameters=[
                     {"input_topic": "/camera/image_raw"},
                     {"frame_id": "camera"},
-                    {"show_preview": True},
+                    {"show_preview": show_preview},
                 ],
             ),
         ]
