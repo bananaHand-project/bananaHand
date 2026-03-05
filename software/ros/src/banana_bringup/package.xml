@@ -9,6 +9,9 @@
 
   <depend>launch</depend>
   <depend>launch_ros</depend>
+  <depend>banana_serial_bridge</depend>
+  <depend>banana_hand_tracking</depend>
+  <depend>banana_hand_mapping</depend>
 
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>

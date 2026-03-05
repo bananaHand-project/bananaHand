@@ -2,13 +2,22 @@
 <package format="3">
   <name>banana_hand_mapping</name>
   <version>0.0.0</version>
-  <description>Hand landmark to joint mapping package (skeleton).</description>
-  <maintainer email="dew.bhaumik8@gmail.com">TODO</maintainer>
-  <license>TODO</license>
+  <description>Hand teleop to motor command mapping.</description>
+  <maintainer email="lokeshpatel257@gmail.com">lokesh</maintainer>
+  <license>TODO: License declaration</license>
 
-  <buildtool_depend>ament_cmake</buildtool_depend>
+  <depend>launch</depend>
+  <depend>launch_ros</depend>
+  <depend>rclpy</depend>
+  <depend>std_msgs</depend>
+  <depend>trajectory_msgs</depend>
+
+  <test_depend>ament_copyright</test_depend>
+  <test_depend>ament_flake8</test_depend>
+  <test_depend>ament_pep257</test_depend>
+  <test_depend>python3-pytest</test_depend>
 
   <export>
-    <build_type>ament_cmake</build_type>
+    <build_type>ament_python</build_type>
   </export>
 </package>
