@@ -40,6 +40,10 @@ Args:
 - `include_vision` (default `true`)
 - `include_mapping` (default `true`)
 
+Vision defaults (`banana_hand_tracking/vision_teleop.launch.py`):
+- `process_fps` defaults to `0.0` (uncapped)
+- `preview_fps` defaults to `0.0` (uncapped)
+
 ## Calibration + Quick Checks
 ```bash
 ros2 service call /hand/calibrate std_srvs/srv/Trigger {}
