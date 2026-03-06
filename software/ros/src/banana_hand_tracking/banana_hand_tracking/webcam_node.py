@@ -100,7 +100,7 @@ class WebcamNode(Node):
         if frame is None:
             return
 
-        # Optional: skip republising the same frame if no new frame has arrived.
+        # Skip republishing the same frame if no new frame has arrived.
         if seq == self._last_published_seq:
             return
         self._last_published_seq = seq
