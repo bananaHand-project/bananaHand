@@ -12,7 +12,6 @@ import rclpy
 from rclpy.callback_groups import ReentrantCallbackGroup
 from rclpy.executors import MultiThreadedExecutor
 from rclpy.node import Node
-from rclpy.qos import qos_profile_sensor_data
 from sensor_msgs.msg import Image
 from geometry_msgs.msg import Point
 from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
@@ -30,21 +29,6 @@ except ImportError as exc:
     ) from exc
 
 
-def _as_bool(value: object) -> bool:
-    if isinstance(value, bool):
-        return value
-    if isinstance(value, str):
-        return value.strip().lower() in {
-            "1",
-            "true",
-            "t",
-            "yes",
-            "y",
-            "on",
-        }
-    return bool(value)
-
-
 class HandTrackingNode(Node):
     """Subscribe to /camera/image_raw and run MediaPipe Hands."""
 
@@ -57,13 +41,13 @@ class HandTrackingNode(Node):
         self.declare_parameter("alpha", 0.2)
         self.declare_parameter("process_width", 640)
         self.declare_parameter("process_height", 480)
-        self.declare_parameter("preview_fps", 0.0)
+        self.declare_parameter("preview_fps", 15.0)
         self.declare_parameter("process_fps", 0.0)
 
         input_topic = str(self.get_parameter("input_topic").value)
         self._frame_id = str(self.get_parameter("frame_id").value)
-        self._show_preview = _as_bool(self.get_parameter("show_preview").value)
-        self._mirror_handedness = _as_bool(
+        self._show_preview = bool(self.get_parameter("show_preview").value)
+        self._mirror_handedness = bool(
             self.get_parameter("mirror_handedness").value
         )
         self._alpha = float(self.get_parameter("alpha").value)
@@ -76,11 +60,7 @@ class HandTrackingNode(Node):
 
         self._bridge = CvBridge()
         self._subscription = self.create_subscription(
-            Image,
-            input_topic,
-            self._on_image,
-            qos_profile_sensor_data,
-            callback_group=self._callback_group,
+            Image, input_topic, self._on_image, 10, callback_group=self._callback_group
         )
         self._publisher = self.create_publisher(HandLandmarks, "/hand/landmarks", 10)
         self._teleop_publisher = self.create_publisher(
@@ -118,14 +98,12 @@ class HandTrackingNode(Node):
             cv2.namedWindow("hand_tracking", cv2.WINDOW_NORMAL)
         self._preview_lock = threading.Lock()
         self._preview_frame = None
-        self._preview_frame_seq = -1
         self._last_preview_time = 0.0
         self._last_process_time = 0.0
 
         self._latest_frame_lock = threading.Lock()
-        self._latest_image_msg = None
-        self._latest_image_seq = 0
-        self._new_image_event = threading.Event()
+        self._latest_frame = None
+        self._latest_frame_seq = 0
 
         self._overlay_lock = threading.Lock()
         self._overlay_points = None
@@ -297,33 +275,30 @@ class HandTrackingNode(Node):
         self._teleop_publisher.publish(msg)
 
     def _on_image(self, msg: Image) -> None:
+        frame = self._bridge.imgmsg_to_cv2(msg, desired_encoding="bgr8")
         with self._latest_frame_lock:
-            self._latest_image_msg = msg
-            self._latest_image_seq += 1
-        self._new_image_event.set()
+            self._latest_frame = frame
+            self._latest_frame_seq += 1
+        if self._show_preview:
+            with self._preview_lock:
+                self._preview_frame = frame
 
     def _process_loop(self) -> None:
         last_seq = -1
         while not self._process_stop.is_set() and rclpy.ok():
-            if not self._new_image_event.wait(timeout=0.1):
-                continue
-            self._new_image_event.clear()
-
             with self._latest_frame_lock:
-                seq = self._latest_image_seq
-                image_msg = self._latest_image_msg
-            if image_msg is None or seq == last_seq:
+                seq = self._latest_frame_seq
+                frame = self._latest_frame
+            if frame is None or seq == last_seq:
+                time.sleep(0.001)
                 continue
             if self._process_fps > 0:
                 now = time.monotonic()
                 if now - self._last_process_time < 1.0 / self._process_fps:
+                    time.sleep(0.001)
                     continue
                 self._last_process_time = now
             last_seq = seq
-
-            frame = self._bridge.imgmsg_to_cv2(
-                image_msg, desired_encoding="bgr8"
-            )
 
             if self._process_width > 0 and self._process_height > 0:
                 frame_proc = cv2.resize(
@@ -436,6 +411,8 @@ class HandTrackingNode(Node):
                     self._teleop_prev = outputs
                     self._publish_teleop(outputs)
 
+            time.sleep(0.001)
+
     def render_preview(self) -> None:
         if not self._show_preview:
             return
@@ -444,20 +421,6 @@ class HandTrackingNode(Node):
             if now - self._last_preview_time < 1.0 / self._preview_fps:
                 return
             self._last_preview_time = now
-
-        preview_msg = None
-        preview_seq = -1
-        with self._latest_frame_lock:
-            preview_msg = self._latest_image_msg
-            preview_seq = self._latest_image_seq
-        if preview_msg is not None:
-            with self._preview_lock:
-                if preview_seq != self._preview_frame_seq:
-                    self._preview_frame = self._bridge.imgmsg_to_cv2(
-                        preview_msg, desired_encoding="bgr8"
-                    )
-                    self._preview_frame_seq = preview_seq
-
         frame = None
         with self._preview_lock:
             if self._preview_frame is not None:
@@ -492,7 +455,6 @@ class HandTrackingNode(Node):
     def destroy_node(self) -> bool:
         self._hands.close()
         self._process_stop.set()
-        self._new_image_event.set()
         if self._process_thread is not None:
             self._process_thread.join(timeout=1.0)
         if self._show_preview:
