@@ -1,45 +1,23 @@
 #!/usr/bin/env python3
-"""
-Robotic Hand FSR Visualizer (ROS2 + PySide6)
-
-Dependencies:
-- ROS2 with rclpy
-- std_msgs
-- PySide6
-
-Run:
-1) Build package:
-   colcon build --packages-select banana_hand_fsr_visualizer
-2) Source workspace:
-   source install/setup.bash
-3) Start visualizer:
-   ros2 run banana_hand_fsr_visualizer fsr_visualizer
-
-Where to change topic / scaling:
-- ROS parameters on this node:
-  - topic_name (default: rx_force)
-  - alpha (default: 0.25)
-  - global_min/global_max
-  - per_finger_min/per_finger_max (optional length=5)
-  - finger_indices (default: [0,1,2,3,4])
-
-How to adapt message type:
-- Replace the subscriber message type and callback parse logic in
-  RosForceSubscriberNode._on_force_msg().
-- The GUI consumes only {thumb,index,middle,ring,pinky} float values, so
-  adapting is isolated to that callback.
-"""
+"""ROS2 + PySide6 2D fingertip force visualizer."""
 
 from __future__ import annotations
 
 import math
+import signal
 import sys
 from dataclasses import dataclass
 from typing import Dict, List
 
 import rclpy
+from rclpy.context import Context
+from rclpy.executors import SingleThreadedExecutor
 from rclpy.node import Node
 from std_msgs.msg import UInt16MultiArray
+try:
+    from rclpy.exceptions import RCLError
+except ImportError:
+    from rclpy._rclpy_pybind11 import RCLError
 
 from PySide6.QtCore import QPointF, QRectF, QTimer, Qt
 from PySide6.QtGui import QColor, QFont, QPainter, QPen
@@ -215,8 +193,8 @@ class HandVisualizerWidget(QWidget):
 
 
 class RosForceSubscriberNode(Node):
-    def __init__(self):
-        super().__init__("banana_fsr_visualizer")
+    def __init__(self, context: Context | None = None):
+        super().__init__("banana_fsr_visualizer", context=context)
 
         self.declare_parameter("topic_name", "rx_force")
         self.declare_parameter("finger_indices", [0, 1, 2, 3, 4])
@@ -319,6 +297,8 @@ class MainWindow(QMainWindow):
 
         self.color_mapper = ForceColorMapper()
         self.hand_widget = HandVisualizerWidget(self.color_mapper, ros_node.contact_threshold)
+        self.executor = SingleThreadedExecutor(context=self.ros_node.context)
+        self.executor.add_node(self.ros_node)
 
         self.status_label = QLabel("ROS: waiting for data")
         self.status_label.setAlignment(Qt.AlignCenter)
@@ -343,7 +323,15 @@ class MainWindow(QMainWindow):
         self.gui_timer.start(max(15, int(1000.0 / max(10.0, ros_node.refresh_hz))))
 
     def _spin_ros_once(self) -> None:
-        rclpy.spin_once(self.ros_node, timeout_sec=0.0)
+        if not self.ros_node.context.ok():
+            self.spin_timer.stop()
+            self.gui_timer.stop()
+            return
+        try:
+            self.executor.spin_once(timeout_sec=0.0)
+        except RCLError:
+            self.spin_timer.stop()
+            self.gui_timer.stop()
 
     def _refresh_gui(self) -> None:
         self.hand_widget.set_samples(self.ros_node.samples, self.ros_node.has_data)
@@ -359,21 +347,41 @@ class MainWindow(QMainWindow):
     def closeEvent(self, event):
         self.spin_timer.stop()
         self.gui_timer.stop()
+        try:
+            self.executor.remove_node(self.ros_node)
+            self.executor.shutdown(timeout_sec=0.0)
+        except Exception:
+            pass
         super().closeEvent(event)
 
 
 def main():
-    rclpy.init()
-    node = RosForceSubscriberNode()
+    context = Context()
+    rclpy.init(context=context)
+    node = RosForceSubscriberNode(context=context)
 
     app = QApplication(sys.argv)
     win = MainWindow(node)
     win.show()
 
-    exit_code = app.exec()
+    # Ensure Ctrl+C closes the Qt app cleanly.
+    signal.signal(signal.SIGINT, lambda *_: app.quit())
 
-    node.destroy_node()
-    rclpy.shutdown()
+    exit_code = 0
+    try:
+        exit_code = app.exec()
+    except KeyboardInterrupt:
+        exit_code = 0
+    finally:
+        try:
+            node.destroy_node()
+        except Exception:
+            pass
+        if context.ok():
+            try:
+                rclpy.shutdown(context=context)
+            except RCLError:
+                pass
     sys.exit(exit_code)
 
 
