@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>banana_hand_fsr_visualizer</name>
+  <version>0.1.0</version>
+  <description>2D ROS2 desktop visualizer for fingertip force data.</description>
+  <maintainer email="lokeshpatel257@gmail.com">lokesh</maintainer>
+  <license>TODO: License declaration</license>
+
+  <depend>launch</depend>
+  <depend>launch_ros</depend>
+  <depend>python3-pyside6</depend>
+  <depend>rclpy</depend>
+  <depend>std_msgs</depend>
+
+  <test_depend>ament_copyright</test_depend>
+  <test_depend>ament_flake8</test_depend>
+  <test_depend>ament_pep257</test_depend>
+  <test_depend>python3-pytest</test_depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>
