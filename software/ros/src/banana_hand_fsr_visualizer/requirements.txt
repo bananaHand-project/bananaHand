@@ -1,0 +1,5 @@
+# Pip-installable dependencies for banana_hand_fsr_visualizer
+PySide6>=6.5,<7
+
+# ROS2 dependencies (rclpy, std_msgs) are provided by your ROS installation
+# and are not typically installed from pip in a ROS workspace.
