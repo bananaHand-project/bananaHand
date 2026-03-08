@@ -41,7 +41,7 @@ import rclpy
 from rclpy.node import Node
 from std_msgs.msg import UInt16MultiArray
 
-from PySide6.QtCore import QPointF, QTimer, Qt
+from PySide6.QtCore import QPointF, QRectF, QTimer, Qt
 from PySide6.QtGui import QColor, QFont, QPainter, QPen
 from PySide6.QtWidgets import QApplication, QLabel, QMainWindow, QVBoxLayout, QWidget
 
@@ -177,23 +177,25 @@ class HandVisualizerWidget(QWidget):
 
             painter.setPen(QColor(225, 230, 235))
             painter.setFont(label_font)
-            painter.drawText(c.x() - 34, c.y() + tip_r + 22, DISPLAY_NAMES[finger])
+            label_rect = QRectF(c.x() - 64, c.y() + tip_r + 10, 128, 24)
+            painter.drawText(label_rect, Qt.AlignHCenter | Qt.AlignVCenter, DISPLAY_NAMES[finger])
 
             painter.setFont(value_font)
             value_text = f"{sample.filtered:.1f}"
-            painter.drawText(c.x() - 20, c.y() + 6, value_text)
+            value_rect = QRectF(c.x() - 46, c.y() - 14, 92, 28)
+            painter.drawText(value_rect, Qt.AlignHCenter | Qt.AlignVCenter, value_text)
 
         self._draw_legend(painter, w, h)
 
         if not self.has_data:
             painter.setPen(QColor(220, 220, 220))
             painter.setFont(QFont("Sans Serif", 10))
-            painter.drawText(18, 28, "Waiting for data on topic...")
+            painter.drawText(QRectF(0, 16, w, 24), Qt.AlignHCenter | Qt.AlignVCenter, "Waiting for data on topic...")
 
     def _draw_legend(self, painter: QPainter, w: int, h: int) -> None:
-        lx = w * 0.1
+        lw = w * 0.62
+        lx = (w - lw) / 2.0
         ly = h * 0.84
-        lw = w * 0.55
         lh = 18
 
         steps = 80
@@ -206,9 +208,10 @@ class HandVisualizerWidget(QWidget):
 
         painter.setPen(QColor(220, 220, 220))
         painter.setFont(QFont("Sans Serif", 9))
-        painter.drawText(int(lx), int(ly + lh + 16), "Low")
-        painter.drawText(int(lx + lw * 0.47), int(ly + lh + 16), "Medium")
-        painter.drawText(int(lx + lw - 24), int(ly + lh + 16), "High")
+        labels_y = ly + lh + 6
+        painter.drawText(QRectF(lx - 28, labels_y, 56, 20), Qt.AlignHCenter | Qt.AlignVCenter, "Low")
+        painter.drawText(QRectF(lx + lw * 0.5 - 38, labels_y, 76, 20), Qt.AlignHCenter | Qt.AlignVCenter, "Medium")
+        painter.drawText(QRectF(lx + lw - 28, labels_y, 56, 20), Qt.AlignHCenter | Qt.AlignVCenter, "High")
 
 
 class RosForceSubscriberNode(Node):
@@ -318,6 +321,7 @@ class MainWindow(QMainWindow):
         self.hand_widget = HandVisualizerWidget(self.color_mapper, ros_node.contact_threshold)
 
         self.status_label = QLabel("ROS: waiting for data")
+        self.status_label.setAlignment(Qt.AlignCenter)
         self.status_label.setStyleSheet("color: #c8c8c8; padding: 4px;")
 
         container = QWidget(self)
