@@ -18,12 +18,16 @@ use protocol::{build_frame, MessageType};
 
 // Keep these indices aligned with uart_g4_combo control_config FORCE_MAPS:
 // 0 ring, 1 pinky, 2 thumb, 3 index_1, 4 middle, 5 index_2.
-const FORCE_RING: usize = 0;
-const FORCE_PINKY: usize = 1;
-const FORCE_THUMB: usize = 2;
-const FORCE_INDEX_1: usize = 3;
-const FORCE_MIDDLE: usize = 4;
-const FORCE_INDEX_2: usize = 5;
+const FORCE_INDEX: usize = 0;
+const FORCE_MIDDLE: usize = 1;
+const FORCE_RING: usize = 2;
+const FORCE_PINKY: usize = 3;
+const FORCE_THUMB: usize = 4;
+const FORCE_PALM_1: usize = 5;
+const FORCE_PALM_2: usize = 6;
+const FORCE_PALM_3: usize = 7;
+const FORCE_PALM_4: usize = 8;
+const FORCE_PALM_5: usize = 9;
 
 #[embassy_executor::main]
 async fn main(_spawner: Spawner) {
@@ -42,16 +46,16 @@ async fn main(_spawner: Spawner) {
     // Finger sensors are mapped to uart_g4_combo force indices 0..5.
     // Extra slots are filled with palm sensors.
     let mut channels: [AnyAdcChannel<_>; 10] = [
-        p.PA2.degrade_adc(), // [0] ring
-        p.PA3.degrade_adc(), // [1] pinky
-        p.PA8.degrade_adc(), // [2] thumb
-        p.PA0.degrade_adc(), // [3] index_1
-        p.PA1.degrade_adc(), // [4] middle
-        p.PA4.degrade_adc(), // [5] index_2 slot filled by palm
-        p.PA6.degrade_adc(), // [6] palm
-        p.PA7.degrade_adc(), // [7] palm
-        p.PB0.degrade_adc(), // [8] palm
-        p.PB1.degrade_adc(), // [9] palm
+        p.PA0.degrade_adc(), // [0] index
+        p.PA1.degrade_adc(), // [1] middle
+        p.PA2.degrade_adc(), // [2] ring
+        p.PA3.degrade_adc(), // [3] pinky
+        p.PA8.degrade_adc(), // [4] thumb
+        p.PA4.degrade_adc(), // [5] palm 1
+        p.PA5.degrade_adc(), // [6] palm 2
+        p.PA6.degrade_adc(), // [7] palm 3
+        p.PA7.degrade_adc(), // [8] palm 4
+        p.PB2.degrade_adc(), // [9] palm 5
     ];
 
     let mut readings: [u16; 10] = [0; 10];
@@ -82,13 +86,8 @@ async fn main(_spawner: Spawner) {
         let frame = build_frame(MessageType::ForceReadings as u8, readings);
         let _ = g4_uart.blocking_write(&frame.buf[..frame.len]);
         info!(
-            "[ring,pink,thumb,idx1,mid,idx2,...]: [{},{},{},{},{},{}|... ]",
-            readings[FORCE_RING],
-            readings[FORCE_PINKY],
-            readings[FORCE_THUMB],
-            readings[FORCE_INDEX_1],
-            readings[FORCE_MIDDLE],
-            readings[FORCE_INDEX_2]
+            "force: {}",
+            readings
         );
     }
 }

@@ -13,6 +13,7 @@ import rclpy
 from rclpy.context import Context
 from rclpy.executors import SingleThreadedExecutor
 from rclpy.node import Node
+from rclpy.qos import HistoryPolicy, QoSProfile, ReliabilityPolicy
 from std_msgs.msg import UInt16MultiArray
 try:
     from rclpy.exceptions import RCLError
@@ -23,13 +24,20 @@ from PySide6.QtCore import QPointF, QRectF, QTimer, Qt
 from PySide6.QtGui import QColor, QFont, QPainter, QPen
 from PySide6.QtWidgets import QApplication, QLabel, QMainWindow, QVBoxLayout, QWidget
 
-FINGER_NAMES = ["thumb", "index", "middle", "ring", "pinky"]
+FINGER_NAMES = ["index", "middle", "ring", "pinky", "thumb"]
+PALM_NAMES = ["palm_1", "palm_2", "palm_3", "palm_4", "palm_5"]
+ALL_SENSOR_NAMES = FINGER_NAMES + PALM_NAMES
 DISPLAY_NAMES = {
-    "thumb": "Thumb",
     "index": "Index",
     "middle": "Middle",
     "ring": "Ring",
     "pinky": "Pinky",
+    "thumb": "Thumb",
+    "palm_1": "Palm 1",
+    "palm_2": "Palm 2",
+    "palm_3": "Palm 3",
+    "palm_4": "Palm 4",
+    "palm_5": "Palm 5",
 }
 
 
@@ -90,7 +98,9 @@ class HandVisualizerWidget(QWidget):
         super().__init__(parent)
         self.color_mapper = color_mapper
         self.contact_threshold = max(0.0, min(1.0, contact_threshold))
-        self.samples: Dict[str, FingerSample] = {name: FingerSample() for name in FINGER_NAMES}
+        self.samples: Dict[str, FingerSample] = {
+            name: FingerSample() for name in ALL_SENSOR_NAMES
+        }
         self.has_data = False
 
         self.setMinimumSize(700, 540)
@@ -109,6 +119,16 @@ class HandVisualizerWidget(QWidget):
             "middle": QPointF(cx, top),
             "ring": QPointF(w * 0.64, top + 22),
             "pinky": QPointF(w * 0.76, top + 58),
+        }
+
+    def _palm_centers(self, w: int, h: int) -> Dict[str, QPointF]:
+        x0 = w * 0.36
+        dx = w * 0.09
+        y_mid = h * 0.56
+        y_amp = h * 0.055
+        y_offsets = [-y_amp, y_amp, -y_amp, y_amp, -y_amp]
+        return {
+            PALM_NAMES[i]: QPointF(x0 + i * dx, y_mid + y_offsets[i]) for i in range(5)
         }
 
     def paintEvent(self, event):
@@ -133,7 +153,9 @@ class HandVisualizerWidget(QWidget):
         painter.drawRoundedRect(palm_x, palm_y, palm_w, palm_h, 70, 70)
 
         centers = self._finger_centers(w, h)
+        palm_centers = self._palm_centers(w, h)
         tip_r = min(w, h) * 0.072
+        palm_r = tip_r * 0.72
 
         label_font = QFont("Sans Serif", 10)
         value_font = QFont("Sans Serif", 11)
@@ -157,6 +179,34 @@ class HandVisualizerWidget(QWidget):
             painter.setFont(label_font)
             label_rect = QRectF(c.x() - 64, c.y() + tip_r + 10, 128, 24)
             painter.drawText(label_rect, Qt.AlignHCenter | Qt.AlignVCenter, DISPLAY_NAMES[finger])
+
+            painter.setFont(value_font)
+            value_text = f"{sample.filtered:.1f}"
+            value_rect = QRectF(c.x() - 46, c.y() - 14, 92, 28)
+            painter.drawText(value_rect, Qt.AlignHCenter | Qt.AlignVCenter, value_text)
+
+        for palm in PALM_NAMES:
+            c = palm_centers[palm]
+            sample = self.samples[palm]
+            color = self.color_mapper.color_for(sample.normalized)
+
+            painter.setPen(QPen(QColor(165, 172, 180), 2))
+            painter.setBrush(color)
+            painter.drawEllipse(c, palm_r, palm_r)
+
+            if sample.normalized >= self.contact_threshold:
+                painter.setPen(QPen(QColor(255, 236, 120), 3))
+                painter.setBrush(Qt.NoBrush)
+                painter.drawEllipse(c, palm_r + 5, palm_r + 5)
+
+            painter.setPen(QColor(225, 230, 235))
+            painter.setFont(label_font)
+            label_rect = QRectF(c.x() - 58, c.y() + palm_r + 8, 116, 22)
+            painter.drawText(
+                label_rect,
+                Qt.AlignHCenter | Qt.AlignVCenter,
+                DISPLAY_NAMES[palm],
+            )
 
             painter.setFont(value_font)
             value_text = f"{sample.filtered:.1f}"
@@ -187,9 +237,9 @@ class HandVisualizerWidget(QWidget):
         painter.setPen(QColor(220, 220, 220))
         painter.setFont(QFont("Sans Serif", 9))
         labels_y = ly + lh + 6
-        painter.drawText(QRectF(lx - 28, labels_y, 56, 20), Qt.AlignHCenter | Qt.AlignVCenter, "Low")
-        painter.drawText(QRectF(lx + lw * 0.5 - 38, labels_y, 76, 20), Qt.AlignHCenter | Qt.AlignVCenter, "Medium")
-        painter.drawText(QRectF(lx + lw - 28, labels_y, 56, 20), Qt.AlignHCenter | Qt.AlignVCenter, "High")
+        painter.drawText(QRectF(lx - 28, labels_y, 56, 20), Qt.AlignHCenter | Qt.AlignVCenter, "0")
+        painter.drawText(QRectF(lx + lw * 0.5 - 38, labels_y, 76, 20), Qt.AlignHCenter | Qt.AlignVCenter, "2048")
+        painter.drawText(QRectF(lx + lw - 38, labels_y, 76, 20), Qt.AlignHCenter | Qt.AlignVCenter, "4095")
 
 
 class RosForceSubscriberNode(Node):
@@ -200,7 +250,7 @@ class RosForceSubscriberNode(Node):
         self.declare_parameter("finger_indices", [0, 1, 2, 3, 4])
         self.declare_parameter("alpha", 0.25)
         self.declare_parameter("global_min", 0.0)
-        self.declare_parameter("global_max", 1200.0)
+        self.declare_parameter("global_max", 4095.0)
         self.declare_parameter("per_finger_min", [])
         self.declare_parameter("per_finger_max", [])
         self.declare_parameter("refresh_hz", 30.0)
@@ -235,12 +285,24 @@ class RosForceSubscriberNode(Node):
         self.contact_threshold = float(self.get_parameter("contact_threshold").value)
         self.simulate_if_no_data = bool(self.get_parameter("simulate_if_no_data").value)
 
-        self.samples: Dict[str, FingerSample] = {name: FingerSample() for name in FINGER_NAMES}
+        self.samples: Dict[str, FingerSample] = {
+            name: FingerSample() for name in ALL_SENSOR_NAMES
+        }
         self.has_data = False
         self.last_rx_time = self.get_clock().now()
         self._sim_phase = 0.0
 
-        self.sub = self.create_subscription(UInt16MultiArray, self.topic_name, self._on_force_msg, 10)
+        latest_only_qos = QoSProfile(
+            history=HistoryPolicy.KEEP_LAST,
+            depth=1,
+            reliability=ReliabilityPolicy.BEST_EFFORT,
+        )
+        self.sub = self.create_subscription(
+            UInt16MultiArray,
+            self.topic_name,
+            self._on_force_msg,
+            latest_only_qos,
+        )
 
         if self.simulate_if_no_data:
             self.create_timer(0.05, self._simulate_if_stale)
@@ -248,16 +310,23 @@ class RosForceSubscriberNode(Node):
         self.get_logger().info(f"FSR visualizer listening on topic '{self.topic_name}'")
 
     def _on_force_msg(self, msg: UInt16MultiArray) -> None:
-        # Easy message-type adaptation point: map incoming message -> 5 force values.
-        vals: List[float] = []
+        finger_vals: List[float] = []
         for idx in self.finger_indices:
-            vals.append(float(msg.data[idx]) if idx < len(msg.data) else 0.0)
+            finger_vals.append(float(msg.data[idx]) if idx < len(msg.data) else 0.0)
 
-        for finger, raw in zip(FINGER_NAMES, vals):
-            prev = self.samples[finger].filtered
-            filtered = self.alpha * raw + (1.0 - self.alpha) * prev
+        tail_vals = [float(v) for v in list(msg.data)[-5:]]
+        if len(tail_vals) < 5:
+            tail_vals = ([0.0] * (5 - len(tail_vals))) + tail_vals
+
+        for finger, raw in zip(FINGER_NAMES, finger_vals):
+            filtered = raw
             norm = self.normalizer.normalize(finger, filtered)
             self.samples[finger] = FingerSample(raw=raw, filtered=filtered, normalized=norm)
+
+        for palm, raw in zip(PALM_NAMES, tail_vals):
+            filtered = raw
+            norm = self.normalizer.normalize(palm, filtered)
+            self.samples[palm] = FingerSample(raw=raw, filtered=filtered, normalized=norm)
 
         self.has_data = True
         self.last_rx_time = self.get_clock().now()
@@ -279,10 +348,22 @@ class RosForceSubscriberNode(Node):
             min_v = self.normalizer.per_finger_min.get(finger, self.normalizer.global_min)
             max_v = self.normalizer.per_finger_max.get(finger, self.normalizer.global_max)
             raw = min_v + waves[i] * (max_v - min_v)
-            prev = self.samples[finger].filtered
-            filtered = self.alpha * raw + (1.0 - self.alpha) * prev
+            filtered = raw
             norm = self.normalizer.normalize(finger, filtered)
             self.samples[finger] = FingerSample(raw=raw, filtered=filtered, normalized=norm)
+
+        palm_base = [0.35, 0.5, 0.7, 0.52, 0.4]
+        palm_amp = [0.15, 0.18, 0.2, 0.16, 0.14]
+        for i, palm in enumerate(PALM_NAMES):
+            wave = palm_base[i] + palm_amp[i] * (
+                0.5 + 0.5 * math.sin(self._sim_phase * (1.12 + i * 0.11))
+            )
+            raw = self.normalizer.global_min + wave * (
+                self.normalizer.global_max - self.normalizer.global_min
+            )
+            filtered = raw
+            norm = self.normalizer.normalize(palm, filtered)
+            self.samples[palm] = FingerSample(raw=raw, filtered=filtered, normalized=norm)
 
         self.has_data = True
 
@@ -340,7 +421,7 @@ class MainWindow(QMainWindow):
         status = "connected" if self.ros_node.has_data else "waiting"
         values = ", ".join(
             f"{DISPLAY_NAMES[k]}: {self.ros_node.samples[k].raw:.0f}/{self.ros_node.samples[k].filtered:.1f}"
-            for k in FINGER_NAMES
+            for k in ALL_SENSOR_NAMES
         )
         self.status_label.setText(f"ROS: {status}  |  topic: {topic}  |  raw/filtered -> {values}")
 

@@ -16,7 +16,7 @@ def generate_launch_description():
         DeclareLaunchArgument("topic_name", default_value="rx_force"),
         DeclareLaunchArgument("alpha", default_value="0.25"),
         DeclareLaunchArgument("global_min", default_value="0.0"),
-        DeclareLaunchArgument("global_max", default_value="1200.0"),
+        DeclareLaunchArgument("global_max", default_value="4095.0"),
         DeclareLaunchArgument("refresh_hz", default_value="30.0"),
         DeclareLaunchArgument("simulate_if_no_data", default_value="false"),
         Node(
