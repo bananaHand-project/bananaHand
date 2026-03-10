@@ -80,7 +80,7 @@ class SerialBridgeNode(Node):
         super().__init__("banana_serial_bridge")
 
         # Parameters
-        self.declare_parameter("port", "/dev/ttyACM0")
+        self.declare_parameter("port", "/dev/ttyUSB0")
         self.declare_parameter("baud", 115200)
         self.declare_parameter("timeout_s", 0.02)
         self.declare_parameter("publish_rate_hz", 200.0)
