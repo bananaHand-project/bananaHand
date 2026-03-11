@@ -3,7 +3,7 @@ use crate::config::{COMMAND_COUNT, FORCE_COUNT, POSITION_COUNT};
 pub const MAX_MOTORS: usize = 6;
 pub const CONTROL_HZ: u64 = 200;
 pub const CONTROL_DT_S: f32 = 1.0 / CONTROL_HZ as f32;
-pub const OUTPUT_DEADBAND_PERCENT: u8 = 3;
+pub const OUTPUT_DEADBAND_PERCENT: u8 = 5;
 
 // Logical motor indices (HRTIM A..F).
 pub const MOTOR_INDEX_1: usize = 0; // HRTIM D
@@ -118,7 +118,7 @@ pub const POSITION_MAPS: [PositionMap; MAX_MOTORS] = [
     },
 ];
 
-pub const FORCE_MAPS: [ForceMap; MAX_MOTORS] = [
+pub const FORCE_MAPS: [ForceMap; MAX_MOTORS-1] = [
     ForceMap {
         motor_idx: MOTOR_RING,
         cmd_idx: CMD_RING,
@@ -144,11 +144,13 @@ pub const FORCE_MAPS: [ForceMap; MAX_MOTORS] = [
         cmd_idx: CMD_MIDDLE,
         force_idx: MOTOR_MIDDLE,
     },
-    ForceMap {
-        motor_idx: MOTOR_THUMB_2,
-        cmd_idx: CMD_THUMB_2,
-        force_idx: MOTOR_THUMB_2,
-    },
+    // no force control for thumb opp right now
+    //
+    // ForceMap {
+    //     motor_idx: MOTOR_THUMB_2,
+    //     cmd_idx: CMD_THUMB_2,
+    //     force_idx: MOTOR_THUMB_2,
+    // },
 ];
 
 pub const POSITION_PID_GAINS: (f32, f32, f32) = (40.0, 0.0, 0.0);
