@@ -157,7 +157,7 @@ class HandTrackingNode(Node):
             "pinky": self._dist2d(landmarks[20], landmarks[17]) / hand_scale,
             "thumb": self._dist2d(landmarks[4], landmarks[2]) / hand_scale,
         }
-        thumb_opp = self._dist2d(landmarks[4], landmarks[17]) / hand_scale
+        thumb_opp = self._dist2d(landmarks[3], landmarks[17]) / hand_scale
         return metrics, thumb_opp
 
     def _compute_curl(self, d_norm: float, d_open: float, d_closed: float) -> float:
@@ -184,10 +184,8 @@ class HandTrackingNode(Node):
             "middle": [],
             "ring": [],
             "pinky": [],
-            "thumb": [],
-            "opp": [],
         }
-        self.get_logger().info("Calibration stage 1/2: Hold hand OPEN")
+        self.get_logger().info("Finger flex calibration stage 1/2: Hold hand OPEN")
 
     def _finish_calibration(self, success: bool, message: str) -> None:
         self._calibration_active = False
@@ -198,17 +196,14 @@ class HandTrackingNode(Node):
     def _advance_calibration_stage(self, now_ns: int) -> None:
         if self._calibration_stage == 1:
             if not all(
-                self._calib_samples[f]
-                for f in ["index", "middle", "ring", "pinky", "thumb"]
-            ) or not self._calib_samples["opp"]:
+                self._calib_samples[f] for f in ["index", "middle", "ring", "pinky"]
+            ):
                 self._finish_calibration(False, "Calibration failed: no hand detected")
                 return
             self._open_ref["index"] = statistics.median(self._calib_samples["index"])
             self._open_ref["middle"] = statistics.median(self._calib_samples["middle"])
             self._open_ref["ring"] = statistics.median(self._calib_samples["ring"])
             self._open_ref["pinky"] = statistics.median(self._calib_samples["pinky"])
-            self._open_ref["thumb"] = statistics.median(self._calib_samples["thumb"])
-            self._thumb_unopp = statistics.median(self._calib_samples["opp"])
 
             self._calibration_stage = 2
             self._calibration_start_ns = now_ns
@@ -217,17 +212,12 @@ class HandTrackingNode(Node):
                 "middle": [],
                 "ring": [],
                 "pinky": [],
-                "thumb": [],
-                "opp": [],
             }
-            self.get_logger().info(
-                "Calibration stage 2/2: Make a FIST and oppose thumb"
-            )
+            self.get_logger().info("Finger flex calibration stage 2/2: Make a FIST")
         elif self._calibration_stage == 2:
             if not all(
-                self._calib_samples[f]
-                for f in ["index", "middle", "ring", "pinky", "thumb"]
-            ) or not self._calib_samples["opp"]:
+                self._calib_samples[f] for f in ["index", "middle", "ring", "pinky"]
+            ):
                 self._finish_calibration(False, "Calibration failed: no hand detected")
                 return
             self._closed_ref["index"] = statistics.median(
@@ -240,9 +230,53 @@ class HandTrackingNode(Node):
             self._closed_ref["pinky"] = statistics.median(
                 self._calib_samples["pinky"]
             )
-            self._closed_ref["thumb"] = statistics.median(
-                self._calib_samples["thumb"]
+
+            self._calibration_stage = 3
+            self._calibration_start_ns = now_ns
+            self._calib_samples = {"thumb": []}
+            self.get_logger().info(
+                "Thumb flex calibration stage 1/2: Hold hand OPEN"
             )
+        elif self._calibration_stage == 3:
+            if not self._calib_samples["thumb"]:
+                self._finish_calibration(False, "Calibration failed: no hand detected")
+                return
+            self._open_ref["thumb"] = statistics.median(self._calib_samples["thumb"])
+
+            self._calibration_stage = 4
+            self._calibration_start_ns = now_ns
+            self._calib_samples = {"thumb": []}
+            self.get_logger().info(
+                "Thumb flex calibration stage 2/2: Flex THUMB"
+            )
+        elif self._calibration_stage == 4:
+            if not self._calib_samples["thumb"]:
+                self._finish_calibration(False, "Calibration failed: no hand detected")
+                return
+            self._closed_ref["thumb"] = statistics.median(self._calib_samples["thumb"])
+
+            self._calibration_stage = 5
+            self._calibration_start_ns = now_ns
+            self._calib_samples = {"opp": []}
+            self.get_logger().info(
+                "Thumb opposition calibration stage 1/2: Hold hand OPEN"
+            )
+        elif self._calibration_stage == 5:
+            if not self._calib_samples["opp"]:
+                self._finish_calibration(False, "Calibration failed: no hand detected")
+                return
+            self._thumb_unopp = statistics.median(self._calib_samples["opp"])
+
+            self._calibration_stage = 6
+            self._calibration_start_ns = now_ns
+            self._calib_samples = {"opp": []}
+            self.get_logger().info(
+                "Thumb opposition calibration stage 2/2: Clench palm"
+            )
+        elif self._calibration_stage == 6:
+            if not self._calib_samples["opp"]:
+                self._finish_calibration(False, "Calibration failed: no hand detected")
+                return
             self._thumb_opp_min = statistics.median(self._calib_samples["opp"])
 
             self._calibrated = True
@@ -348,17 +382,21 @@ class HandTrackingNode(Node):
             if self._calibration_active:
                 if has_hand and len(landmarks_points) == 21:
                     metrics, thumb_opp = self._compute_hand_metrics(landmarks_points)
-                    for key in ["index", "middle", "ring", "pinky", "thumb"]:
-                        self._calib_samples[key].append(metrics[key])
-                    self._calib_samples["opp"].append(thumb_opp)
+                    if self._calibration_stage in (1, 2):
+                        for key in ["index", "middle", "ring", "pinky"]:
+                            self._calib_samples[key].append(metrics[key])
+                    elif self._calibration_stage in (3, 4):
+                        self._calib_samples["thumb"].append(metrics["thumb"])
+                    elif self._calibration_stage in (5, 6):
+                        self._calib_samples["opp"].append(thumb_opp)
 
-                if now_ns - self._calibration_start_ns >= 2_000_000_000:
+                if now_ns - self._calibration_start_ns >= 5_000_000_000:
                     self._advance_calibration_stage(now_ns)
 
             if not self._calibrated:
                 outputs = [0.0] * 6
                 if now_ns - self._last_warn_ns > 2_000_000_000:
-                    self.get_logger().warn("Not calibrated; teleop outputs are zero")
+                    # self.get_logger().warn("Not calibrated; teleop outputs are zero")
                     self._last_warn_ns = now_ns
                 self._teleop_prev = outputs
                 self._publish_teleop(outputs)

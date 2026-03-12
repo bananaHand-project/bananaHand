@@ -2,7 +2,7 @@
 #![no_main]
 
 mod fmt;
-mod force_sensor;
+// mod force_sensor;
 mod protocol;
 
 #[cfg(not(feature = "defmt"))]
@@ -16,46 +16,78 @@ use embassy_stm32::usart::{Config as UartConfig, UartTx};
 use fmt::info;
 use protocol::{build_frame, MessageType};
 
+// Keep these indices aligned with uart_g4_combo control_config FORCE_MAPS:
+// 0 ring, 1 pinky, 2 thumb, 3 index_1, 4 middle, 5 index_2.
+const FORCE_INDEX: usize = 0;
+const FORCE_MIDDLE: usize = 1;
+const FORCE_RING: usize = 2;
+const FORCE_PINKY: usize = 3;
+const FORCE_THUMB: usize = 4;
+const FORCE_PALM_1: usize = 5;
+const FORCE_PALM_2: usize = 6;
+const FORCE_PALM_3: usize = 7;
+const FORCE_PALM_4: usize = 8;
+const FORCE_PALM_5: usize = 9;
+
 #[embassy_executor::main]
 async fn main(_spawner: Spawner) {
     let p = embassy_stm32::init(Default::default());
-    let mut adc = Adc::new(p.ADC1, SampleTime::CYCLES247_5, Resolution::BITS12);
+    let mut adc = Adc::new(p.ADC1, Resolution::BITS12);
 
     // C0 -> G4 force stream.
     let mut g4_uart_config = UartConfig::default();
     g4_uart_config.baudrate = 115_200;
-    let mut g4_uart = UartTx::new_blocking(p.USART1, p.PB6, g4_uart_config).unwrap();
+    let mut g4_uart = UartTx::new_blocking(p.USART1, p.PC14, g4_uart_config).unwrap();
 
     // Enable/disable sensors here. Disabled sensors transmit 0.
     const SENSOR_ENABLED: [bool; 10] = [true, true, true, true, true, true, true, true, true, true];
 
-    // C071RB board-aware ADC pinout:
-    // avoid PA2/PA3 (USART2 VCP default on MB2046) and PA5 (user LED).
+    // Channel order is the exact order placed into the outgoing force frame.
+    // Finger sensors are mapped to uart_g4_combo force indices 0..5.
+    // Extra slots are filled with palm sensors.
     let mut channels: [AnyAdcChannel<_>; 10] = [
-        p.PA0.degrade_adc(),
-        p.PA1.degrade_adc(),
-        p.PA4.degrade_adc(),
-        p.PA6.degrade_adc(),
-        p.PA7.degrade_adc(),
-        p.PA8.degrade_adc(),
-        p.PB0.degrade_adc(),
-        p.PB1.degrade_adc(),
-        p.PB10.degrade_adc(),
-        p.PB11.degrade_adc(),
+        p.PA0.degrade_adc(), // [0] index
+        p.PA1.degrade_adc(), // [1] middle
+        p.PA2.degrade_adc(), // [2] ring
+        p.PA3.degrade_adc(), // [3] pinky
+        p.PA8.degrade_adc(), // [4] thumb
+        p.PA4.degrade_adc(), // [5] palm 1
+        p.PA5.degrade_adc(), // [6] palm 2
+        p.PA6.degrade_adc(), // [7] palm 3
+        p.PA7.degrade_adc(), // [8] palm 4
+        p.PB2.degrade_adc(), // [9] palm 5
     ];
 
     let mut readings: [u16; 10] = [0; 10];
     loop {
         for (idx, channel) in channels.iter_mut().enumerate() {
             readings[idx] = if SENSOR_ENABLED[idx] {
-                adc.blocking_read(channel)
+                adc.blocking_read(channel, SampleTime::CYCLES24_5)
             } else {
                 0
             };
         }
 
+        // Simulated force readings
+        // readings = [
+        //     4000,
+        //     4000,
+        //     4000,
+        //     4000,
+        //     4000,
+        //     4000,
+        //     4000,
+        //     4000,
+        //     4000,
+        //     4000
+        // ];
+
+
         let frame = build_frame(MessageType::ForceReadings as u8, readings);
         let _ = g4_uart.blocking_write(&frame.buf[..frame.len]);
-        info!("ADC array raw: {}", readings);
+        info!(
+            "force: {}",
+            readings
+        );
     }
 }

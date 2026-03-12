@@ -8,6 +8,26 @@ from rclpy.node import Node
 from std_msgs.msg import UInt16MultiArray
 from trajectory_msgs.msg import JointTrajectory
 
+POS_INDEX_1 = 0
+POS_MIDDLE = 1
+POS_RING = 2
+POS_PINKY = 3
+POS_THUMB_1 = 4
+POS_THUMB_2 = 5
+POS_INDEX_2 = 6
+POS_THUMB_3 = 7
+
+POSITION_NAMES = [
+    "index_1",
+    "middle",
+    "ring",
+    "pinky",
+    "thumb_1",
+    "thumb_2",
+    "index_2",
+    "thumb_3",
+]
+
 
 def _clamp(value: float, lo: float, hi: float) -> float:
     return max(lo, min(hi, value))
@@ -21,8 +41,10 @@ class TeleopToTxPositionsNode(Node):
         self.declare_parameter("output_topic", "/tx_positions")
         self.declare_parameter("input_min_ratio", 0.0)
         self.declare_parameter("input_max_ratio", 1.0)
-        self.declare_parameter("adc_min", 0)
-        self.declare_parameter("adc_max", 4095)
+        self.declare_parameter("min_motor_positions", [0, 0, 0, 0, 0, 0, 0, 0])
+        self.declare_parameter(
+            "max_motor_positions", [4095, 4095, 4095, 4095, 4095, 4095, 4095, 4095]
+        )
         self.declare_parameter("source_indices", [0, 1, 2, 3, 4, 5, -1, -1])
         self.declare_parameter("fill_ratio", 0.0)
 
@@ -30,8 +52,12 @@ class TeleopToTxPositionsNode(Node):
         output_topic = str(self.get_parameter("output_topic").value)
         self._input_min = float(self.get_parameter("input_min_ratio").value)
         self._input_max = float(self.get_parameter("input_max_ratio").value)
-        self._adc_min = int(self.get_parameter("adc_min").value)
-        self._adc_max = int(self.get_parameter("adc_max").value)
+        self._min_motor_positions = [
+            int(v) for v in self.get_parameter("min_motor_positions").value
+        ]
+        self._max_motor_positions = [
+            int(v) for v in self.get_parameter("max_motor_positions").value
+        ]
         self._source_indices = [
             int(v) for v in self.get_parameter("source_indices").value
         ]
@@ -43,17 +69,30 @@ class TeleopToTxPositionsNode(Node):
             )
             self._input_min = 0.0
             self._input_max = 1.0
-        if self._adc_max < self._adc_min:
+        if len(self._min_motor_positions) != len(POSITION_NAMES):
             self.get_logger().warn(
-                "adc_max must be >= adc_min; forcing 0..4095"
+                f"min_motor_positions must be length {len(POSITION_NAMES)}; forcing all zeros"
             )
-            self._adc_min = 0
-            self._adc_max = 4095
-        if len(self._source_indices) != 8:
+            self._min_motor_positions = [0] * len(POSITION_NAMES)
+        if len(self._max_motor_positions) != len(POSITION_NAMES):
             self.get_logger().warn(
-                "source_indices must be length 8; forcing default mapping"
+                f"max_motor_positions must be length {len(POSITION_NAMES)}; forcing all 4095"
+            )
+            self._max_motor_positions = [4095] * len(POSITION_NAMES)
+        if len(self._source_indices) != len(POSITION_NAMES):
+            self.get_logger().warn(
+                f"source_indices must be length {len(POSITION_NAMES)}; forcing default mapping"
             )
             self._source_indices = [0, 1, 2, 3, 4, 5, -1, -1]
+        for idx, (min_pos, max_pos) in enumerate(
+            zip(self._min_motor_positions, self._max_motor_positions)
+        ):
+            if max_pos < min_pos:
+                self.get_logger().warn(
+                    f"motor {POSITION_NAMES[idx]} (index {idx}): max_motor_positions must be >= min_motor_positions; forcing 0..4095"
+                )
+                self._min_motor_positions[idx] = 0
+                self._max_motor_positions[idx] = 4095
 
         self._sub = self.create_subscription(
             JointTrajectory, input_topic, self._on_teleop, 10
@@ -61,16 +100,20 @@ class TeleopToTxPositionsNode(Node):
         self._pub = self.create_publisher(UInt16MultiArray, output_topic, 10)
 
         self.get_logger().info(
-            f"Mapping {input_topic} -> {output_topic} with ADC range "
-            f"[{self._adc_min}, {self._adc_max}]"
+            f"Mapping {input_topic} -> {output_topic} with positions "
+            f"{list(enumerate(POSITION_NAMES))}, mins={self._min_motor_positions}, "
+            f"maxes={self._max_motor_positions}"
         )
 
-    def _ratio_to_adc(self, ratio: float) -> int:
+    def _ratio_to_adc(self, ratio: float, output_idx: int) -> int:
         normalized = (ratio - self._input_min) / (
             self._input_max - self._input_min
         )
         normalized = _clamp(normalized, 0.0, 1.0)
-        adc = self._adc_min + normalized * (self._adc_max - self._adc_min)
+        adc = self._min_motor_positions[output_idx] + normalized * (
+            self._max_motor_positions[output_idx]
+            - self._min_motor_positions[output_idx]
+        )
         return int(round(adc))
 
     def _resolve_ratio(self, source: List[float], src_idx: int) -> float:
@@ -85,9 +128,9 @@ class TeleopToTxPositionsNode(Node):
         src_positions = list(msg.points[0].positions)
         out_values: List[int] = []
 
-        for src_idx in self._source_indices:
+        for output_idx, src_idx in enumerate(self._source_indices):
             ratio = self._resolve_ratio(src_positions, src_idx)
-            out_values.append(self._ratio_to_adc(ratio))
+            out_values.append(self._ratio_to_adc(ratio, output_idx))
 
         out_msg = UInt16MultiArray()
         out_msg.data = out_values

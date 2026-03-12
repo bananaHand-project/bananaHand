@@ -1,9 +1,7 @@
-# This file was automatically generated.
-
 [package]
-edition = "2024"
-name = "force_sensor_test"
+name = "c0_usb_to_uart_converter"
 version = "0.1.0"
+edition = "2024"
 
 [dependencies]
 cortex-m = { version = "0.7.7", features = ["inline-asm", "critical-section-single-core"] }
@@ -12,16 +10,22 @@ defmt = { version = "1.0.1", optional = true }
 defmt-rtt = { version = "1.1.0", optional = true }
 embassy-executor = { version = "0.9.1", features = ["arch-cortex-m", "executor-thread"] }
 embassy-futures = "0.1.2"
-embassy-stm32 = { version = "0.5.0", features = ["memory-x", "stm32c071k8", "time-driver-any", "exti", "unstable-pac", "single-bank"] }
 embassy-sync = "0.7.2"
 embassy-time = { version = "0.5.0", features = ["tick-hz-32_768"] }
-heapless = "0.8.0"
+embassy-stm32 = { version = "0.5.0", features = [
+    "memory-x",
+    "stm32c071rb",
+    "time-driver-any",
+    "exti",
+    "unstable-pac",
+    "single-bank",
+] }
+cobs = { version = "0.5.0", default-features = false }
 panic-halt = "1.0.0"
 panic-probe = { version = "1.0.0", features = ["print-defmt"], optional = true }
-cobs = { version = "0.5.0", default-features = false }
 
 [[bin]]
-name = "force_sensor_test"
+name = "c0_usb_to_uart_converter"
 test = false
 bench = false
 

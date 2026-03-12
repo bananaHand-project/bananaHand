@@ -31,6 +31,7 @@ setup(
                 "teleop_to_tx_positions = "
                 "banana_hand_mapping.teleop_to_tx_positions_node:main"
             ),
+            "manual_control = banana_hand_mapping.manual_control_node:main",
         ],
     },
 )

@@ -11,7 +11,7 @@ setup(
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
     ],
-    install_requires=['setuptools', 'pyserial'],
+    install_requires=['setuptools', 'pyserial', 'cobs'],
     zip_safe=True,
     maintainer='lokesh',
     maintainer_email='lokeshpatel257@gmail.com',
@@ -25,6 +25,7 @@ setup(
     entry_points={
         'console_scripts': [
             'serial_bridge = banana_serial_bridge.serial_bridge_node:main',
+            'kortex_serial_bridge = banana_serial_bridge.kortex_serial_bridge_node:main',
         ],
     },
 )
