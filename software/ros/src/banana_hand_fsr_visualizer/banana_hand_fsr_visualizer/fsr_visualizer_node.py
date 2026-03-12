@@ -24,12 +24,12 @@ from PySide6.QtCore import QPointF, QRectF, QTimer, Qt
 from PySide6.QtGui import QColor, QFont, QPainter, QPen
 from PySide6.QtWidgets import QApplication, QLabel, QMainWindow, QVBoxLayout, QWidget
 
-FINGER_NAMES = ["index", "middle", "ring", "pinky", "thumb"]
+FINGER_NAMES = ["middle", "index", "ring", "pinky", "thumb"]
 PALM_NAMES = ["palm_1", "palm_2", "palm_3", "palm_4", "palm_5"]
 ALL_SENSOR_NAMES = FINGER_NAMES + PALM_NAMES
 DISPLAY_NAMES = {
-    "index": "Index",
-    "middle": "Middle",
+    "middle": "Middle", # SWITCHED
+    "index": "Index", # SWITCHED
     "ring": "Ring",
     "pinky": "Pinky",
     "thumb": "Thumb",

@@ -38,32 +38,33 @@ class ManualControlNode(Node):
     def run(self) -> None:        
         self.get_logger().info("started")
         while rclpy.ok():
-            cmd = [0, 0, 0, 0, 0, 0,0,0]
+            # regular (min values)
+            cmd = [400, 400, 400, 400, 300, 200,0,0]
             self.publish_positions(cmd)
             time.sleep(2)
 
             # cylindrical
-            cmd = [2000, 2000, 2000, 2000, 1000, 4000,0,0]
+            cmd = [1800, 1800, 1800, 1800, 2000, 4000,0,0]
             self.publish_positions(cmd)
             time.sleep(2)
 
-            # spherical
-            cmd = [2500, 2000, 2000, 2500, 1000, 2000,0,0]
-            self.publish_positions(cmd)
-            time.sleep(2)
-
-            # pinch
-            cmd = [2000, 0, 0, 0, 1000, 4000,0,0]
+            # # spherical
+            cmd = [2500, 1800, 1800, 3000, 1500, 4000,0,0]
             self.publish_positions(cmd)
             time.sleep(2)
 
             # pinch
-            cmd = [2000, 2000, 0, 0, 1000, 4000,0,0]
+            cmd = [1700, 0, 0, 0, 1700, 2000,0,0]
             self.publish_positions(cmd)
             time.sleep(2)
 
-            # hook
-            cmd = [3000, 3000, 3000, 3000, 0, 0,0,0]
+            # tripod
+            cmd = [1800, 1800, 0, 0, 1800, 3000,0,0]
+            self.publish_positions(cmd)
+            time.sleep(2)
+
+            # # hook
+            cmd = [4000, 4000, 4000, 4000, 0, 0,0,0]
             self.publish_positions(cmd)
             time.sleep(2)
 
