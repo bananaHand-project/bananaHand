@@ -12,6 +12,7 @@ def generate_launch_description() -> LaunchDescription:
                 output="screen",
                 parameters=[
                     {"camera_index": 0},
+                    {"output_topic": "/camera/image_raw"},
                     {"frame_id": "camera"},
                     {"publish_hz": 30.0},
                 ],

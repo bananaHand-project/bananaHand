@@ -15,25 +15,31 @@ class WebcamNode(Node):
     def __init__(self) -> None:
         super().__init__("webcam_node")
         self.declare_parameter("camera_index", 0)
+        self.declare_parameter("output_topic", "/camera/image_raw")
         self.declare_parameter("frame_id", "camera")
         self.declare_parameter("publish_hz", 30.0)
         self.declare_parameter("show_preview", True)
+        self.declare_parameter("preview_window_name", "webcam_preview")
         self.declare_parameter("use_v4l2", True)
 
         camera_index = int(self.get_parameter("camera_index").value)
+        output_topic = str(self.get_parameter("output_topic").value)
         self._frame_id = str(self.get_parameter("frame_id").value)
         publish_hz = float(self.get_parameter("publish_hz").value)
         self._show_preview = bool(self.get_parameter("show_preview").value)
+        self._preview_window_name = str(
+            self.get_parameter("preview_window_name").value
+        )
         self._use_v4l2 = bool(self.get_parameter("use_v4l2").value)
 
         self._bridge = CvBridge()
-        self._publisher = self.create_publisher(Image, "/camera/image_raw", 10)
+        self._publisher = self.create_publisher(Image, output_topic, 10)
         self._timer = self.create_timer(1.0 / max(publish_hz, 1.0), self._tick)
         self._cap = None
         self._camera_index = camera_index
         self._open_camera()
         if self._show_preview:
-            cv2.namedWindow("webcam_preview", cv2.WINDOW_NORMAL)
+            cv2.namedWindow(self._preview_window_name, cv2.WINDOW_NORMAL)
 
     def _open_camera(self) -> None:
         if self._cap and self._cap.isOpened():
@@ -59,7 +65,7 @@ class WebcamNode(Node):
         msg.header.frame_id = self._frame_id
         self._publisher.publish(msg)
         if self._show_preview:
-            cv2.imshow("webcam_preview", frame)
+            cv2.imshow(self._preview_window_name, frame)
             cv2.waitKey(1)
 
     def destroy_node(self) -> bool:
