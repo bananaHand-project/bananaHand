@@ -7,6 +7,8 @@ pub enum MessageType {
     PositionUpdate = 0x01,
     ForceReadings = 0x02,
     TelemetryCombined = 0x03,
+    ControlModeUpdate = 0x04,
+    ForceCommand = 0x05,
 }
 
 fn checksum(data: &[u8]) -> u8 {
@@ -113,13 +115,13 @@ pub fn build_telemetry_frame<const P: usize, const F: usize>(
     framed
 }
 
-pub struct FrameParser<const N: usize> {
+pub struct FrameParser {
     enc_buf: [u8; MAX_FRAME],
     enc_len: usize,
     dec_buf: [u8; MAX_FRAME],
 }
 
-impl<const N: usize> FrameParser<N> {
+impl FrameParser {
     pub fn new() -> Self {
         Self {
             enc_buf: [0; MAX_FRAME],
@@ -129,12 +131,6 @@ impl<const N: usize> FrameParser<N> {
     }
 
     pub fn parse_byte(&mut self, byte: u8) -> Option<(u8, &[u8])> {
-        const fn payload_len(n: usize) -> usize {
-            n * 2
-        }
-
-        let payload_len = payload_len(N);
-
         // accumulate until delimiter
         if byte != COBS_DELIM {
             if self.enc_len < MAX_FRAME {
@@ -173,13 +169,8 @@ impl<const N: usize> FrameParser<N> {
 
         let msg_type = self.dec_buf[0];
 
-        if dec_len != 1 + payload_len + 1 {
-            defmt::error!("Length mismatch");
-            return None;
-        }
-
         let payload_start = 1;
-        let payload_end = payload_start + payload_len;
+        let payload_end = dec_len - 1;
         let payload = &self.dec_buf[payload_start..payload_end];
 
         let chk = self.dec_buf[payload_end];

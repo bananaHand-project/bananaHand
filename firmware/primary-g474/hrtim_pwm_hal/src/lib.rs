@@ -908,7 +908,7 @@ fn set_cmp_for_dc(timer: HrtimSubTimer, cmp: HrtimXCompare, period: u16, percent
     // If CMP == PERIOD, both events happen together and reset wins, producing 0%.
     // Map 100% to PERIOD+1 so CMP never matches within the counting window.
     let cmp_set = match p {
-        0 => period,                     // true 0% in this set/reset scheme
+        0 => period, // true 0% in this set/reset scheme
         100 => period.saturating_add(1), // true 100%
         _ => {
             let raw = ((u32::from(period) * u32::from(p)) / 100) as u16;

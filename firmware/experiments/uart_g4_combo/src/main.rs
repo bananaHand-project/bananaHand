@@ -19,27 +19,27 @@ use panic_halt as _;
 use {defmt_rtt as _, panic_probe as _};
 
 use embassy_executor::Spawner;
-use embassy_stm32::{bind_interrupts, time::khz};
 use embassy_stm32::usart::{Config as UartConfig, Uart, UartRx};
 use embassy_stm32::{
     Config,
     adc::{Adc, AdcChannel, AdcConfig},
+    gpio::OutputType,
     rcc::{APBPrescaler, clocks},
     time::Hertz,
-    timer::simple_pwm::{SimplePwm, PwmPin},
-    gpio::OutputType
+    timer::simple_pwm::{PwmPin, SimplePwm},
 };
+use embassy_stm32::{bind_interrupts, time::khz};
 use embassy_time::{Duration, Ticker};
 use hrtim_pwm_hal::{HrtimCore, HrtimPrescaler, period_reg_val};
 
 use config::{COMMAND_COUNT, FORCE_COUNT, POSITION_COUNT};
 use control_config::{
-    CONTROL_HZ, MAX_MOTORS, MOTOR_INDEX_1, MOTOR_THUMB_2, MOTOR_MIDDLE, MOTOR_NAMES,
-    MOTOR_PINKY, MOTOR_RING, MOTOR_THUMB_1, POS_THUMB_2, POS_THUMB_3, POSITION_NAMES,
-    is_valid_config,
+    CONTROL_HZ, ControlMode, DEFAULT_CONTROL_MODE, MAX_MOTORS, MOTOR_INDEX_1, MOTOR_MIDDLE,
+    MOTOR_PINKY, MOTOR_RING, MOTOR_THUMB_1, MOTOR_THUMB_2, STARTUP_FORCE_COMMANDS,
+    STARTUP_POSITION_COMMANDS,
 };
-use motor_control::{Controller, MotorPwmCommand, pwm_command_from_motor_command};
-use shared::SharedData;
+use motor_control::{Controller, MotorCommand, MotorPwmCommand, pwm_command_from_motor_command};
+use shared::{SharedData, SharedMode};
 
 bind_interrupts!(struct Irqs {
     USART2 => embassy_stm32::usart::InterruptHandler<embassy_stm32::peripherals::USART2>;
@@ -47,7 +47,9 @@ bind_interrupts!(struct Irqs {
 });
 
 static SHARED_POSITIONS: SharedData<POSITION_COUNT> = SharedData::new();
-static SHARED_COMMANDS: SharedData<COMMAND_COUNT> = SharedData::new();
+static SHARED_POSITION_COMMANDS: SharedData<COMMAND_COUNT> = SharedData::new();
+static SHARED_FORCE_COMMANDS: SharedData<COMMAND_COUNT> = SharedData::new();
+static SHARED_CONTROL_MODE: SharedMode = SharedMode::new(DEFAULT_CONTROL_MODE.to_wire());
 static SHARED_FORCE: SharedData<FORCE_COUNT> = SharedData::new();
 const PWM_FREQ: Hertz = Hertz(20_000);
 
@@ -56,6 +58,10 @@ fn swap_pwm_channels_if_req(motor_idx: usize, mut cmd: MotorPwmCommand) -> Motor
         core::mem::swap(&mut cmd.ch1_percent, &mut cmd.ch2_percent);
     }
     cmd
+}
+
+fn coast_all_outputs() -> [MotorCommand; MAX_MOTORS] {
+    [MotorCommand::Coast; MAX_MOTORS]
 }
 
 #[embassy_executor::main]
@@ -83,6 +89,10 @@ async fn main(_spawner: Spawner) {
     }
     let p = embassy_stm32::init(config);
 
+    SHARED_POSITION_COMMANDS.write_frame(&STARTUP_POSITION_COMMANDS);
+    SHARED_FORCE_COMMANDS.write_frame(&STARTUP_FORCE_COMMANDS);
+    SHARED_CONTROL_MODE.write(DEFAULT_CONTROL_MODE.to_wire());
+
     // USART3: PC link (kept off PA2/PA3 because those are used as potentiometer inputs).
     let mut uart3_config = UartConfig::default();
     uart3_config.baudrate = 115_200;
@@ -91,8 +101,8 @@ async fn main(_spawner: Spawner) {
         p.PC11, // RX pin (PC -> MCU)
         p.PB10, // TX pin (MCU -> PC)
         Irqs,
-        p.DMA1_CH6,  // TX DMA channel
-        p.DMA1_CH5,  // RX DMA channel
+        p.DMA1_CH6, // TX DMA channel
+        p.DMA1_CH5, // RX DMA channel
         uart3_config,
     )
     .unwrap();
@@ -106,7 +116,12 @@ async fn main(_spawner: Spawner) {
         ))
         .unwrap();
     _spawner
-        .spawn(command_reader::command_reader_task(rx3, &SHARED_COMMANDS))
+        .spawn(command_reader::command_reader_task(
+            rx3,
+            &SHARED_POSITION_COMMANDS,
+            &SHARED_FORCE_COMMANDS,
+            &SHARED_CONTROL_MODE,
+        ))
         .unwrap();
 
     // USART2: C0 force reader (RX only).
@@ -115,7 +130,7 @@ async fn main(_spawner: Spawner) {
 
     // RX on PA15 from C0 USART1_TX (PB6).
     let _uart1_rx = UartRx::new(p.USART2, Irqs, p.PA15, p.DMA1_CH1, uart1_config).unwrap();
-    
+
     _spawner
         .spawn(c0_reader::c0_reader_task(_uart1_rx, &SHARED_FORCE))
         .unwrap();
@@ -135,7 +150,12 @@ async fn main(_spawner: Spawner) {
         p.PA1.degrade_adc(),  // POS_THUMB_3 (USELESS)
     ];
     _spawner
-        .spawn(position_reader::position_reader_task(adc, dma, pos_ch, &SHARED_POSITIONS))
+        .spawn(position_reader::position_reader_task(
+            adc,
+            dma,
+            pos_ch,
+            &SHARED_POSITIONS,
+        ))
         .unwrap();
 
     // OTHER PWM TIMERS
@@ -143,7 +163,15 @@ async fn main(_spawner: Spawner) {
     let thumb_rev_ch2 = PwmPin::new(p.PC1, OutputType::PushPull);
     let thumb_flex_ch1 = PwmPin::new(p.PC2, OutputType::PushPull);
     let thumb_flex_ch2 = PwmPin::new(p.PC3, OutputType::PushPull);
-    let thumb_pwm = SimplePwm::new(p.TIM1, Some(thumb_rev_ch1), Some(thumb_rev_ch2), Some(thumb_flex_ch1), Some(thumb_flex_ch2), khz(20), Default::default());
+    let thumb_pwm = SimplePwm::new(
+        p.TIM1,
+        Some(thumb_rev_ch1),
+        Some(thumb_rev_ch2),
+        Some(thumb_flex_ch1),
+        Some(thumb_flex_ch2),
+        khz(20),
+        Default::default(),
+    );
     let thumb_pwm_ch = thumb_pwm.split();
     let mut thumb_rev_ch1 = thumb_pwm_ch.ch1; // THUMB REVOLVE
     let mut thumb_rev_ch2 = thumb_pwm_ch.ch2; // THUMB REVOLVE
@@ -154,7 +182,7 @@ async fn main(_spawner: Spawner) {
     thumb_rev_ch2.enable(); // THUMB REVOLVE
     thumb_flex_ch1.enable(); // (USELESS)
     thumb_flex_ch2.enable(); // (USELESS)
-    
+
     // HRTIM PWM TIMERS
     let prescaler = HrtimPrescaler::DIV32;
     let period = period_reg_val(clocks(&p.RCC), APBPrescaler::DIV1, prescaler, PWM_FREQ).unwrap();
@@ -182,54 +210,72 @@ async fn main(_spawner: Spawner) {
 
     let mut controller = Controller::new();
     let mut control_ticker = Ticker::every(Duration::from_hz(CONTROL_HZ));
-    let mut status_tick: u32 = 0;
-
-    // MAIN PID LOOP //
-    // let mut command_toggle = true;
+    let mut applied_mode = DEFAULT_CONTROL_MODE;
+    let mut waiting_for_fresh_command = false;
+    let mut required_command_seq = SHARED_POSITION_COMMANDS.seq();
 
     loop {
-        let mut latest_cmd = SHARED_COMMANDS.read_snapshot();
-    
-        // IF YOU WANT TO SEND MANUAL HARD CODED COMMANDS
-        // status_tick = status_tick.wrapping_add(1);
-        // if status_tick % 200 == 0 {
+        let requested_mode =
+            ControlMode::from_wire(SHARED_CONTROL_MODE.read()).unwrap_or(DEFAULT_CONTROL_MODE);
 
-        //     command_toggle = !command_toggle;
-        // }
-        // if (command_toggle) {
-        //     latest_cmd =
-        //     [
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0
-        //     ]
-        // } else {
-        //     latest_cmd =
-        //     [
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         4000,
-        //         0,
-        //         0
-        //     ]
-        // };
+        if requested_mode != applied_mode {
+            let latest_positions = SHARED_POSITIONS.read_snapshot();
+            let latest_force = SHARED_FORCE.read_snapshot();
+            let latest_position_commands = SHARED_POSITION_COMMANDS.read_snapshot();
+            let latest_force_commands = SHARED_FORCE_COMMANDS.read_snapshot();
 
-        
+            defmt::info!(
+                "mode change: {} -> {}, position_cmds: {}, force_cmds: {}, positions: {}, forces: {}",
+                applied_mode.to_wire(),
+                requested_mode.to_wire(),
+                latest_position_commands,
+                latest_force_commands,
+                latest_positions,
+                latest_force
+            );
+
+            controller.set_mode(requested_mode);
+            applied_mode = requested_mode;
+            waiting_for_fresh_command = true;
+            required_command_seq = match applied_mode {
+                ControlMode::Position => SHARED_POSITION_COMMANDS.seq(),
+                ControlMode::Force => SHARED_FORCE_COMMANDS.seq(),
+            };
+        }
+
         let latest_force = SHARED_FORCE.read_snapshot();
         let latest_positions = SHARED_POSITIONS.read_snapshot();
+        let position_commands = SHARED_POSITION_COMMANDS.read_snapshot();
+        let force_commands = SHARED_FORCE_COMMANDS.read_snapshot();
 
-        defmt::info!("command: {}, positions: {}", latest_cmd, latest_positions);
+        let active_command_seq = match applied_mode {
+            ControlMode::Position => SHARED_POSITION_COMMANDS.seq(),
+            ControlMode::Force => SHARED_FORCE_COMMANDS.seq(),
+        };
 
-        controller.set_mode(control_config::CONTROL_MODE);
-        let outputs = controller.step(&latest_cmd, &latest_positions, &latest_force);
+        if waiting_for_fresh_command && active_command_seq != required_command_seq {
+            waiting_for_fresh_command = false;
+        }
+
+        let active_commands = match applied_mode {
+            ControlMode::Position => &position_commands,
+            ControlMode::Force => &force_commands,
+        };
+
+        // defmt::info!(
+        //     "mode: {}, waiting: {}, command: {}, positions: {}",
+        //     applied_mode.to_wire(),
+        //     waiting_for_fresh_command,
+        //     active_commands,
+        //     latest_positions
+        // );
+
+        let outputs = if waiting_for_fresh_command {
+            coast_all_outputs()
+        } else {
+            controller.step(active_commands, &latest_positions, &latest_force)
+        };
+
         let m_ring = pwm_command_from_motor_command(outputs[MOTOR_RING]);
         let m_pinky = pwm_command_from_motor_command(outputs[MOTOR_PINKY]);
         let m_thumb_1 = pwm_command_from_motor_command(outputs[MOTOR_THUMB_1]);
@@ -256,7 +302,6 @@ async fn main(_spawner: Spawner) {
         tim_e.ch2_set_dc_percent(m_middle.ch2_percent);
         thumb_rev_ch1.set_duty_cycle_percent(m_thumb_2.ch1_percent);
         thumb_rev_ch2.set_duty_cycle_percent(m_thumb_2.ch2_percent);
-
 
         control_ticker.next().await;
     }
