@@ -1,3 +1,6 @@
+from glob import glob
+import os
+
 from setuptools import find_packages, setup
 
 package_name = "banana_grasp_classification"
@@ -9,6 +12,7 @@ setup(
     data_files=[
         ("share/ament_index/resource_index/packages", ["resource/" + package_name]),
         ("share/" + package_name, ["package.xml", "README.md"]),
+        (os.path.join("share", package_name, "launch"), glob("launch/*.py")),
     ],
     install_requires=["setuptools", "numpy", "open3d"],
     zip_safe=True,
@@ -26,6 +30,10 @@ setup(
             (
                 "ground_plane_removal_node = "
                 "banana_grasp_classification.ground_plane_removal_node:main"
+            ),
+            (
+                "grasp_rule_classifier_node = "
+                "banana_grasp_classification.grasp_rule_classifier_node:main"
             ),
         ],
     },
