@@ -2,7 +2,7 @@
 <package format="3">
   <name>banana_hand_fsr_visualizer</name>
   <version>0.1.0</version>
-  <description>2D ROS2 desktop visualizer for fingertip force data.</description>
+  <description>Branded ROS2 desktop dashboard for BananaHand force and position telemetry.</description>
   <maintainer email="lokeshpatel257@gmail.com">lokesh</maintainer>
   <license>TODO: License declaration</license>
 
@@ -10,6 +10,7 @@
   <depend>launch_ros</depend>
   <depend>python3-pyside6</depend>
   <depend>rclpy</depend>
+  <depend>sensor_msgs</depend>
   <depend>std_msgs</depend>
 
   <test_depend>ament_copyright</test_depend>

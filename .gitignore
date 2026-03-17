@@ -6,6 +6,9 @@
 /vision_teleop/teleop_ws/install/
 /vision_teleop/teleop_ws/log/
 /vision_teleop/teleop_ws/.colcon/
+log/
+build/
+
 
 # Python artifacts
 **/__pycache__/

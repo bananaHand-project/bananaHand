@@ -18,7 +18,7 @@ setup(
     zip_safe=True,
     maintainer="lokesh",
     maintainer_email="lokeshpatel257@gmail.com",
-    description="2D ROS2 fingertip force visualizer for the Banana Hand.",
+    description="BananaHand ROS2 dashboard for force and position telemetry.",
     license="TODO: License declaration",
     extras_require={"test": ["pytest"]},
     entry_points={
