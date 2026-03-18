@@ -19,24 +19,23 @@ use panic_halt as _;
 use {defmt_rtt as _, panic_probe as _};
 
 use embassy_executor::Spawner;
-use embassy_stm32::{bind_interrupts, time::khz};
 use embassy_stm32::usart::{Config as UartConfig, Uart, UartRx};
 use embassy_stm32::{
     Config,
     adc::{Adc, AdcChannel, AdcConfig},
+    gpio::OutputType,
     rcc::{APBPrescaler, clocks},
     time::Hertz,
-    timer::simple_pwm::{SimplePwm, PwmPin},
-    gpio::OutputType
+    timer::simple_pwm::{PwmPin, SimplePwm},
 };
+use embassy_stm32::{bind_interrupts, time::khz};
 use embassy_time::{Duration, Ticker};
 use hrtim_pwm_hal::{HrtimCore, HrtimPrescaler, period_reg_val};
 
 use config::{COMMAND_COUNT, FORCE_COUNT, POSITION_COUNT};
 use control_config::{
-    CONTROL_HZ, MAX_MOTORS, MOTOR_INDEX_1, MOTOR_THUMB_2, MOTOR_MIDDLE, MOTOR_NAMES,
-    MOTOR_PINKY, MOTOR_RING, MOTOR_THUMB_1, POS_THUMB_2, POS_THUMB_3, POSITION_NAMES,
-    is_valid_config,
+    CONTROL_HZ, MAX_MOTORS, MOTOR_INDEX_1, MOTOR_MIDDLE, MOTOR_NAMES, MOTOR_PINKY, MOTOR_RING,
+    MOTOR_THUMB_1, MOTOR_THUMB_2, POS_THUMB_2, POS_THUMB_3, POSITION_NAMES, is_valid_config,
 };
 use motor_control::{Controller, MotorPwmCommand, pwm_command_from_motor_command};
 use shared::SharedData;
@@ -91,8 +90,8 @@ async fn main(_spawner: Spawner) {
         p.PC11, // RX pin (PC -> MCU)
         p.PB10, // TX pin (MCU -> PC)
         Irqs,
-        p.DMA1_CH6,  // TX DMA channel
-        p.DMA1_CH5,  // RX DMA channel
+        p.DMA1_CH6, // TX DMA channel
+        p.DMA1_CH5, // RX DMA channel
         uart3_config,
     )
     .unwrap();
@@ -115,7 +114,7 @@ async fn main(_spawner: Spawner) {
 
     // RX on PA15 from C0 USART1_TX (PB6).
     let _uart1_rx = UartRx::new(p.USART2, Irqs, p.PA15, p.DMA1_CH1, uart1_config).unwrap();
-    
+
     _spawner
         .spawn(c0_reader::c0_reader_task(_uart1_rx, &SHARED_FORCE))
         .unwrap();
@@ -135,7 +134,12 @@ async fn main(_spawner: Spawner) {
         p.PA1.degrade_adc(),  // POS_THUMB_3 (USELESS)
     ];
     _spawner
-        .spawn(position_reader::position_reader_task(adc, dma, pos_ch, &SHARED_POSITIONS))
+        .spawn(position_reader::position_reader_task(
+            adc,
+            dma,
+            pos_ch,
+            &SHARED_POSITIONS,
+        ))
         .unwrap();
 
     // OTHER PWM TIMERS
@@ -143,7 +147,15 @@ async fn main(_spawner: Spawner) {
     let thumb_rev_ch2 = PwmPin::new(p.PC1, OutputType::PushPull);
     let thumb_flex_ch1 = PwmPin::new(p.PC2, OutputType::PushPull);
     let thumb_flex_ch2 = PwmPin::new(p.PC3, OutputType::PushPull);
-    let thumb_pwm = SimplePwm::new(p.TIM1, Some(thumb_rev_ch1), Some(thumb_rev_ch2), Some(thumb_flex_ch1), Some(thumb_flex_ch2), khz(20), Default::default());
+    let thumb_pwm = SimplePwm::new(
+        p.TIM1,
+        Some(thumb_rev_ch1),
+        Some(thumb_rev_ch2),
+        Some(thumb_flex_ch1),
+        Some(thumb_flex_ch2),
+        khz(20),
+        Default::default(),
+    );
     let thumb_pwm_ch = thumb_pwm.split();
     let mut thumb_rev_ch1 = thumb_pwm_ch.ch1; // THUMB REVOLVE
     let mut thumb_rev_ch2 = thumb_pwm_ch.ch2; // THUMB REVOLVE
@@ -154,7 +166,7 @@ async fn main(_spawner: Spawner) {
     thumb_rev_ch2.enable(); // THUMB REVOLVE
     thumb_flex_ch1.enable(); // (USELESS)
     thumb_flex_ch2.enable(); // (USELESS)
-    
+
     // HRTIM PWM TIMERS
     let prescaler = HrtimPrescaler::DIV32;
     let period = period_reg_val(clocks(&p.RCC), APBPrescaler::DIV1, prescaler, PWM_FREQ).unwrap();
@@ -189,7 +201,7 @@ async fn main(_spawner: Spawner) {
 
     loop {
         let mut latest_cmd = SHARED_COMMANDS.read_snapshot();
-    
+
         // IF YOU WANT TO SEND MANUAL HARD CODED COMMANDS
         // status_tick = status_tick.wrapping_add(1);
         // if status_tick % 200 == 0 {
@@ -222,11 +234,15 @@ async fn main(_spawner: Spawner) {
         //     ]
         // };
 
-        
         let latest_force = SHARED_FORCE.read_snapshot();
         let latest_positions = SHARED_POSITIONS.read_snapshot();
 
-        defmt::info!("command: {}, positions: {}", latest_cmd, latest_positions);
+        defmt::info!(
+            "command: {}, positions: {}, forces: {}",
+            latest_cmd,
+            latest_positions,
+            latest_force
+        );
 
         controller.set_mode(control_config::CONTROL_MODE);
         let outputs = controller.step(&latest_cmd, &latest_positions, &latest_force);
@@ -256,7 +272,6 @@ async fn main(_spawner: Spawner) {
         tim_e.ch2_set_dc_percent(m_middle.ch2_percent);
         thumb_rev_ch1.set_duty_cycle_percent(m_thumb_2.ch1_percent);
         thumb_rev_ch2.set_duty_cycle_percent(m_thumb_2.ch2_percent);
-
 
         control_ticker.next().await;
     }

@@ -19,6 +19,7 @@ heapless = "0.8.0"
 panic-halt = "1.0.0"
 panic-probe = { version = "1.0.0", features = ["print-defmt"], optional = true }
 cobs = { version = "0.5.0", default-features = false }
+banana_hand_common = { path = "../common" }
 
 [[bin]]
 name = "sensing-c071"

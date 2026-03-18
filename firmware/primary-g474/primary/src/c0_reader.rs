@@ -1,18 +1,22 @@
+use banana_hand_common::{FORCE_DATA_PACKET_LEN, FORCE_SENSOR_COUNT, ForceDataPacket};
 use embassy_stm32::mode::Async;
 use embassy_stm32::usart::UartRx;
 
 use crate::config::FORCE_COUNT;
-use crate::protocol::{FrameParser, MessageType};
 use crate::shared::SharedData;
-use defmt::info;
+
+const _: [(); FORCE_COUNT] = [(); FORCE_SENSOR_COUNT];
+const _: [(); FORCE_SENSOR_COUNT] = [(); FORCE_COUNT];
+
 #[embassy_executor::task]
 pub async fn c0_reader_task(
     mut rx: UartRx<'static, Async>,
     shared: &'static SharedData<FORCE_COUNT>,
 ) {
-    let mut parser = FrameParser::<FORCE_COUNT>::new();
     let mut readings = [0u16; FORCE_COUNT];
     let mut rx_buf = [0u8; 64];
+    let mut packet_buf = [0u8; FORCE_DATA_PACKET_LEN];
+    let mut packet_len = 0usize;
 
     loop {
         let n = match rx.read_until_idle(&mut rx_buf).await {
@@ -21,17 +25,24 @@ pub async fn c0_reader_task(
         };
 
         for &b in &rx_buf[..n] {
-            if let Some((msg_type, payload)) = parser.parse_byte(b) {
-                if msg_type != MessageType::ForceReadings as u8 {
-                    info!("Received COBS frame type {} not ForceReadings", msg_type);
-                    continue;
+            packet_buf[packet_len] = b;
+            packet_len += 1;
+
+            if packet_len != FORCE_DATA_PACKET_LEN {
+                continue;
+            }
+
+            match ForceDataPacket::parse(&packet_buf) {
+                Ok(packet) => {
+                    readings.copy_from_slice(&packet.into_readings());
+                    shared.write_frame(&readings);
+                    packet_len = 0;
                 }
-                for idx in 0..FORCE_COUNT {
-                    let lo = payload[idx * 2];
-                    let hi = payload[idx * 2 + 1];
-                    readings[idx] = u16::from_le_bytes([lo, hi]);
+                Err(_) => {
+                    // No frame delimiter is used on this link, so resync by sliding one byte.
+                    packet_buf.copy_within(1..FORCE_DATA_PACKET_LEN, 0);
+                    packet_len = FORCE_DATA_PACKET_LEN - 1;
                 }
-                shared.write_frame(&readings);
             }
         }
     }

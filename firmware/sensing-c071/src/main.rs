@@ -3,18 +3,17 @@
 
 mod fmt;
 // mod force_sensor;
-mod protocol;
 
 #[cfg(not(feature = "defmt"))]
 use panic_halt as _;
 #[cfg(feature = "defmt")]
 use {defmt_rtt as _, panic_probe as _};
 
+use banana_hand_common::ForceDataPacket;
 use embassy_executor::Spawner;
 use embassy_stm32::adc::{Adc, AnyAdcChannel, AdcChannel, Resolution, SampleTime};
 use embassy_stm32::usart::{Config as UartConfig, UartTx};
-use fmt::info;
-use protocol::{build_frame, MessageType};
+use fmt::{error, info};
 
 // Keep these indices aligned with uart_g4_combo control_config FORCE_MAPS:
 // 0 ring, 1 pinky, 2 thumb, 3 index_1, 4 middle, 5 index_2.
@@ -83,8 +82,23 @@ async fn main(_spawner: Spawner) {
         // ];
 
 
-        let frame = build_frame(MessageType::ForceReadings as u8, readings);
-        let _ = g4_uart.blocking_write(&frame.buf[..frame.len]);
+        let force_packet = match ForceDataPacket::new(readings) {
+            Ok(packet) => packet,
+            Err(_) => {
+                error!("ForceDataPacket::new failed");
+                continue;
+            }
+        };
+
+        let encoded = match force_packet.encode() {
+            Ok(packet) => packet,
+            Err(_) => {
+                error!("ForceDataPacket::encode failed");
+                continue;
+            }
+        };
+
+        let _ = g4_uart.blocking_write(&encoded);
         info!(
             "force: {}",
             readings

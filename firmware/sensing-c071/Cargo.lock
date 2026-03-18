@@ -36,6 +36,10 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c08606f8c3cbf4ce6ec8e28fb0014a2c086708fe954eaa885384a6165172e7e8"
 
 [[package]]
+name = "banana_hand_common"
+version = "0.1.0"
+
+[[package]]
 name = "bare-metal"
 version = "0.2.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -849,6 +853,7 @@ checksum = "388a1df253eca08550bef6c72392cfe7c30914bf41df5269b68cbd6ff8f570a3"
 name = "sensing-c071"
 version = "0.1.0"
 dependencies = [
+ "banana_hand_common",
  "cobs",
  "cortex-m",
  "cortex-m-rt",
