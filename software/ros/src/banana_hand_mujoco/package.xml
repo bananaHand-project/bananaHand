@@ -1,18 +1,17 @@
 <?xml version="1.0"?>
-<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>banana_bringup</name>
-  <version>0.0.0</version>
-  <description>TODO: Package description</description>
+  <name>banana_hand_mujoco</name>
+  <version>0.1.0</version>
+  <description>MuJoCo-backed Banana Hand visualization for ROS 2 and Foxglove.</description>
   <maintainer email="lokeshpatel257@gmail.com">lokesh</maintainer>
   <license>TODO: License declaration</license>
 
   <depend>launch</depend>
   <depend>launch_ros</depend>
-  <depend>banana_hand_mujoco</depend>
-  <depend>banana_serial_bridge</depend>
-  <depend>banana_hand_tracking</depend>
-  <depend>banana_hand_mapping</depend>
+  <depend>ament_index_python</depend>
+  <depend>rclpy</depend>
+  <depend>sensor_msgs</depend>
+  <depend>std_msgs</depend>
 
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>

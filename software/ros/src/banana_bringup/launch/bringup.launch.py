@@ -14,7 +14,10 @@ def generate_launch_description():
     baud = LaunchConfiguration("baud")
     include_vision = LaunchConfiguration("include_vision")
     include_mapping = LaunchConfiguration("include_mapping")
+    include_visualization = LaunchConfiguration("include_visualization")
     show_preview = LaunchConfiguration("show_preview")
+    show_mujoco_viewer = LaunchConfiguration("show_mujoco_viewer")
+    launch_foxglove_bridge = LaunchConfiguration("launch_foxglove_bridge")
 
     hand_tracking_launch = os.path.join(
         get_package_share_directory("banana_hand_tracking"),
@@ -26,13 +29,21 @@ def generate_launch_description():
         "launch",
         "hand_mapping.launch.py",
     )
+    mujoco_visualization_launch = os.path.join(
+        get_package_share_directory("banana_hand_mujoco"),
+        "launch",
+        "mujoco_visualization.launch.py",
+    )
 
     return LaunchDescription([
         DeclareLaunchArgument("port", default_value="/dev/ttyACM0"),
         DeclareLaunchArgument("baud", default_value="115200"),
         DeclareLaunchArgument("include_vision", default_value="true"),
         DeclareLaunchArgument("include_mapping", default_value="true"),
+        DeclareLaunchArgument("include_visualization", default_value="true"),
         DeclareLaunchArgument("show_preview", default_value="true"),
+        DeclareLaunchArgument("show_mujoco_viewer", default_value="false"),
+        DeclareLaunchArgument("launch_foxglove_bridge", default_value="true"),
 
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(hand_tracking_launch),
@@ -43,6 +54,14 @@ def generate_launch_description():
             PythonLaunchDescriptionSource(hand_mapping_launch),
             condition=IfCondition(include_mapping),
             launch_arguments={}.items(),
+        ),
+        IncludeLaunchDescription(
+            PythonLaunchDescriptionSource(mujoco_visualization_launch),
+            condition=IfCondition(include_visualization),
+            launch_arguments={
+                "show_mujoco_viewer": show_mujoco_viewer,
+                "launch_foxglove_bridge": launch_foxglove_bridge,
+            }.items(),
         ),
 
         Node(

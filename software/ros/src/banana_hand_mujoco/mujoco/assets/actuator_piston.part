@@ -1,0 +1,13 @@
+{
+    "configuration": "default",
+    "documentId": "0a0f899ce59c60b61859c991",
+    "documentMicroversion": "17bc48022290b974c54cdb01",
+    "elementId": "b6064fac23f0b80980370735",
+    "fullConfiguration": "default",
+    "id": "Mhl5D11TwaeAhFFfy",
+    "isStandardContent": false,
+    "name": "actuator-piston <8>",
+    "partId": "JHD",
+    "suppressed": false,
+    "type": "Part"
+}

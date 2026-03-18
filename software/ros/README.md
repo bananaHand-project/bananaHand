@@ -5,16 +5,23 @@ End-to-end launch now runs:
 - hand mapping (`banana_hand_mapping`)  
   `/hand/teleop_joint_trajectory` -> `/tx_positions` (scaled to `0..4095`)
 - serial bridge (`banana_serial_bridge`) to hardware
+- MuJoCo visualization (`banana_hand_mujoco`) for local MuJoCo viewing and Foxglove
 
 ## Build
 ```bash
 cd software/ros
 source /opt/ros/humble/setup.bash
 pip install --user -r src/banana_hand_tracking/requirements.txt
+pip install --user mujoco
 colcon build --symlink-install --packages-select \
   banana_interfaces banana_hand_tracking banana_hand_mapping \
-  banana_serial_bridge banana_bringup
+  banana_serial_bridge banana_hand_mujoco banana_bringup
 source install/setup.bash
+```
+
+Optional Foxglove bridge:
+```bash
+sudo apt install ros-$ROS_DISTRO-foxglove-bridge
 ```
 
 ## Run Bringup
@@ -31,6 +38,12 @@ ros2 launch banana_bringup bringup.launch.py show_preview:=false
 # Run serial bridge only (no vision/mapping)
 ros2 launch banana_bringup bringup.launch.py \
   include_vision:=false include_mapping:=false
+
+# Launch the MuJoCo desktop viewer alongside ROS visualization
+ros2 launch banana_bringup bringup.launch.py show_mujoco_viewer:=true
+
+# Skip MuJoCo/Foxglove visualization entirely
+ros2 launch banana_bringup bringup.launch.py include_visualization:=false
 ```
 
 Args:
@@ -39,6 +52,22 @@ Args:
 - `show_preview` (default `true`)
 - `include_vision` (default `true`)
 - `include_mapping` (default `true`)
+- `include_visualization` (default `true`)
+- `show_mujoco_viewer` (default `false`)
+- `launch_foxglove_bridge` (default `true`)
+
+## Foxglove Visualization
+The MuJoCo visualizer publishes:
+- `/banana_hand/markers` (`visualization_msgs/msg/MarkerArray`)
+- `/banana_hand/mujoco_joint_states` (`sensor_msgs/msg/JointState`)
+
+If `foxglove_bridge` is installed, `bringup.launch.py` starts it automatically. In Foxglove:
+1. Open a live connection to the Foxglove Bridge.
+2. Add a 3D panel.
+3. Set the display frame to `world`.
+4. Enable `/banana_hand/markers`.
+
+This replaces the old RViz/URDF display path.
 
 ## Calibration + Quick Checks
 ```bash
