@@ -1,7 +1,6 @@
 #![no_std]
 #![no_main]
 
-mod board_config;
 mod c0_reader;
 mod command_reader;
 mod config;
