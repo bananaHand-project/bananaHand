@@ -14,8 +14,10 @@ mod protocol;
 mod shared;
 mod telemetry_sender;
 
+use crate::motor_control::MotorCommand;
 #[cfg(not(feature = "defmt"))]
 use panic_halt as _;
+
 #[cfg(feature = "defmt")]
 use {defmt_rtt as _, panic_probe as _};
 
@@ -33,7 +35,6 @@ use embassy_stm32::{bind_interrupts, time::khz};
 use embassy_time::{Duration, Ticker};
 use hrtim_pwm_hal::{HrtimCore, HrtimPrescaler, period_reg_val};
 
-use board_config::MOTOR_PWM_SWAP;
 use config::{COMMAND_COUNT, FORCE_COUNT, POSITION_COUNT};
 use control_config::{CONTROL_HZ, CommandInputs, ForceInputs, PositionInputs};
 use motor_control::{Controller, MotorPwmCommand};
@@ -49,13 +50,6 @@ static SHARED_POSITIONS: SharedData<POSITION_COUNT> = SharedData::new();
 static SHARED_COMMANDS: SharedData<COMMAND_COUNT> = SharedData::new();
 static SHARED_FORCE: SharedData<FORCE_COUNT> = SharedData::new();
 const PWM_FREQ: Hertz = Hertz(20_000);
-
-fn swap_pwm_channels_if_req(swap_channels: bool, mut cmd: MotorPwmCommand) -> MotorPwmCommand {
-    if swap_channels {
-        core::mem::swap(&mut cmd.ch1_percent, &mut cmd.ch2_percent);
-    }
-    cmd
-}
 
 #[embassy_executor::main]
 async fn main(_spawner: Spawner) {
@@ -208,19 +202,12 @@ async fn main(_spawner: Spawner) {
         let force_inputs = ForceInputs::from_raw(&latest_force);
 
         let outputs = controller.step(&command_inputs, &position_inputs, &force_inputs);
-        let m_ring = outputs.ring.into();
-        let m_pinky = outputs.pinky.into();
-        let m_thumb_1 = outputs.thumb_flex.into();
-        let m_index_1 = outputs.index1.into();
-        let m_middle = outputs.middle.into();
-        let m_thumb_2 = outputs.thumb_revolve.into();
-
-        let m_ring = swap_pwm_channels_if_req(MOTOR_PWM_SWAP.ring, m_ring);
-        let m_pinky = swap_pwm_channels_if_req(MOTOR_PWM_SWAP.pinky, m_pinky);
-        let m_thumb_1 = swap_pwm_channels_if_req(MOTOR_PWM_SWAP.thumb_flex, m_thumb_1);
-        let m_index_1 = swap_pwm_channels_if_req(MOTOR_PWM_SWAP.index1, m_index_1);
-        let m_middle = swap_pwm_channels_if_req(MOTOR_PWM_SWAP.middle, m_middle);
-        let m_thumb_2 = swap_pwm_channels_if_req(MOTOR_PWM_SWAP.thumb_revolve, m_thumb_2);
+        let m_ring: MotorPwmCommand = outputs.ring.into();
+        let m_pinky: MotorPwmCommand = outputs.pinky.into();
+        let m_thumb_1: MotorPwmCommand = outputs.thumb_flex.into();
+        let m_index_1: MotorPwmCommand = outputs.index1.into();
+        let m_middle: MotorPwmCommand = outputs.middle.into();
+        let m_thumb_2: MotorPwmCommand = outputs.thumb_revolve.into();
 
         tim_a.ch1_set_dc_percent(m_ring.ch1_percent);
         tim_a.ch2_set_dc_percent(m_ring.ch2_percent);
@@ -228,8 +215,11 @@ async fn main(_spawner: Spawner) {
         tim_b.ch2_set_dc_percent(m_pinky.ch2_percent);
         tim_c.ch1_set_dc_percent(m_thumb_1.ch1_percent);
         tim_c.ch2_set_dc_percent(m_thumb_1.ch2_percent);
-        tim_d.ch1_set_dc_percent(m_index_1.ch1_percent);
-        tim_d.ch2_set_dc_percent(m_index_1.ch2_percent);
+
+        // Channels are swapped due to mistake in the schematic. When the board is revised, the channels can be returned to their proper order.
+        tim_d.ch1_set_dc_percent(m_index_1.ch2_percent);
+        tim_d.ch2_set_dc_percent(m_index_1.ch1_percent);
+
         tim_e.ch1_set_dc_percent(m_middle.ch1_percent);
         tim_e.ch2_set_dc_percent(m_middle.ch2_percent);
         thumb_rev_ch1.set_duty_cycle_percent(m_thumb_2.ch1_percent);
