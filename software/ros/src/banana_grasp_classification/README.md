@@ -3,7 +3,7 @@
 Point-cloud preprocessing and rule-based grasp classification for BananaHand.
 
 The package currently contains two one-shot ROS 2 nodes:
-- `ground_plane_removal_node`: finds a downsampled reconstruction `.ply`, removes a support-like plane with RANSAC, filters isolated DBSCAN clusters, writes a new `.ply`, and exits.
+- `ground_plane_removal_node`: finds a downsampled reconstruction `.ply`, removes a support-like plane with RANSAC when one is found, filters isolated DBSCAN clusters, writes a new `.ply`, and exits. If no valid support plane is found, it writes an unchanged passthrough copy with the configured ground-removed suffix so downstream steps can still run.
 - `grasp_rule_classifier_node`: finds a ground-removed `.ply`, extracts robust geometry descriptors, scores the five grip classes with explicit rules, writes a detailed JSON result, and exits.
 
 Supported inputs:

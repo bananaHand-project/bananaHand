@@ -1,4 +1,4 @@
-"""One-shot ROS 2 node that classifies a ground-removed point cloud into a grasp."""
+"""ROS 2 node that classifies a ground-removed point cloud into a grasp."""
 
 from __future__ import annotations
 
