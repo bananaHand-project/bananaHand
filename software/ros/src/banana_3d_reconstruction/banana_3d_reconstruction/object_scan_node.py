@@ -68,6 +68,7 @@ class FrameBundle:
 class SavedScan:
     clean_cloud: object
     downsampled_cloud: object
+    color_image_bgr: np.ndarray
     metadata: dict
     scan_dir: Path
 
@@ -485,6 +486,7 @@ class ObjectScanNode(Node):
         debug_dir = scan_dir / "debug"
         if self._save_intermediate_debug_clouds:
             debug_dir.mkdir(parents=True, exist_ok=True)
+        representative_frame = captured_frames[0]
 
         fused_cloud = None
         last_accepted_centroid = None
@@ -713,6 +715,7 @@ class ObjectScanNode(Node):
                 "files": {
                     "final_object_cloud": "final_object_cloud.ply",
                     "final_object_cloud_downsampled": "final_object_cloud_downsampled.ply",
+                    "final_rgb_image": "final_rgb_image.png",
                     "metadata": "metadata.json",
                 },
                 "frame_logs": frame_logs,
@@ -724,6 +727,10 @@ class ObjectScanNode(Node):
         write_point_cloud(
             scan_dir / "final_object_cloud_downsampled.ply",
             downsampled_cloud,
+        )
+        self._save_scan_images(
+            scan_dir,
+            representative_frame.color_image_bgr,
         )
         write_metadata_json(scan_dir / "metadata.json", metadata)
 
@@ -737,6 +744,7 @@ class ObjectScanNode(Node):
         saved_scan = SavedScan(
             clean_cloud=clone_cloud(clean_cloud),
             downsampled_cloud=clone_cloud(downsampled_cloud),
+            color_image_bgr=representative_frame.color_image_bgr.copy(),
             metadata=copy.deepcopy(metadata),
             scan_dir=scan_dir,
         )
@@ -797,6 +805,14 @@ class ObjectScanNode(Node):
         scan_dir = self._output_dir / f"scan_{timestamp}"
         scan_dir.mkdir(parents=True, exist_ok=True)
         return scan_dir
+
+    def _save_scan_images(self, scan_dir: Path, color_image_bgr: np.ndarray) -> None:
+        rgb_path = scan_dir / "final_rgb_image.png"
+        rgb_written = cv2.imwrite(str(rgb_path), color_image_bgr)
+        if not rgb_written:
+            raise RuntimeError(
+                f"failed to save scan images to {scan_dir}"
+            )
 
     def _publish_final_cloud(self, cloud: object) -> None:
         msg = open3d_to_pointcloud2(cloud, self.get_clock().now().to_msg(), self._frame_id)
@@ -889,6 +905,10 @@ class ObjectScanNode(Node):
         write_point_cloud(
             scan_dir / "final_object_cloud_downsampled.ply",
             saved_scan.downsampled_cloud,
+        )
+        self._save_scan_images(
+            scan_dir,
+            saved_scan.color_image_bgr,
         )
         write_metadata_json(scan_dir / "metadata.json", metadata)
         self._publish_final_cloud(saved_scan.downsampled_cloud)

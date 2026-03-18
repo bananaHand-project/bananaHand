@@ -10,9 +10,9 @@ Burst-mode RGB-D tabletop object scanning package for Intel RealSense depth came
 - Segments the tabletop object from the full frame on every burst frame.
 - Fuses only the selected object-only clouds.
 - Publishes the final clean cloud on `/object/point_cloud`.
-- Saves the final cloud, downsampled cloud, metadata, and optional debug artifacts in a timestamped scan folder.
+- Saves the final cloud, downsampled cloud, one RGB image, metadata, and optional debug artifacts in a timestamped scan folder.
 
-This package is now intentionally optimized for one practical Demo 2 workflow:
+This package is intentionally optimized for one practical Demo 2 workflow:
 - one object on a mostly clear desk
 - camera held mostly still
 - good diagonal viewing angle so the camera sees a few faces of the object
@@ -157,6 +157,7 @@ This is specifically meant to remove leftover desk patches and small junk before
 
 - `scan_YYYYMMDD_HHMMSS/final_object_cloud.ply`
 - `scan_YYYYMMDD_HHMMSS/final_object_cloud_downsampled.ply`
+- `scan_YYYYMMDD_HHMMSS/final_rgb_image.png`
 - `scan_YYYYMMDD_HHMMSS/metadata.json`
 
 When `save_intermediate_debug_clouds:=true`, the package also saves:

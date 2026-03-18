@@ -2,40 +2,119 @@
 
 Point-cloud preprocessing and rule-based grasp classification for BananaHand.
 
-The package currently contains two one-shot ROS 2 nodes:
-- `ground_plane_removal_node`: finds a downsampled reconstruction `.ply`, removes a support-like plane with RANSAC when one is found, filters isolated DBSCAN clusters, writes a new `.ply`, and exits. If no valid support plane is found, it writes an unchanged passthrough copy with the configured ground-removed suffix so downstream steps can still run.
-- `grasp_rule_classifier_node`: finds a ground-removed `.ply`, extracts robust geometry descriptors, scores the five grip classes with explicit rules, writes a detailed JSON result, and exits.
+This package contains two one-shot ROS 2 nodes:
+- `ground_plane_removal_node`
+- `grasp_rule_classifier_node`
 
-Supported inputs:
+It also contains one convenience launch file:
+- `grasp_pipeline.launch.py`
 
-Ground-plane removal node:
+The intended workflow is:
+1. start from a reconstructed downsampled object cloud
+2. remove the table / ground plane when one is detectable
+3. classify the remaining object cloud into an initial grasp type
+4. save both the processed `.ply` and a detailed grasp JSON beside it
+
+## Reference Results
+
+The scan/result set used during classifier testing is stored in:
+- `resource/banana_scans`
+
+Those folders mirror the test objects we ran through the pipeline and keep the saved outputs beside each scan, including:
+- ground-removed `.ply` clouds
+- grasp-classification `.json` results
+
+## Nodes
+
+### `ground_plane_removal_node`
+
+This node searches an input directory for a reconstructed point cloud, fits candidate support planes with RANSAC on a downsampled copy, scores those candidates using:
+- inlier ratio
+- alignment with the configured height axis
+- whether the plane lies toward the expected table side of the cloud
+
+If a valid table-like plane is found, the node:
+- keeps only points on the object side of that plane
+- applies DBSCAN cluster filtering
+- optionally applies statistical outlier removal
+- writes `<input_stem>_ground_removed.ply`
+
+If no valid table-like plane is found, the node does not fail the pipeline anymore. It writes an unchanged passthrough copy using the same output suffix so downstream classification can still run.
+
+Supported input filenames:
 - `final_output_cloud_downsampled.ply`
 - `final_object_cloud_downsampled.ply`
 
-Rule-based classifier node by default:
+Default output filename:
+- `final_object_cloud_downsampled_ground_removed.ply`
+
+### `grasp_rule_classifier_node`
+
+This node searches for an already ground-removed cloud, computes geometric descriptors, runs a deterministic scored rules engine, writes a JSON result beside the cloud, and exits.
+
+Supported input filenames by default:
 - `final_output_cloud_downsampled_ground_removed.ply`
 - `final_object_cloud_downsampled_ground_removed.ply`
 
-Default outputs:
-- `final_object_cloud_downsampled_ground_removed.ply`
+Default output filename:
 - `final_object_cloud_downsampled_ground_removed_grasp.json`
 
-The classifier writes the JSON beside the input `.ply` using:
-- `<input_stem>_grasp.json`
+The classifier is rule-based only. It does not use ML inference.
 
-The classifier is deterministic and rule-based. It does not use ML inference. It scores:
+Grip classes:
 - `pinch`
 - `tripod`
 - `cylindrical`
 - `spherical`
 - `hook`
 
-`hook` remains in the output but is heavily suppressed by an explicit penalty so it is very unlikely to win.
+`hook` remains in the output but is strongly suppressed with an explicit penalty so it almost never wins unless the evidence is unusually strong.
+
+## Classifier Behavior
+
+The classifier is designed for partial single-view RealSense object clouds. It uses:
+- conservative statistical cleanup
+- optional radius outlier cleanup
+- robust PCA extents using percentiles
+- oriented bounding box extents
+- normal reuse or adaptive estimation
+- local surface variation as a direct flat-vs-curved surface cue
+- normal-direction concentration
+- trimmed cylinder fitting
+- least-squares sphere fitting with a centroid-offset sanity check
+- explicit box-like vs cylinder-like vs sphere-like intermediate evidence
+- explicit per-grip score terms saved into JSON
+
+Additional classifier details reflected in the current code:
+- `surface_variation_median` plays a direct role in separating flat box faces from curved cylindrical or spherical surfaces
+- `normal_estimation_radius_m` is an upper-bound cap, not a fixed radius; the actual radius is scaled from the object's minor extent
+- sphere fits that drift too far from the cloud centroid are rejected so partial hemispheres do not create unrealistic large sphere diameters
+- compact round objects use an explicit small-sphere cue so ping-pong-ball-scale objects favor `tripod` instead of falling through to `pinch`
+- larger round objects require both strong round-fit evidence and size before `spherical` gets boosted
+- cylindrical power grasps get extra support from tall curved bodies, while medium / large box-like prisms still map to `cylindrical`
+- `pinch` depends on a genuinely small usable body span, not just a tiny shell depth, so wide hollow objects like cups do not collapse to precision grasps
+- compact non-spherical objects with both small height and small width get an explicit `pinch` boost, which helps cases like small rounded cases that are not truly spherical
+- the JSON output intentionally keeps the `single_view_partial_cloud` assumption enabled for this capture pipeline
+
+Important practical behavior:
+- large cereal box / Lego box -> usually `cylindrical` using a thickness-like span
+- bottle / mug / spray bottle / olive oil bottle -> usually `cylindrical`
+- orange / apple -> usually `spherical` if large enough
+- ping pong ball / lime -> usually `tripod`
+- glue stick / small box / dice -> usually `pinch`
+
+The recommended opening is:
+- `recommended_opening_m = grasp_span_basis_m + opening_margin_m`
+
+By default:
+- `opening_margin_m = 0.03`
+
+If `max_hand_opening_m > 0`, the final opening is clamped.
 
 ## Build
 
 ```bash
-cd software/ros
+cd /home/dbhaumik/BananaHand/software/ros
 source /opt/ros/humble/setup.bash
 colcon build --symlink-install --packages-select banana_grasp_classification
 source install/setup.bash
@@ -48,21 +127,31 @@ ros2 run banana_grasp_classification ground_plane_removal_node --ros-args \
   -p input_dir:=/home/dbhaumik/banana_scans/cup
 ```
 
-Useful parameters:
-- `input_dir`: root directory to search
-- `recursive_search`: search subdirectories recursively
-- `output_suffix`: suffix added before `.ply` in the output filename
-- `plane_distance_threshold_m`: RANSAC inlier distance threshold
-- `min_plane_inlier_ratio`: minimum inlier ratio required to accept a ground-like plane
-- `ground_height_axis`: axis used as height for support-plane validation
-- `ground_axis_positive_is_lower`: when `true`, larger axis values are treated as lower/closer to the table
-- `min_ground_axis_alignment`: candidate plane normal must align with the height axis by at least this amount
-- `ground_plane_height_margin_m`: plane must lie on the low side of the cloud by at least this margin
-- `max_ground_plane_candidates`: number of dominant planes to inspect before giving up
-- `cluster_eps_m`: DBSCAN neighbor radius
-- `cluster_min_points`: minimum local density for DBSCAN clusters
-- `min_cluster_size`: minimum accepted cluster size after DBSCAN
-- `keep_largest_cluster_only`: keep only the largest surviving cluster
+Useful ground-removal parameters:
+- `input_dir`: directory to search
+- `recursive_search`: whether to search subdirectories, default `true`
+- `output_suffix`: output stem suffix, default `_ground_removed`
+- `ground_height_axis`: axis treated as height, one of `x`, `y`, `z`
+- `table_is_positive_direction_along_axis`: whether the table is toward the positive direction of that axis
+- `min_ground_axis_alignment`: minimum normal alignment with the chosen axis
+- `voxel_size_m`: downsampling used only for plane fitting
+- `plane_distance_threshold_m`: RANSAC inlier threshold
+- `plane_ransac_n`
+- `plane_num_iterations`
+- `max_ground_plane_candidates`
+- `min_plane_inlier_ratio`
+- `plane_clearance_above_table_m`: clearance margin above the detected table plane
+- `remove_statistical_outliers`
+- `sor_nb_neighbors`
+- `sor_std_ratio`
+- `cluster_eps_m`
+- `cluster_min_points`
+- `min_cluster_size`
+- `keep_largest_cluster_only`
+
+Notes:
+- if no valid plane is found, the node writes a passthrough copy and returns success
+- if DBSCAN rejects everything, the node keeps the current cloud instead of destroying it
 
 ## Run Rule-Based Grasp Classification
 
@@ -71,33 +160,24 @@ ros2 run banana_grasp_classification grasp_rule_classifier_node --ros-args \
   -p input_dir:=/home/dbhaumik/banana_scans/cup
 ```
 
-The classifier expects a ground-removed input by default. It performs:
-- conservative statistical and optional radius outlier cleanup
-- robust PCA extents using percentiles
-- oriented bounding box extents
-- local surface variation and normal-dispersion measurements
-- trimmed cylinder-like fitting for partial bottle / mug style clouds
-- least-squares sphere fitting for compact round objects
-- explicit per-grip rule scoring and JSON serialization
-
-Important classifier parameters:
-- `input_dir`: root directory to search
-- `recursive_search`: search subdirectories recursively
-- `ground_removed_suffix`: required suffix on the input `.ply` stem, default `_ground_removed`
-- `output_suffix`: JSON suffix added to the input stem, default `_grasp`
-- `opening_margin_m`: added to the selected grasp span basis, default `0.03`
-- `max_hand_opening_m`: optional clamp for the final recommended opening, `0.0` disables clamping
-- `small_object_max_span_m`: upper span for clear precision-object evidence
-- `tripod_object_max_span_m`: round-object size threshold where tripod is preferred over spherical
-- `power_grasp_min_span_m`: lower span threshold for power-grasp evidence
-- `spherical_extent_ratio_max`: extent-similarity threshold for spherical evidence
-- `spherical_fit_error_max_m`: sphere-fit error threshold
-- `cylindrical_radius_cv_max`: cylinder radial-variation threshold
-- `cylindrical_fit_error_max_m`: cylinder fit error threshold
-- `box_flatness_ratio_max`: flatness threshold that contributes to box-like evidence
-- `box_power_grasp_min_major_m`: major-axis size threshold for large box-like power grasps
-- `box_power_grasp_min_middle_m`: middle-axis size threshold for large box-like power grasps
-- `hook_score_penalty`: explicit suppression prior applied to hook
+Useful classifier parameters:
+- `input_dir`: directory to search
+- `recursive_search`: whether to search subdirectories, default `true`
+- `ground_removed_suffix`: required suffix for the classifier input, default `_ground_removed`
+- `output_suffix`: JSON output suffix, default `_grasp`
+- `opening_margin_m`
+- `max_hand_opening_m`
+- `small_object_max_span_m`
+- `tripod_object_max_span_m`
+- `power_grasp_min_span_m`
+- `spherical_extent_ratio_max`
+- `spherical_fit_error_max_m`
+- `cylindrical_radius_cv_max`
+- `cylindrical_fit_error_max_m`
+- `box_flatness_ratio_max`
+- `box_power_grasp_min_major_m`
+- `box_power_grasp_min_middle_m`
+- `hook_score_penalty`
 
 Cleanup and descriptor parameters:
 - `statistical_nb_neighbors`
@@ -108,7 +188,7 @@ Cleanup and descriptor parameters:
 - `extent_percentile_low`
 - `extent_percentile_high`
 - `surface_variation_k_neighbors`
-- `normal_estimation_radius_m`
+- `normal_estimation_radius_m`: upper cap for adaptive normal estimation radius
 - `normal_estimation_max_nn`
 - `cylinder_axis_trim_percent`
 - `cylinder_radial_outlier_percent`
@@ -116,43 +196,50 @@ Cleanup and descriptor parameters:
 
 ## Combined Launch Pipeline
 
-`grasp_pipeline.launch.py` runs the existing ground-plane removal node first and only starts the classifier after it exits.
+`grasp_pipeline.launch.py` runs ground removal first and then classification in one launch command.
 
 ```bash
 ros2 launch banana_grasp_classification grasp_pipeline.launch.py \
   input_dir:=/home/dbhaumik/banana_scans/cup
 ```
 
-Useful launch arguments:
+Exposed launch arguments:
 - `input_dir`
 - `recursive_search`
 - `output_suffix`: ground-removal suffix, default `_ground_removed`
-- `classifier_output_suffix`: JSON suffix, default `_grasp`
+- `classifier_output_suffix`: classifier JSON suffix, default `_grasp`
 - `opening_margin_m`
 - `max_hand_opening_m`
 - `small_object_max_span_m`
 - `tripod_object_max_span_m`
 - `power_grasp_min_span_m`
 
-## Output JSON
+Behavior:
+- if ground removal finds a table-like plane, the classifier uses the filtered cloud
+- if ground removal does not find a valid plane, the classifier still runs on the passthrough `_ground_removed.ply`
 
-The classifier JSON is intentionally verbose so the decision stays inspectable. It includes:
-- selected grip and confidence
-- recommended initial hand opening
-- grasp-span basis and opening margin
-- per-grip scores
+## JSON Output
+
+The classifier writes:
+- `<input_stem>_grasp.json`
+
+The JSON is intentionally verbose and includes:
+- selected grip
+- confidence
+- recommended opening
+- grasp span basis
+- all grip scores
 - intermediate family evidence
-- decision path and score terms
+- object family label
+- decision path
+- per-grip score terms
 - PCA and OBB dimensions
-- cylinder and sphere descriptor values
+- cylinder and sphere fit metrics
 - local surface descriptors
-- point cloud stats and cleanup counts
-- parameter values used for the decision
+- point cloud cleanup statistics
+- assumptions used by the classifier
+- parameter values used to produce the result
 
-Practical intended behavior:
-- large cereal box / Lego box -> `cylindrical` using thickness-like span
-- bottle / olive oil bottle / spray bottle / mug -> `cylindrical` using estimated body diameter when available
-- orange / apple -> `spherical` when large enough
-- ping pong ball / lime -> `tripod`
-- glue stick / small box / dice -> `pinch`
-- `hook` almost never wins
+Example output pair:
+- `final_object_cloud_downsampled_ground_removed.ply`
+- `final_object_cloud_downsampled_ground_removed_grasp.json`
