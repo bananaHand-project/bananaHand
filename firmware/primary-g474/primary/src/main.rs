@@ -1,6 +1,7 @@
 #![no_std]
 #![no_main]
 
+mod board_config;
 mod c0_reader;
 mod command_reader;
 mod config;
@@ -32,11 +33,9 @@ use embassy_stm32::{bind_interrupts, time::khz};
 use embassy_time::{Duration, Ticker};
 use hrtim_pwm_hal::{HrtimCore, HrtimPrescaler, period_reg_val};
 
+use board_config::{PositionSensorId, MOTOR_PWM_SWAP, POSITION_ADC_ORDER};
 use config::{COMMAND_COUNT, FORCE_COUNT, POSITION_COUNT};
-use control_config::{
-    CONTROL_HZ, MAX_MOTORS, MOTOR_INDEX_1, MOTOR_MIDDLE, MOTOR_NAMES, MOTOR_PINKY, MOTOR_RING,
-    MOTOR_THUMB_1, MOTOR_THUMB_2, POS_THUMB_2, POS_THUMB_3, POSITION_NAMES, is_valid_config,
-};
+use control_config::{CommandInputs, ForceInputs, PositionInputs, CONTROL_HZ};
 use motor_control::{Controller, MotorPwmCommand, pwm_command_from_motor_command};
 use shared::SharedData;
 
@@ -50,8 +49,8 @@ static SHARED_COMMANDS: SharedData<COMMAND_COUNT> = SharedData::new();
 static SHARED_FORCE: SharedData<FORCE_COUNT> = SharedData::new();
 const PWM_FREQ: Hertz = Hertz(20_000);
 
-fn swap_pwm_channels_if_req(motor_idx: usize, mut cmd: MotorPwmCommand) -> MotorPwmCommand {
-    if control_config::MOTOR_PWM_SWAP[motor_idx] {
+fn swap_pwm_channels_if_req(swap_channels: bool, mut cmd: MotorPwmCommand) -> MotorPwmCommand {
+    if swap_channels {
         core::mem::swap(&mut cmd.ch1_percent, &mut cmd.ch2_percent);
     }
     cmd
@@ -59,11 +58,6 @@ fn swap_pwm_channels_if_req(motor_idx: usize, mut cmd: MotorPwmCommand) -> Motor
 
 #[embassy_executor::main]
 async fn main(_spawner: Spawner) {
-    // debug_assert!(is_valid_config());
-    // debug_assert!(MOTOR_NAMES.len() == MAX_MOTORS);
-    // debug_assert!(POSITION_NAMES.len() == POSITION_COUNT);
-    // debug_assert!(POS_THUMB_2 == 6 && POS_THUMB_3 == 7);
-
     let mut config = Config::default();
     {
         use embassy_stm32::rcc::*;
@@ -113,25 +107,34 @@ async fn main(_spawner: Spawner) {
     uart1_config.baudrate = 115_200;
 
     // RX on PA15 from C0 USART1_TX (PB6).
-    let _uart1_rx = UartRx::new(p.USART2, Irqs, p.PA15, p.DMA1_CH1, uart1_config).unwrap();
+    let uart1_rx = UartRx::new(p.USART2, Irqs, p.PA15, p.DMA1_CH1, uart1_config).unwrap();
 
     _spawner
-        .spawn(c0_reader::c0_reader_task(_uart1_rx, &SHARED_FORCE))
+        .spawn(c0_reader::c0_reader_task(uart1_rx, &SHARED_FORCE))
         .unwrap();
 
     // ADC + position reader (G4 pots).
     let dma = p.DMA1_CH2;
     let adc = Adc::new(p.ADC1, AdcConfig::default());
-    // Keep ADC channel order aligned with control_config::POS_* constants.
+    // Keep this order aligned with board_config::POSITION_ADC_ORDER.
+    debug_assert!(POSITION_ADC_ORDER[0] == PositionSensorId::Index1);
+    debug_assert!(POSITION_ADC_ORDER[1] == PositionSensorId::Middle);
+    debug_assert!(POSITION_ADC_ORDER[2] == PositionSensorId::Ring);
+    debug_assert!(POSITION_ADC_ORDER[3] == PositionSensorId::Pinky);
+    debug_assert!(POSITION_ADC_ORDER[4] == PositionSensorId::ThumbFlex);
+    debug_assert!(POSITION_ADC_ORDER[5] == PositionSensorId::ThumbRevolve);
+    debug_assert!(POSITION_ADC_ORDER[6] == PositionSensorId::Index2);
+    debug_assert!(POSITION_ADC_ORDER[7] == PositionSensorId::ThumbAux);
+
     let pos_ch = [
-        p.PA3.degrade_adc(),  // POS_INDEX_1
-        p.PB1.degrade_adc(),  // POS_MIDDLE
-        p.PB0.degrade_adc(),  // POS_RING
-        p.PF0.degrade_adc(),  // POS_PINKY
-        p.PA2.degrade_adc(),  // POS_THUMB_1 (flex)
-        p.PA0.degrade_adc(),  // POS_THUMB_2 (revolve)
-        p.PB11.degrade_adc(), // POS_INDEX_2 (USELESS)
-        p.PA1.degrade_adc(),  // POS_THUMB_3 (USELESS)
+        p.PA3.degrade_adc(),  // PositionSensorId::Index1
+        p.PB1.degrade_adc(),  // PositionSensorId::Middle
+        p.PB0.degrade_adc(),  // PositionSensorId::Ring
+        p.PF0.degrade_adc(),  // PositionSensorId::Pinky
+        p.PA2.degrade_adc(),  // PositionSensorId::ThumbFlex
+        p.PA0.degrade_adc(),  // PositionSensorId::ThumbRevolve
+        p.PB11.degrade_adc(), // PositionSensorId::Index2 (unused)
+        p.PA1.degrade_adc(),  // PositionSensorId::ThumbAux (unused)
     ];
     _spawner
         .spawn(position_reader::position_reader_task(
@@ -194,46 +197,10 @@ async fn main(_spawner: Spawner) {
 
     let mut controller = Controller::new();
     let mut control_ticker = Ticker::every(Duration::from_hz(CONTROL_HZ));
-    let mut status_tick: u32 = 0;
 
     // MAIN PID LOOP //
-    // let mut command_toggle = true;
-
     loop {
-        let mut latest_cmd = SHARED_COMMANDS.read_snapshot();
-
-        // IF YOU WANT TO SEND MANUAL HARD CODED COMMANDS
-        // status_tick = status_tick.wrapping_add(1);
-        // if status_tick % 200 == 0 {
-
-        //     command_toggle = !command_toggle;
-        // }
-        // if (command_toggle) {
-        //     latest_cmd =
-        //     [
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0
-        //     ]
-        // } else {
-        //     latest_cmd =
-        //     [
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         4000,
-        //         0,
-        //         0
-        //     ]
-        // };
-
+        let latest_cmd = SHARED_COMMANDS.read_snapshot();
         let latest_force = SHARED_FORCE.read_snapshot();
         let latest_positions = SHARED_POSITIONS.read_snapshot();
 
@@ -245,20 +212,24 @@ async fn main(_spawner: Spawner) {
         );
 
         controller.set_mode(control_config::CONTROL_MODE);
-        let outputs = controller.step(&latest_cmd, &latest_positions, &latest_force);
-        let m_ring = pwm_command_from_motor_command(outputs[MOTOR_RING]);
-        let m_pinky = pwm_command_from_motor_command(outputs[MOTOR_PINKY]);
-        let m_thumb_1 = pwm_command_from_motor_command(outputs[MOTOR_THUMB_1]);
-        let m_index_1 = pwm_command_from_motor_command(outputs[MOTOR_INDEX_1]);
-        let m_middle = pwm_command_from_motor_command(outputs[MOTOR_MIDDLE]);
-        let m_thumb_2 = pwm_command_from_motor_command(outputs[MOTOR_THUMB_2]);
+        let command_inputs = CommandInputs::from_raw(&latest_cmd);
+        let position_inputs = PositionInputs::from_raw(&latest_positions);
+        let force_inputs = ForceInputs::from_raw(&latest_force);
 
-        let m_ring = swap_pwm_channels_if_req(MOTOR_RING, m_ring);
-        let m_pinky = swap_pwm_channels_if_req(MOTOR_PINKY, m_pinky);
-        let m_thumb_1 = swap_pwm_channels_if_req(MOTOR_THUMB_1, m_thumb_1);
-        let m_index_1 = swap_pwm_channels_if_req(MOTOR_INDEX_1, m_index_1);
-        let m_middle = swap_pwm_channels_if_req(MOTOR_MIDDLE, m_middle);
-        let m_thumb_2 = swap_pwm_channels_if_req(MOTOR_THUMB_2, m_thumb_2);
+        let outputs = controller.step(&command_inputs, &position_inputs, &force_inputs);
+        let m_ring = pwm_command_from_motor_command(outputs.ring);
+        let m_pinky = pwm_command_from_motor_command(outputs.pinky);
+        let m_thumb_1 = pwm_command_from_motor_command(outputs.thumb_flex);
+        let m_index_1 = pwm_command_from_motor_command(outputs.index1);
+        let m_middle = pwm_command_from_motor_command(outputs.middle);
+        let m_thumb_2 = pwm_command_from_motor_command(outputs.thumb_revolve);
+
+        let m_ring = swap_pwm_channels_if_req(MOTOR_PWM_SWAP.ring, m_ring);
+        let m_pinky = swap_pwm_channels_if_req(MOTOR_PWM_SWAP.pinky, m_pinky);
+        let m_thumb_1 = swap_pwm_channels_if_req(MOTOR_PWM_SWAP.thumb_flex, m_thumb_1);
+        let m_index_1 = swap_pwm_channels_if_req(MOTOR_PWM_SWAP.index1, m_index_1);
+        let m_middle = swap_pwm_channels_if_req(MOTOR_PWM_SWAP.middle, m_middle);
+        let m_thumb_2 = swap_pwm_channels_if_req(MOTOR_PWM_SWAP.thumb_revolve, m_thumb_2);
 
         tim_a.ch1_set_dc_percent(m_ring.ch1_percent);
         tim_a.ch2_set_dc_percent(m_ring.ch2_percent);
