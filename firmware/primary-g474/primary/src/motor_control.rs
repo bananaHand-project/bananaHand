@@ -109,7 +109,7 @@ impl Controller {
             let setpoint_mm = position_bits_to_mm(commands.get(actuator.command));
             let feedback_mm = position_bits_to_mm(positions.get(actuator.position));
             let u = self.position_pids[idx].update(setpoint_mm, feedback_mm, CONTROL_DT_S);
-            outputs[idx] = motor_command_from_output(u);
+            outputs[idx] = u.into();
         }
 
         MotorOutputs::from_ordered(outputs)
@@ -126,42 +126,46 @@ impl Controller {
             let setpoint = force_bits_to_newtons(commands.get(actuator.command));
             let feedback = force_bits_to_newtons(forces.get(force_channel));
             let u = self.force_pids[idx].update(setpoint, feedback, CONTROL_DT_S);
-            outputs[idx] = motor_command_from_output(u);
+            outputs[idx] = u.into();
         }
 
         MotorOutputs::from_ordered(outputs)
     }
 }
 
-fn motor_command_from_output(u: f32) -> MotorCommand {
-    let duty = u.abs().clamp(1.0, 100.0) as u8;
-    if duty < OUTPUT_DEADBAND_PERCENT {
-        return MotorCommand::Brake;
-    }
-    if u >= 0.0 {
-        MotorCommand::MoveOut(duty)
-    } else {
-        MotorCommand::MoveIn(duty)
+impl From<f32> for MotorCommand {
+    fn from(u: f32) -> Self {
+        let duty = u.abs().clamp(1.0, 100.0) as u8;
+        if duty < OUTPUT_DEADBAND_PERCENT {
+            return MotorCommand::Brake;
+        }
+        if u >= 0.0 {
+            MotorCommand::MoveOut(duty)
+        } else {
+            MotorCommand::MoveIn(duty)
+        }
     }
 }
 
-pub fn pwm_command_from_motor_command(cmd: MotorCommand) -> MotorPwmCommand {
-    match cmd {
-        MotorCommand::Coast => MotorPwmCommand {
-            ch1_percent: 0,
-            ch2_percent: 0,
-        },
-        MotorCommand::Brake => MotorPwmCommand {
-            ch1_percent: 100,
-            ch2_percent: 100,
-        },
-        MotorCommand::MoveOut(duty) => MotorPwmCommand {
-            ch1_percent: 100,
-            ch2_percent: 101 - duty, // MUST BE 101 SO CH2 WILL NEVER BE 0, OR ELSE MOTOR JUST COASTS
-        },
-        MotorCommand::MoveIn(duty) => MotorPwmCommand {
-            ch1_percent: 101 - duty, // MUST BE 101 SO CH2 WILL NEVER BE 0, OR ELSE MOTOR JUST COASTS
-            ch2_percent: 100,
-        },
+impl From<MotorCommand> for MotorPwmCommand {
+    fn from(cmd: MotorCommand) -> Self {
+        match cmd {
+            MotorCommand::Coast => Self {
+                ch1_percent: 0,
+                ch2_percent: 0,
+            },
+            MotorCommand::Brake => Self {
+                ch1_percent: 100,
+                ch2_percent: 100,
+            },
+            MotorCommand::MoveOut(duty) => Self {
+                ch1_percent: 100,
+                ch2_percent: 101 - duty, // MUST BE 101 SO CH2 WILL NEVER BE 0, OR ELSE MOTOR JUST COASTS
+            },
+            MotorCommand::MoveIn(duty) => Self {
+                ch1_percent: 101 - duty, // MUST BE 101 SO CH2 WILL NEVER BE 0, OR ELSE MOTOR JUST COASTS
+                ch2_percent: 100,
+            },
+        }
     }
 }
