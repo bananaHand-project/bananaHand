@@ -23,7 +23,7 @@ use embassy_executor::Spawner;
 use embassy_stm32::usart::{Config as UartConfig, Uart, UartRx};
 use embassy_stm32::{
     Config,
-    adc::{Adc, AdcChannel, AdcConfig},
+    adc::{Adc, AdcConfig},
     gpio::OutputType,
     rcc::{APBPrescaler, clocks},
     time::Hertz,
@@ -33,10 +33,11 @@ use embassy_stm32::{bind_interrupts, time::khz};
 use embassy_time::{Duration, Ticker};
 use hrtim_pwm_hal::{HrtimCore, HrtimPrescaler, period_reg_val};
 
-use board_config::{PositionSensorId, MOTOR_PWM_SWAP, POSITION_ADC_ORDER};
+use board_config::MOTOR_PWM_SWAP;
 use config::{COMMAND_COUNT, FORCE_COUNT, POSITION_COUNT};
-use control_config::{CommandInputs, ForceInputs, PositionInputs, CONTROL_HZ};
+use control_config::{CONTROL_HZ, CommandInputs, ForceInputs, PositionInputs};
 use motor_control::{Controller, MotorPwmCommand, pwm_command_from_motor_command};
+use position_reader::PosAdcPins;
 use shared::SharedData;
 
 bind_interrupts!(struct Irqs {
@@ -116,31 +117,21 @@ async fn main(_spawner: Spawner) {
     // ADC + position reader (G4 pots).
     let dma = p.DMA1_CH2;
     let adc = Adc::new(p.ADC1, AdcConfig::default());
-    // Keep this order aligned with board_config::POSITION_ADC_ORDER.
-    debug_assert!(POSITION_ADC_ORDER[0] == PositionSensorId::Index1);
-    debug_assert!(POSITION_ADC_ORDER[1] == PositionSensorId::Middle);
-    debug_assert!(POSITION_ADC_ORDER[2] == PositionSensorId::Ring);
-    debug_assert!(POSITION_ADC_ORDER[3] == PositionSensorId::Pinky);
-    debug_assert!(POSITION_ADC_ORDER[4] == PositionSensorId::ThumbFlex);
-    debug_assert!(POSITION_ADC_ORDER[5] == PositionSensorId::ThumbRevolve);
-    debug_assert!(POSITION_ADC_ORDER[6] == PositionSensorId::Index2);
-    debug_assert!(POSITION_ADC_ORDER[7] == PositionSensorId::ThumbAux);
-
-    let pos_ch = [
-        p.PA3.degrade_adc(),  // PositionSensorId::Index1
-        p.PB1.degrade_adc(),  // PositionSensorId::Middle
-        p.PB0.degrade_adc(),  // PositionSensorId::Ring
-        p.PF0.degrade_adc(),  // PositionSensorId::Pinky
-        p.PA2.degrade_adc(),  // PositionSensorId::ThumbFlex
-        p.PA0.degrade_adc(),  // PositionSensorId::ThumbRevolve
-        p.PB11.degrade_adc(), // PositionSensorId::Index2 (unused)
-        p.PA1.degrade_adc(),  // PositionSensorId::ThumbAux (unused)
-    ];
+    let pos_pins = PosAdcPins {
+        pinky: p.PF0,
+        ring: p.PB0,
+        middle: p.PB1,
+        index1: p.PA3,
+        index2: p.PB11,
+        thumb_opp: p.PA0,
+        thumb_flex: p.PA2,
+        thumb_aux: p.PA1,
+    };
     _spawner
         .spawn(position_reader::position_reader_task(
             adc,
             dma,
-            pos_ch,
+            pos_pins,
             &SHARED_POSITIONS,
         ))
         .unwrap();
