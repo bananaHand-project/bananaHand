@@ -21,8 +21,10 @@ CONTROL_MODE_POSITION = 0
 CONTROL_MODE_FORCE = 1
 POSITION_COUNT = 8
 FORCE_COUNT = 10
+CURRENT_COUNT = 8
 POSITION_LEN = POSITION_COUNT * 2
 FORCE_LEN = FORCE_COUNT * 2
+CURRENT_LEN = CURRENT_COUNT * 2
 
 MAX_ENC_FRAME = 512  # cap to avoid runaway buffer on noise
 
@@ -75,7 +77,7 @@ def parse_u16_le(payload: bytes) -> List[int]:
     return [struct.unpack("<H", payload[i : i + 2])[0] for i in range(0, len(payload), 2)]
 
 
-def parse_body(body: bytes) -> Optional[Tuple[int, List[int], List[int]]]:
+def parse_body(body: bytes) -> Optional[Tuple[int, List[int], List[int], List[int]]]:
     # body: [type][payload][chk]
     if len(body) < 3:
         return None
@@ -91,14 +93,17 @@ def parse_body(body: bytes) -> Optional[Tuple[int, List[int], List[int]]]:
         if len(payload) != POSITION_LEN:
             return None
         positions = parse_u16_le(payload)
-        return (msg_type, positions, [])
+        return (msg_type, positions, [], [])
 
     if msg_type == MSG_TYPE_TELEMETRY:
-        if len(payload) != POSITION_LEN + FORCE_LEN:
+        if len(payload) != POSITION_LEN + FORCE_LEN + CURRENT_LEN:
             return None
         positions = parse_u16_le(payload[:POSITION_LEN])
-        forces = parse_u16_le(payload[POSITION_LEN:])
-        return (msg_type, positions, forces)
+        force_start = POSITION_LEN
+        force_end = force_start + FORCE_LEN
+        forces = parse_u16_le(payload[force_start:force_end])
+        currents = parse_u16_le(payload[force_end:])
+        return (msg_type, positions, forces, currents)
 
     return None
 
@@ -127,6 +132,7 @@ class SerialBridgeNode(Node):
         # ROS interfaces
         self.pub_js = self.create_publisher(JointState, "rx_positions", 10)
         self.pub_force = self.create_publisher(UInt16MultiArray, "rx_force", 10)
+        self.pub_current = self.create_publisher(UInt16MultiArray, "rx_current", 10)
         self.sub_pos_cmd = self.create_subscription(
             UInt16MultiArray, "tx_positions", self.on_position_cmd, 10
         )
@@ -244,7 +250,7 @@ class SerialBridgeNode(Node):
             if parsed is None:
                 continue
 
-            msg_type, positions, forces = parsed
+            msg_type, positions, forces, currents = parsed
 
             if msg_type == MSG_TYPE_POSITION or msg_type == MSG_TYPE_TELEMETRY:
                 js = JointState()
@@ -257,6 +263,10 @@ class SerialBridgeNode(Node):
                 force_msg = UInt16MultiArray()
                 force_msg.data = [int(v) for v in forces]
                 self.pub_force.publish(force_msg)
+
+                current_msg = UInt16MultiArray()
+                current_msg.data = [int(v) for v in currents]
+                self.pub_current.publish(current_msg)
 
     def _extract_one_cobs_encoded_frame(self) -> Optional[bytes]:
         """

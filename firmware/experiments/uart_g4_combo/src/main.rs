@@ -5,6 +5,7 @@ mod c0_reader;
 mod command_reader;
 mod config;
 mod control_config;
+mod current_reader;
 mod fmt;
 mod motor_control;
 mod pid;
@@ -32,7 +33,7 @@ use embassy_stm32::{bind_interrupts, time::khz};
 use embassy_time::{Duration, Ticker};
 use hrtim_pwm_hal::{HrtimCore, HrtimPrescaler, period_reg_val};
 
-use config::{COMMAND_COUNT, FORCE_COUNT, POSITION_COUNT};
+use config::{COMMAND_COUNT, CURRENT_COUNT, FORCE_COUNT, POSITION_COUNT};
 use control_config::{
     CONTROL_HZ, ControlMode, DEFAULT_CONTROL_MODE, MAX_MOTORS, MOTOR_INDEX_1, MOTOR_MIDDLE,
     MOTOR_PINKY, MOTOR_RING, MOTOR_THUMB_1, MOTOR_THUMB_2, STARTUP_FORCE_COMMANDS,
@@ -47,6 +48,7 @@ bind_interrupts!(struct Irqs {
 });
 
 static SHARED_POSITIONS: SharedData<POSITION_COUNT> = SharedData::new();
+static SHARED_CURRENTS: SharedData<CURRENT_COUNT> = SharedData::new();
 static SHARED_POSITION_COMMANDS: SharedData<COMMAND_COUNT> = SharedData::new();
 static SHARED_FORCE_COMMANDS: SharedData<COMMAND_COUNT> = SharedData::new();
 static SHARED_CONTROL_MODE: SharedMode = SharedMode::new(DEFAULT_CONTROL_MODE.to_wire());
@@ -113,6 +115,7 @@ async fn main(_spawner: Spawner) {
             tx3,
             &SHARED_POSITIONS,
             &SHARED_FORCE,
+            &SHARED_CURRENTS,
         ))
         .unwrap();
     _spawner
@@ -158,30 +161,52 @@ async fn main(_spawner: Spawner) {
         ))
         .unwrap();
 
+    // ADC2 + current reader (same logical order as positions/commands).
+    let current_dma = p.DMA2_CH1;
+    let current_adc = Adc::new(p.ADC2, AdcConfig::default());
+    let current_ch = [
+        p.PB2.degrade_adc(), // CUR_INDEX_1
+        p.PC5.degrade_adc(), // CUR_MIDDLE
+        p.PA7.degrade_adc(), // CUR_RING
+        p.PA6.degrade_adc(), // CUR_PINKY
+        p.PA5.degrade_adc(), // CUR_THUMB_1
+        p.PF1.degrade_adc(), // CUR_THUMB_2
+        p.PC4.degrade_adc(), // CUR_INDEX_2 (USELESS)
+        p.PA4.degrade_adc(), // CUR_THUMB_3 (USELESS)
+    ];
+    _spawner
+        .spawn(current_reader::current_reader_task(
+            current_adc,
+            current_dma,
+            current_ch,
+            &SHARED_CURRENTS,
+        ))
+        .unwrap();
+
     // OTHER PWM TIMERS
     let thumb_rev_ch1 = PwmPin::new(p.PC0, OutputType::PushPull);
     let thumb_rev_ch2 = PwmPin::new(p.PC1, OutputType::PushPull);
-    let thumb_flex_ch1 = PwmPin::new(p.PC2, OutputType::PushPull);
-    let thumb_flex_ch2 = PwmPin::new(p.PC3, OutputType::PushPull);
+    let thumb_3_ch1 = PwmPin::new(p.PC2, OutputType::PushPull);
+    let thumb_3_ch2 = PwmPin::new(p.PC3, OutputType::PushPull);
     let thumb_pwm = SimplePwm::new(
         p.TIM1,
         Some(thumb_rev_ch1),
         Some(thumb_rev_ch2),
-        Some(thumb_flex_ch1),
-        Some(thumb_flex_ch2),
+        Some(thumb_3_ch1),
+        Some(thumb_3_ch2),
         khz(20),
         Default::default(),
     );
     let thumb_pwm_ch = thumb_pwm.split();
     let mut thumb_rev_ch1 = thumb_pwm_ch.ch1; // THUMB REVOLVE
     let mut thumb_rev_ch2 = thumb_pwm_ch.ch2; // THUMB REVOLVE
-    let mut thumb_flex_ch1 = thumb_pwm_ch.ch3; // (USELESS)
-    let mut thumb_flex_ch2 = thumb_pwm_ch.ch4; // (USELESS)
+    let mut thumb_3_ch1 = thumb_pwm_ch.ch3; // (USELESS)
+    let mut thumb_3_ch2 = thumb_pwm_ch.ch4; // (USELESS)
 
     thumb_rev_ch1.enable(); // THUMB REVOLVE
     thumb_rev_ch2.enable(); // THUMB REVOLVE
-    thumb_flex_ch1.enable(); // (USELESS)
-    thumb_flex_ch2.enable(); // (USELESS)
+    thumb_3_ch1.enable(); // (USELESS)
+    thumb_3_ch2.enable(); // (USELESS)
 
     // HRTIM PWM TIMERS
     let prescaler = HrtimPrescaler::DIV32;
@@ -261,14 +286,6 @@ async fn main(_spawner: Spawner) {
             ControlMode::Position => &position_commands,
             ControlMode::Force => &force_commands,
         };
-
-        // defmt::info!(
-        //     "mode: {}, waiting: {}, command: {}, positions: {}",
-        //     applied_mode.to_wire(),
-        //     waiting_for_fresh_command,
-        //     active_commands,
-        //     latest_positions
-        // );
 
         let outputs = if waiting_for_fresh_command {
             coast_all_outputs()

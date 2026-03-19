@@ -67,16 +67,17 @@ pub fn build_frame<const N: usize>(msg_type: u8, values: [u16; N]) -> BuiltFrame
     framed
 }
 
-pub fn build_telemetry_frame<const P: usize, const F: usize>(
+pub fn build_telemetry_frame<const P: usize, const F: usize, const C: usize>(
     positions: [u16; P],
     forces: [u16; F],
+    currents: [u16; C],
 ) -> BuiltFrame {
-    let payload_len = (P + F) * 2;
+    let payload_len = (P + F + C) * 2;
 
     let mut body = [0u8; MAX_FRAME];
     let mut body_len = 0usize;
 
-    // body: [type][positions...][forces...][chk]
+    // body: [type][positions...][forces...][currents...][chk]
     body[body_len] = MessageType::TelemetryCombined as u8;
     body_len += 1;
 
@@ -89,6 +90,12 @@ pub fn build_telemetry_frame<const P: usize, const F: usize>(
     }
 
     for v in forces {
+        let bytes = v.to_le_bytes();
+        body[body_len..body_len + 2].copy_from_slice(&bytes);
+        body_len += 2;
+    }
+
+    for v in currents {
         let bytes = v.to_le_bytes();
         body[body_len..body_len + 2].copy_from_slice(&bytes);
         body_len += 2;
