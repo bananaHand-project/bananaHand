@@ -242,6 +242,7 @@ class GraspRuleClassifierNode(Node):
         self.declare_parameter("small_object_max_span_m", 0.045)
         self.declare_parameter("tripod_object_max_span_m", 0.065)
         self.declare_parameter("power_grasp_min_span_m", 0.045)
+        self.declare_parameter("small_body_dimension_max_m", 0.06)
         self.declare_parameter("spherical_extent_ratio_max", 1.30)
         self.declare_parameter("spherical_fit_error_max_m", 0.015)
         self.declare_parameter("cylindrical_radius_cv_max", 0.30)
@@ -296,6 +297,9 @@ class GraspRuleClassifierNode(Node):
             ),
             "power_grasp_min_span_m": float(
                 self.get_parameter("power_grasp_min_span_m").value
+            ),
+            "small_body_dimension_max_m": float(
+                self.get_parameter("small_body_dimension_max_m").value
             ),
             "spherical_extent_ratio_max": float(
                 self.get_parameter("spherical_extent_ratio_max").value
@@ -974,6 +978,8 @@ class GraspRuleClassifierNode(Node):
             max(dimensions.width_like_m, EPSILON),
             99.0,
         )
+        height_width_similarity_score = spread_score(height_to_width_ratio, 1.0, 0.22)
+        sphere_height_balance_score = inverse_ramp(height_to_width_ratio, 1.10, 1.28)
         round_xy_balance = spread_score(major_to_middle, 1.0, 0.22)
         round_shell_partiality = 1.0 if surface.is_partial_view else 0.0
         sphere_fit_score = inverse_ramp(
@@ -1098,6 +1104,13 @@ class GraspRuleClassifierNode(Node):
             thresholds["cylindrical_radius_cv_max"],
             thresholds["cylindrical_radius_cv_max"] + 0.16,
         )
+        small_body_dimension_max_m = thresholds["small_body_dimension_max_m"]
+        small_body_dimension_soft_m = max(small_body_dimension_max_m - 0.005, 0.0)
+        wrap_body_size_score = ramp(
+            max(dimensions.width_like_m, dimensions.thickness_like_m),
+            small_body_dimension_max_m,
+            small_body_dimension_max_m + 0.015,
+        )
         compact_round_body_size_score = inverse_ramp(
             max(dimensions.height_like_m, dimensions.width_like_m),
             thresholds["tripod_object_max_span_m"],
@@ -1112,12 +1125,14 @@ class GraspRuleClassifierNode(Node):
             compact_round_body_size_score
             * normalized_sphere_fit_score
             * round_fit_cylinder_cv_score
+            * sphere_height_balance_score
             * inverse_ramp(geometry.elongation_ratio, 1.55, 2.20)
             * (1.0 - 0.55 * flat_round_penalty)
         )
         large_sphere_candidate = clamp01(
             large_round_body_size_score
             * normalized_sphere_fit_score
+            * sphere_height_balance_score
             * clamp01(
                 0.65 * compact_visible_ratio_score
                 + 0.35 * inverse_ramp(geometry.elongation_ratio, 1.45, 2.10)
@@ -1143,6 +1158,16 @@ class GraspRuleClassifierNode(Node):
             0.60 * box_like
             + 0.40 * large_face_score * thin_box_score
         )
+        tall_round_body_cylinder_support = clamp01(
+            ramp(height_to_width_ratio, 1.18, 1.45)
+            * max(
+                cylinder_cv_score,
+                cylinder_fit_score,
+                cylinder_like_raw,
+                compact_round_shell_score,
+            )
+            * wrap_body_size_score
+        )
         cylinder_like = clamp01(
             cylinder_like_raw * (1.0 - 0.85 * round_penalty_from_box)
             + 0.14
@@ -1151,6 +1176,7 @@ class GraspRuleClassifierNode(Node):
             + 0.12
             * compact_round_shell_score
             * spread_score(cylinder.diameter_estimate_m, middle_extent, 0.04)
+            + 0.16 * tall_round_body_cylinder_support
             - 0.18 * box_override_penalty
             - 0.14
             * max(small_sphere_candidate, large_sphere_candidate)
@@ -1185,7 +1211,9 @@ class GraspRuleClassifierNode(Node):
             + 0.08 * compact_round_shell_score
             + 0.10 * small_sphere_candidate
             + 0.12 * large_sphere_candidate
+            + 0.08 * sphere_height_balance_score
             - 0.12 * elongated_non_sphere_penalty
+            - 0.22 * tall_round_body_cylinder_support
         )
 
         capped_cylinder_span_m = min(
@@ -1262,6 +1290,45 @@ class GraspRuleClassifierNode(Node):
             thresholds["tripod_object_max_span_m"],
             thresholds["tripod_object_max_span_m"] + 0.03,
         )
+        spherical_shape_core = clamp01(
+            0.45 * sphere_like
+            + 0.20 * compact_round_shell_score
+            + 0.20 * sphere_height_balance_score
+            + 0.15 * curvature_score
+        )
+        small_spherical_body = clamp01(
+            inverse_ramp(
+                max(dimensions.height_like_m, dimensions.width_like_m),
+                small_body_dimension_soft_m,
+                small_body_dimension_max_m,
+            )
+            * spherical_shape_core
+            * inverse_ramp(box_like, 0.50, 0.70)
+        )
+        large_spherical_body = clamp01(
+            ramp(
+                min(dimensions.height_like_m, dimensions.width_like_m),
+                small_body_dimension_soft_m,
+                small_body_dimension_max_m,
+            )
+            * spherical_shape_core
+            * inverse_ramp(box_like, 0.50, 0.70)
+        )
+        non_spherical_shape_core = clamp01(
+            0.40 * inverse_ramp(sphere_like, 0.50, 0.72)
+            + 0.30 * inverse_ramp(height_width_similarity_score, 0.70, 0.90)
+            + 0.20 * tall_body_score
+            + 0.10 * inverse_ramp(compact_round_shell_score, 0.55, 0.75)
+        )
+        small_non_spherical_body = clamp01(
+            inverse_ramp(
+                max(dimensions.width_like_m, dimensions.thickness_like_m),
+                small_body_dimension_soft_m,
+                small_body_dimension_max_m,
+            )
+            * non_spherical_shape_core
+            * (1.0 - 0.85 * small_spherical_body)
+        )
 
         box_power_object = clamp01(
             0.34 * box_like
@@ -1328,6 +1395,11 @@ class GraspRuleClassifierNode(Node):
             "round_partial_shell": compact_round_shell_score,
             "small_round_object": small_sphere_candidate,
             "large_round_object": large_sphere_candidate,
+            "small_spherical_body": small_spherical_body,
+            "large_spherical_body": large_spherical_body,
+            "small_non_spherical_body": small_non_spherical_body,
+            "sphere_height_balance": sphere_height_balance_score,
+            "tall_round_body_cylinder_support": tall_round_body_cylinder_support,
             "compact_non_spherical_object": compact_non_spherical_object,
             "large_box_face": large_face_score,
         }
@@ -1349,12 +1421,14 @@ class GraspRuleClassifierNode(Node):
             "tall_curved_body": 0.12
             * tall_body_score
             * max(cylinder_cv_score, cylinder_fit_score),
+            "tall_round_body_support": 0.18 * tall_round_body_cylinder_support,
             "wide_body_wrap": 0.10
             * wide_body_score
             * max(cylinder_like, box_power_object, cylinder_fit_score),
             "round_shell_support": 0.10
             * compact_round_shell_score
             * inverse_ramp(major_extent, 0.12, 0.18),
+            "small_non_spherical_body_penalty": -0.20 * small_non_spherical_body,
             "compact_precision_penalty": -0.22 * compact_non_spherical_object,
             "precision_penalty": -0.16 * small_precision_object,
             "small_round_penalty": -0.12
@@ -1369,11 +1443,15 @@ class GraspRuleClassifierNode(Node):
             "partial_round_shell_support": 0.14 * compact_round_shell_score,
             "large_round_size": 0.18 * large_round_size_score,
             "large_round_shape": 0.20 * large_sphere_candidate,
+            "explicit_large_sphere_rule": 0.18 * large_spherical_body,
+            "height_width_balance": 0.16 * sphere_height_balance_score,
             "not_precision_scale": 0.08 * (1.0 - small_precision_object),
             "elongation_penalty": -0.15 * elongated_score,
+            "tall_round_body_penalty": -0.32 * tall_round_body_cylinder_support,
             "box_penalty": -0.18 * box_like,
             "flat_round_penalty": -0.18 * flat_round_penalty,
             "compact_precision_penalty": -0.30 * compact_non_spherical_object,
+            "small_sphere_rule_penalty": -0.12 * small_spherical_body,
             "small_round_penalty": -0.10 * small_sphere_candidate,
         }
         score_terms["tripod"] = {
@@ -1381,6 +1459,7 @@ class GraspRuleClassifierNode(Node):
             "compact_roundness": 0.18 * round_compact_score,
             "sphere_evidence": 0.12 * sphere_like,
             "small_spherical_object": 0.30 * small_sphere_candidate,
+            "explicit_small_sphere_rule": 0.30 * small_spherical_body,
             "precision_bias": 0.02 * small_precision_object,
             "elongation_penalty": -0.10 * elongated_score,
             "power_penalty": -0.18 * power_size_score,
@@ -1391,6 +1470,7 @@ class GraspRuleClassifierNode(Node):
             "overall_smallness": 0.18 * precision_size_score,
             "narrow_body_support": 0.18 * narrow_body_score,
             "compact_non_spherical_support": 0.90 * compact_non_spherical_object,
+            "small_non_spherical_rule": 0.42 * small_non_spherical_body,
             "precision_shape": 0.20
             * max(
                 elongated_score,
@@ -1398,6 +1478,7 @@ class GraspRuleClassifierNode(Node):
             )
             * narrow_body_score,
             "not_power_object": 0.10 * (1.0 - box_power_object),
+            "small_sphere_rule_penalty": -0.42 * small_spherical_body,
             "sphere_penalty": -0.18 * (sphere_like * large_round_size_score),
             "round_shell_penalty": -0.28 * compact_round_shell_score * large_round_size_score,
             "small_round_penalty": -0.24 * small_sphere_candidate,
@@ -1554,6 +1635,8 @@ class GraspRuleClassifierNode(Node):
             decision_path.append("compact sphere fit dominates the small-object evidence")
         elif family_evidence.get("large_round_object", 0.0) >= 0.45:
             decision_path.append("round body is too large for a precision grasp")
+        elif family_evidence.get("tall_round_body_cylinder_support", 0.0) >= 0.45:
+            decision_path.append("curved body is too tall relative to its width to be spherical")
         elif family_evidence["box_power_object"] >= 0.55:
             decision_path.append("large object with thin grasp dimension")
         elif family_evidence["small_precision_object"] >= 0.55:
@@ -1581,6 +1664,8 @@ class GraspRuleClassifierNode(Node):
             decision_path.append("round fit is strong enough to override the tiny shell depth")
         elif family_evidence.get("large_round_object", 0.0) >= 0.45:
             decision_path.append("round geometry dominates over cylindrical wrap cues")
+        elif family_evidence.get("tall_round_body_cylinder_support", 0.0) >= 0.45:
+            decision_path.append("height is noticeably larger than width, so the round shell is treated as cylindrical")
         elif family_evidence["round_partial_shell"] >= max(family_evidence["box_like"], 0.58):
             decision_path.append("similar visible extents and sphere fit override shell thickness")
         elif family_evidence["box_like"] >= max(family_evidence["sphere_like"], 0.45):
@@ -1643,6 +1728,12 @@ class GraspRuleClassifierNode(Node):
             if strong_box_wrap:
                 grasp_span_basis_m = dimensions.thickness_like_m
                 basis_reason = "box-like power grasp uses thickness-like span"
+            elif family_evidence.get("tall_round_body_cylinder_support", 0.0) >= 0.45:
+                grasp_span_basis_m = max(
+                    cylinder.diameter_estimate_m,
+                    dimensions.middle_extent_m,
+                )
+                basis_reason = "tall curved body uses visible cylindrical diameter span"
             elif (
                 family_evidence.get("round_partial_shell", 0.0) >= 0.58
                 and sphere.diameter_estimate_m > 0.0

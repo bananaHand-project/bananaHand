@@ -9,10 +9,14 @@
 
   <buildtool_depend>ament_python</buildtool_depend>
 
+  <depend>banana_interfaces</depend>
   <depend>rclpy</depend>
+  <depend>std_msgs</depend>
 
   <exec_depend>ament_index_python</exec_depend>
+  <exec_depend>banana_3d_reconstruction</exec_depend>
   <exec_depend>launch</exec_depend>
+  <exec_depend>launch_ros</exec_depend>
   <exec_depend>python3-numpy</exec_depend>
 
   <test_depend>ament_copyright</test_depend>

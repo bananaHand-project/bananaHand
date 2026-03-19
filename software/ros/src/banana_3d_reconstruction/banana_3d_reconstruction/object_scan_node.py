@@ -103,6 +103,9 @@ class ObjectScanNode(Node):
         self._final_cloud_publisher = self.create_publisher(
             PointCloud2, self._output_topic, 1
         )
+        self._completed_scan_dir_publisher = self.create_publisher(
+            String, "/object_scan/completed_scan_dir", 10
+        )
         self._status_publisher = self.create_publisher(
             String, "/object_scan/status", 10
         )
@@ -818,6 +821,11 @@ class ObjectScanNode(Node):
         msg = open3d_to_pointcloud2(cloud, self.get_clock().now().to_msg(), self._frame_id)
         self._final_cloud_publisher.publish(msg)
 
+    def _publish_completed_scan_dir(self, scan_dir: Path) -> None:
+        msg = String()
+        msg.data = str(scan_dir.resolve())
+        self._completed_scan_dir_publisher.publish(msg)
+
     def _finish_processing(
         self,
         success: bool,
@@ -831,6 +839,8 @@ class ObjectScanNode(Node):
 
         if success:
             self.get_logger().info(message)
+            if saved_scan is not None:
+                self._publish_completed_scan_dir(saved_scan.scan_dir)
         else:
             self.get_logger().warning(message)
         self._publish_status(message)
@@ -912,6 +922,7 @@ class ObjectScanNode(Node):
         )
         write_metadata_json(scan_dir / "metadata.json", metadata)
         self._publish_final_cloud(saved_scan.downsampled_cloud)
+        self._publish_completed_scan_dir(scan_dir)
         response.success = True
         response.message = f"saved last scan copy to {scan_dir}"
         self._publish_status(response.message)

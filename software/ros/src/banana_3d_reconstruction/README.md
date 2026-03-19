@@ -10,6 +10,7 @@ Burst-mode RGB-D tabletop object scanning package for Intel RealSense depth came
 - Segments the tabletop object from the full frame on every burst frame.
 - Fuses only the selected object-only clouds.
 - Publishes the final clean cloud on `/object/point_cloud`.
+- Publishes the saved scan directory on `/object_scan/completed_scan_dir` after each successful scan save.
 - Saves the final cloud, downsampled cloud, one RGB image, metadata, and optional debug artifacts in a timestamped scan folder.
 
 This package is intentionally optimized for one practical Demo 2 workflow:
@@ -30,10 +31,22 @@ This is not trying to be a full 360 reconstruction system.
 
 ## Build
 
+If you only want the scan node itself:
+
 ```bash
 cd software/ros
 source /opt/ros/humble/setup.bash
 colcon build --symlink-install --packages-select banana_3d_reconstruction
+source install/setup.bash
+```
+
+If you want the combined scan -> ground removal -> grasp-classification launch from `banana_grasp_classification`:
+
+```bash
+cd software/ros
+source /opt/ros/humble/setup.bash
+colcon build --symlink-install --packages-select \
+  banana_interfaces banana_3d_reconstruction banana_grasp_classification
 source install/setup.bash
 ```
 
@@ -79,6 +92,12 @@ Optional service start:
 ros2 service call /object_scan/start_scan std_srvs/srv/Trigger "{}"
 ```
 
+End-to-end scan -> ground removal -> grasp classification:
+
+```bash
+ros2 launch banana_grasp_classification scan_to_grasp.launch.py
+```
+
 ## Preview Controls
 
 - `s`: start a burst scan
@@ -101,6 +120,8 @@ The preview overlays show:
 5. Keep the camera still during the short burst.
 6. Wait for processing to finish.
 7. Check `final_object_cloud.ply` or subscribe to `/object/point_cloud`.
+
+If you are running the combined scan-to-grasp launch, the saved scan directory is also published on `/object_scan/completed_scan_dir` so downstream grasp processing can start immediately.
 
 ## Automatic Object Selection
 
@@ -143,6 +164,7 @@ This is specifically meant to remove leftover desk patches and small junk before
 ## Topics
 
 - `/object/point_cloud` (`sensor_msgs/msg/PointCloud2`): final cleaned object cloud
+- `/object_scan/completed_scan_dir` (`std_msgs/msg/String`): absolute path to the newly saved scan directory
 - `/object_scan/status` (`std_msgs/msg/String`): scan state updates
 - `/object_scan/debug/raw_frame_cloud` (`sensor_msgs/msg/PointCloud2`, optional)
 - `/object_scan/debug/plane_removed_cloud` (`sensor_msgs/msg/PointCloud2`, optional)

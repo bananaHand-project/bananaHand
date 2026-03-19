@@ -35,6 +35,10 @@ setup(
                 "grasp_rule_classifier_node = "
                 "banana_grasp_classification.grasp_rule_classifier_node:main"
             ),
+            (
+                "scan_grasp_pipeline_node = "
+                "banana_grasp_classification.scan_grasp_pipeline_node:main"
+            ),
         ],
     },
 )
