@@ -1,0 +1,62 @@
+{
+    // Onshape URL of the assembly
+    "url": "https://cad.onshape.com/documents/0a0f899ce59c60b61859c991/w/d22d541f278fbcb2dfd45b88/e/3d0f6edf0206f9f0b58d8fd9",
+    // Output format
+    "output_format": "mujoco",
+    // Don't create actuators for passive joints
+    "joint_properties": {
+        "indexrev1": {"actuated": false},
+        "indexrev2": {"actuated": false},
+        "indexrev3": {"actuated": false},
+        "indexrev4": {"actuated": false},
+        "indexrev5": {"actuated": false},
+        "indexrev6": {"actuated": false},
+        "indexrev7": {"actuated": false},
+        "indexrev8": {"actuated": false},
+        "indexrev9": {"actuated": false},
+
+        "middlerev1": {"actuated": false},
+        "middlerev2": {"actuated": false},
+        "middlerev3": {"actuated": false},
+        "middlerev4": {"actuated": false},
+        "middlerev5": {"actuated": false},
+        "middlerev6": {"actuated": false},
+        "middlerev7": {"actuated": false},
+        "middlerev8": {"actuated": false},
+        "middlerev9": {"actuated": false},
+
+	"ringrev1": {"actuated": false},
+        "ringrev2": {"actuated": false},
+        "ringrev3": {"actuated": false},
+        "ringrev4": {"actuated": false},
+        "ringrev5": {"actuated": false},
+        "ringrev6": {"actuated": false},
+        "ringrev7": {"actuated": false},
+        "ringrev8": {"actuated": false},
+        "ringrev9": {"actuated": false},
+
+	"pinkyrev1": {"actuated": false},
+        "pinkyrev2": {"actuated": false},
+        "pinkyrev3": {"actuated": false},
+        "pinkyrev4": {"actuated": false},
+        "pinkyrev5": {"actuated": false},
+        "pinkyrev6": {"actuated": false},
+        "pinkyrev7": {"actuated": false},
+        "pinkyrev8": {"actuated": false},
+        "pinkyrev9": {"actuated": false},
+
+	"thumbrev1": {"actuated": false},
+        "thumbrev2": {"actuated": false},
+        "thumbrev3": {"actuated": false},
+        "thumbrev4": {"actuated": false},
+        "thumbrev5": {"actuated": false},
+        "thumbrev6": {"actuated": false},
+        "thumbrev7": {"actuated": false},
+        "thumbrev8": {"actuated": false},
+        "thumbrev9": {"actuated": false},
+
+	"clevisrev1": {"actuated": false},
+        "clevisrev2": {"actuated": false},
+        "thumbpivot": {"actuated": false}
+    }
+}
