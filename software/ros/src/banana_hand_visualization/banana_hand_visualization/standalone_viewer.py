@@ -11,7 +11,7 @@ import mujoco.viewer
 
 
 def main() -> None:
-    model_path = Path(get_package_share_directory("banana_hand_mujoco")) / "mujoco" / "scene.xml"
+    model_path = Path(get_package_share_directory("banana_hand_visualization")) / "mujoco" / "scene.xml"
     model = mujoco.MjModel.from_xml_path(str(model_path))
     mujoco.viewer.launch(model)
 

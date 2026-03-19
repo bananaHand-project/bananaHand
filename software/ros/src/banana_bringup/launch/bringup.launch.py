@@ -17,6 +17,8 @@ def generate_launch_description():
     include_visualization = LaunchConfiguration("include_visualization")
     show_preview = LaunchConfiguration("show_preview")
     show_mujoco_viewer = LaunchConfiguration("show_mujoco_viewer")
+    state_source = LaunchConfiguration("state_source")
+    show_fsr_debugger = LaunchConfiguration("show_fsr_debugger")
     launch_foxglove_bridge = LaunchConfiguration("launch_foxglove_bridge")
 
     hand_tracking_launch = os.path.join(
@@ -30,7 +32,7 @@ def generate_launch_description():
         "hand_mapping.launch.py",
     )
     mujoco_visualization_launch = os.path.join(
-        get_package_share_directory("banana_hand_mujoco"),
+        get_package_share_directory("banana_hand_visualization"),
         "launch",
         "mujoco_visualization.launch.py",
     )
@@ -43,6 +45,8 @@ def generate_launch_description():
         DeclareLaunchArgument("include_visualization", default_value="true"),
         DeclareLaunchArgument("show_preview", default_value="true"),
         DeclareLaunchArgument("show_mujoco_viewer", default_value="false"),
+        DeclareLaunchArgument("state_source", default_value="rx_positions"),
+        DeclareLaunchArgument("show_fsr_debugger", default_value="false"),
         DeclareLaunchArgument("launch_foxglove_bridge", default_value="true"),
 
         IncludeLaunchDescription(
@@ -60,8 +64,19 @@ def generate_launch_description():
             condition=IfCondition(include_visualization),
             launch_arguments={
                 "show_mujoco_viewer": show_mujoco_viewer,
+                "state_source": state_source,
                 "launch_foxglove_bridge": launch_foxglove_bridge,
             }.items(),
+        ),
+        Node(
+            package="banana_hand_visualization",
+            executable="fsr_visualizer",
+            name="banana_fsr_visualizer",
+            output="screen",
+            condition=IfCondition(show_fsr_debugger),
+            parameters=[{
+                "topic_name": "rx_force",
+            }],
         ),
 
         Node(

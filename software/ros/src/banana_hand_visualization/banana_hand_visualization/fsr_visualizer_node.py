@@ -9,27 +9,27 @@ import sys
 from dataclasses import dataclass
 from typing import Dict, List
 
+from PySide6.QtCore import QPointF, QRectF, QTimer, Qt
+from PySide6.QtGui import QColor, QFont, QPainter, QPen
+from PySide6.QtWidgets import QApplication, QLabel, QMainWindow, QVBoxLayout, QWidget
 import rclpy
 from rclpy.context import Context
 from rclpy.executors import SingleThreadedExecutor
 from rclpy.node import Node
-from rclpy.qos import HistoryPolicy, QoSProfile, ReliabilityPolicy
-from std_msgs.msg import UInt16MultiArray
 try:
     from rclpy.exceptions import RCLError
 except ImportError:
     from rclpy._rclpy_pybind11 import RCLError
+from rclpy.qos import HistoryPolicy, QoSProfile, ReliabilityPolicy
+from std_msgs.msg import UInt16MultiArray
 
-from PySide6.QtCore import QPointF, QRectF, QTimer, Qt
-from PySide6.QtGui import QColor, QFont, QPainter, QPen
-from PySide6.QtWidgets import QApplication, QLabel, QMainWindow, QVBoxLayout, QWidget
 
 FINGER_NAMES = ["middle", "index", "ring", "pinky", "thumb"]
 PALM_NAMES = ["palm_1", "palm_2", "palm_3", "palm_4", "palm_5"]
 ALL_SENSOR_NAMES = FINGER_NAMES + PALM_NAMES
 DISPLAY_NAMES = {
-    "middle": "Middle", # SWITCHED
-    "index": "Index", # SWITCHED
+    "middle": "Middle",
+    "index": "Index",
     "ring": "Ring",
     "pinky": "Pinky",
     "thumb": "Thumb",
@@ -94,7 +94,9 @@ class ForceColorMapper:
 
 
 class HandVisualizerWidget(QWidget):
-    def __init__(self, color_mapper: ForceColorMapper, contact_threshold: float, parent: QWidget | None = None):
+    def __init__(
+        self, color_mapper: ForceColorMapper, contact_threshold: float, parent: QWidget | None = None
+    ):
         super().__init__(parent)
         self.color_mapper = color_mapper
         self.contact_threshold = max(0.0, min(1.0, contact_threshold))
@@ -127,9 +129,7 @@ class HandVisualizerWidget(QWidget):
         y_mid = h * 0.56
         y_amp = h * 0.055
         y_offsets = [-y_amp, y_amp, -y_amp, y_amp, -y_amp]
-        return {
-            PALM_NAMES[i]: QPointF(x0 + i * dx, y_mid + y_offsets[i]) for i in range(5)
-        }
+        return {PALM_NAMES[i]: QPointF(x0 + i * dx, y_mid + y_offsets[i]) for i in range(5)}
 
     def paintEvent(self, event):
         del event
@@ -142,7 +142,6 @@ class HandVisualizerWidget(QWidget):
         w = self.width()
         h = self.height()
 
-        # Palm region.
         palm_color = QColor(66, 74, 83)
         painter.setPen(QPen(QColor(110, 118, 128), 2))
         painter.setBrush(palm_color)
@@ -202,11 +201,7 @@ class HandVisualizerWidget(QWidget):
             painter.setPen(QColor(225, 230, 235))
             painter.setFont(label_font)
             label_rect = QRectF(c.x() - 58, c.y() + palm_r + 8, 116, 22)
-            painter.drawText(
-                label_rect,
-                Qt.AlignHCenter | Qt.AlignVCenter,
-                DISPLAY_NAMES[palm],
-            )
+            painter.drawText(label_rect, Qt.AlignHCenter | Qt.AlignVCenter, DISPLAY_NAMES[palm])
 
             painter.setFont(value_font)
             value_text = f"{sample.filtered:.1f}"
@@ -218,7 +213,11 @@ class HandVisualizerWidget(QWidget):
         if not self.has_data:
             painter.setPen(QColor(220, 220, 220))
             painter.setFont(QFont("Sans Serif", 10))
-            painter.drawText(QRectF(0, 16, w, 24), Qt.AlignHCenter | Qt.AlignVCenter, "Waiting for data on topic...")
+            painter.drawText(
+                QRectF(0, 16, w, 24),
+                Qt.AlignHCenter | Qt.AlignVCenter,
+                "Waiting for data on topic...",
+            )
 
     def _draw_legend(self, painter: QPainter, w: int, h: int) -> None:
         lw = w * 0.62
@@ -238,8 +237,16 @@ class HandVisualizerWidget(QWidget):
         painter.setFont(QFont("Sans Serif", 9))
         labels_y = ly + lh + 6
         painter.drawText(QRectF(lx - 28, labels_y, 56, 20), Qt.AlignHCenter | Qt.AlignVCenter, "0")
-        painter.drawText(QRectF(lx + lw * 0.5 - 38, labels_y, 76, 20), Qt.AlignHCenter | Qt.AlignVCenter, "2048")
-        painter.drawText(QRectF(lx + lw - 38, labels_y, 76, 20), Qt.AlignHCenter | Qt.AlignVCenter, "4095")
+        painter.drawText(
+            QRectF(lx + lw * 0.5 - 38, labels_y, 76, 20),
+            Qt.AlignHCenter | Qt.AlignVCenter,
+            "2048",
+        )
+        painter.drawText(
+            QRectF(lx + lw - 38, labels_y, 76, 20),
+            Qt.AlignHCenter | Qt.AlignVCenter,
+            "4095",
+        )
 
 
 class RosForceSubscriberNode(Node):
@@ -260,7 +267,9 @@ class RosForceSubscriberNode(Node):
         self.topic_name = str(self.get_parameter("topic_name").value)
         self.finger_indices = list(self.get_parameter("finger_indices").value)
         if len(self.finger_indices) != 5:
-            self.get_logger().warn("finger_indices must have length 5; falling back to [0,1,2,3,4].")
+            self.get_logger().warn(
+                "finger_indices must have length 5; falling back to [0,1,2,3,4]."
+            )
             self.finger_indices = [0, 1, 2, 3, 4]
 
         self.alpha = float(self.get_parameter("alpha").value)
@@ -445,7 +454,6 @@ def main():
     win = MainWindow(node)
     win.show()
 
-    # Ensure Ctrl+C closes the Qt app cleanly.
     signal.signal(signal.SIGINT, lambda *_: app.quit())
 
     exit_code = 0

@@ -9,7 +9,7 @@
 
   <depend>launch</depend>
   <depend>launch_ros</depend>
-  <depend>banana_hand_mujoco</depend>
+  <depend>banana_hand_visualization</depend>
   <depend>banana_serial_bridge</depend>
   <depend>banana_hand_tracking</depend>
   <depend>banana_hand_mapping</depend>

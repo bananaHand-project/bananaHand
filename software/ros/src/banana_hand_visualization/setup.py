@@ -3,7 +3,7 @@ import os
 
 from setuptools import find_packages, setup
 
-package_name = "banana_hand_mujoco"
+package_name = "banana_hand_visualization"
 
 
 def package_files(pattern: str) -> list[tuple[str, list[str]]]:
@@ -28,7 +28,7 @@ setup(
         (os.path.join("share", package_name, "launch"), glob("launch/*.py")),
     ]
     + package_files("mujoco/**/*"),
-    install_requires=["setuptools", "mujoco"],
+    install_requires=["setuptools", "mujoco", "PySide6"],
     zip_safe=True,
     maintainer="lokesh",
     maintainer_email="lokeshpatel257@gmail.com",
@@ -37,11 +37,13 @@ setup(
     extras_require={"test": ["pytest"]},
     entry_points={
         "console_scripts": [
-            "mujoco_visualizer = banana_hand_mujoco.mujoco_visualizer_node:main",
-            "standalone_viewer = banana_hand_mujoco.standalone_viewer:main",
-            "test_actuator_publisher = banana_hand_mujoco.test_actuator_publisher:main",
-            "force_gauge_bridge = banana_hand_mujoco.force_gauge_bridge:main",
-            "test_force_publisher = banana_hand_mujoco.test_force_publisher:main",
+            "mujoco_visualizer = banana_hand_visualization.mujoco_visualizer_node:main",
+            "standalone_viewer = banana_hand_visualization.standalone_viewer:main",
+            "fsr_visualizer = banana_hand_visualization.fsr_visualizer_node:main",
+            "fsr_test_publisher = banana_hand_visualization.test_force_publisher:main",
+            "fsr_visualizer_test_publisher = banana_hand_visualization.test_force_publisher:main",
+            "test_actuator_publisher = banana_hand_visualization.test_actuator_publisher:main",
+            "test_force_publisher = banana_hand_visualization.test_force_publisher:main",
         ],
     },
 )

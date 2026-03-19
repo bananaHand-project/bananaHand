@@ -20,7 +20,7 @@ def generate_launch_description():
         DeclareLaunchArgument("refresh_hz", default_value="30.0"),
         DeclareLaunchArgument("simulate_if_no_data", default_value="false"),
         Node(
-            package="banana_hand_fsr_visualizer",
+            package="banana_hand_visualization",
             executable="fsr_visualizer",
             name="banana_fsr_visualizer",
             output="screen",

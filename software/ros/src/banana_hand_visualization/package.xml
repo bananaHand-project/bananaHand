@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package format="3">
-  <name>banana_hand_mujoco</name>
+  <name>banana_hand_visualization</name>
   <version>0.1.0</version>
   <description>MuJoCo-backed Banana Hand visualization for ROS 2 and Foxglove.</description>
   <maintainer email="lokeshpatel257@gmail.com">lokesh</maintainer>
@@ -9,9 +9,11 @@
   <depend>launch</depend>
   <depend>launch_ros</depend>
   <depend>ament_index_python</depend>
+  <depend>python3-pyside6</depend>
   <depend>rclpy</depend>
   <depend>sensor_msgs</depend>
   <depend>std_msgs</depend>
+  <depend>trajectory_msgs</depend>
 
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>

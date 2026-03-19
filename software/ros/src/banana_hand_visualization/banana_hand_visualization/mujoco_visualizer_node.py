@@ -12,34 +12,66 @@ import mujoco.viewer
 import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import JointState
-from std_msgs.msg import Float32MultiArray, UInt16MultiArray
+from std_msgs.msg import UInt16MultiArray
+from trajectory_msgs.msg import JointTrajectory
 
 
-ACTUATOR_COUNT = 6
 POSITION_COUNT = 8
 SETTLE_STEPS = 25
+FORCE_SENSOR_NAMES = [
+    "thumb",
+    "index",
+    "middle",
+    "ring",
+    "pinky",
+    "palm_1",
+    "palm_2",
+    "palm_3",
+    "palm_4",
+    "palm_5",
+]
 
 
 def clamp(value: float, lo: float, hi: float) -> float:
     return max(lo, min(hi, value))
 
 
+def normalize_state_source(value: str) -> str:
+    source = value.strip().lower()
+    aliases = {
+        "rx": "rx_positions",
+        "feedback": "rx_positions",
+        "rx_positions": "rx_positions",
+        "teleop": "teleop",
+        "teleop_joint_trajectory": "teleop",
+    }
+    if source not in aliases:
+        raise ValueError("state_source must be one of: rx_positions, teleop")
+    return aliases[source]
+
+
 class BananaHandMujocoVisualizer(Node):
     def __init__(self) -> None:
-        super().__init__("banana_hand_mujoco_visualizer")
+        super().__init__("banana_hand_visualization")
 
         default_model_path = (
-            Path(get_package_share_directory("banana_hand_mujoco")) / "mujoco" / "scene.xml"
+            Path(get_package_share_directory("banana_hand_visualization")) / "mujoco" / "scene.xml"
         )
         self.declare_parameter("model_path", str(default_model_path))
         self.declare_parameter("state_publish_rate_hz", 30.0)
         self.declare_parameter("show_mujoco_viewer", False)
-        self.declare_parameter("actuator_command_topic", "/banana_hand/actuator_commands")
-        self.declare_parameter("command_topic", "/tx_positions")
+        self.declare_parameter("state_source", "rx_positions")
+        self.declare_parameter("teleop_topic", "/hand/teleop_joint_trajectory")
         self.declare_parameter("feedback_topic", "/rx_positions")
+        self.declare_parameter("teleop_input_min_ratio", 0.0)
+        self.declare_parameter("teleop_input_max_ratio", 1.0)
+        self.declare_parameter("teleop_source_indices", [0, 1, 2, 3, 4, 5, -1, -1])
+        self.declare_parameter("teleop_fill_ratio", 0.0)
+        self.declare_parameter("force_input_topic", "/rx_force")
         self.declare_parameter("joint_state_topic", "/banana_hand/mujoco_joint_states")
-        self.declare_parameter("actuator_state_topic", "/banana_hand/actuator_state")
-        self.declare_parameter("command_state_topic", "/banana_hand/command_state")
+        self.declare_parameter("force_state_topic", "/banana_hand/force_state")
+        self.declare_parameter("force_sensor_indices", list(range(len(FORCE_SENSOR_NAMES))))
+        self.declare_parameter("force_scale", 1.0)
         self.declare_parameter(
             "actuator_map",
             [
@@ -65,13 +97,31 @@ class BananaHandMujocoVisualizer(Node):
             "motor_maxs",
             [3900.0, 3900.0, 3900.0, 3900.0, 3900.0, 3900.0, 4095.0, 4095.0],
         )
+        self.declare_parameter(
+            "position_invert_mask",
+            [True, True, True, True, True, True, False, False],
+        )
 
         self._state_publish_rate_hz = float(self.get_parameter("state_publish_rate_hz").value)
         self._show_mujoco_viewer = bool(self.get_parameter("show_mujoco_viewer").value)
+        self._state_source = normalize_state_source(str(self.get_parameter("state_source").value))
         self._actuator_map = list(self.get_parameter("actuator_map").value)
         self._direct_joint_map = list(self.get_parameter("direct_joint_map").value)
         self._motor_mins = [float(v) for v in self.get_parameter("motor_mins").value]
         self._motor_maxs = [float(v) for v in self.get_parameter("motor_maxs").value]
+        self._position_invert_mask = [
+            bool(v) for v in self.get_parameter("position_invert_mask").value
+        ]
+        self._teleop_input_min = float(self.get_parameter("teleop_input_min_ratio").value)
+        self._teleop_input_max = float(self.get_parameter("teleop_input_max_ratio").value)
+        self._teleop_source_indices = [
+            int(v) for v in self.get_parameter("teleop_source_indices").value
+        ]
+        self._teleop_fill_ratio = float(self.get_parameter("teleop_fill_ratio").value)
+        self._force_sensor_indices = [
+            int(v) for v in self.get_parameter("force_sensor_indices").value
+        ]
+        self._force_scale = float(self.get_parameter("force_scale").value)
 
         if len(self._actuator_map) != POSITION_COUNT:
             raise ValueError("actuator_map must contain 8 entries")
@@ -79,6 +129,14 @@ class BananaHandMujocoVisualizer(Node):
             raise ValueError("direct_joint_map must contain 8 entries")
         if len(self._motor_mins) != POSITION_COUNT or len(self._motor_maxs) != POSITION_COUNT:
             raise ValueError("motor_mins and motor_maxs must contain 8 entries")
+        if len(self._position_invert_mask) != POSITION_COUNT:
+            raise ValueError("position_invert_mask must contain 8 entries")
+        if len(self._teleop_source_indices) != POSITION_COUNT:
+            raise ValueError("teleop_source_indices must contain 8 entries")
+        if self._teleop_input_max <= self._teleop_input_min:
+            raise ValueError("teleop_input_max_ratio must be greater than teleop_input_min_ratio")
+        if len(self._force_sensor_indices) != len(FORCE_SENSOR_NAMES):
+            raise ValueError(f"force_sensor_indices must contain {len(FORCE_SENSOR_NAMES)} entries")
 
         model_path = Path(str(self.get_parameter("model_path").value)).expanduser().resolve()
         if not model_path.exists():
@@ -102,26 +160,22 @@ class BananaHandMujocoVisualizer(Node):
             for actuator_id in range(self._model.nu)
         }
 
-        self._last_positions = [0.0] * POSITION_COUNT
-
         joint_state_topic = str(self.get_parameter("joint_state_topic").value)
-        actuator_state_topic = str(self.get_parameter("actuator_state_topic").value)
-        command_state_topic = str(self.get_parameter("command_state_topic").value)
-        actuator_command_topic = str(self.get_parameter("actuator_command_topic").value)
-        command_topic = str(self.get_parameter("command_topic").value)
+        teleop_topic = str(self.get_parameter("teleop_topic").value)
         feedback_topic = str(self.get_parameter("feedback_topic").value)
+        force_input_topic = str(self.get_parameter("force_input_topic").value)
+        force_state_topic = str(self.get_parameter("force_state_topic").value)
 
         self._joint_pub = self.create_publisher(JointState, joint_state_topic, 10)
-        self._actuator_state_pub = self.create_publisher(JointState, actuator_state_topic, 10)
-        self._command_state_pub = self.create_publisher(JointState, command_state_topic, 10)
-        self.create_subscription(
-            Float32MultiArray, actuator_command_topic, self._on_actuator_commands, 10
-        )
-        self.create_subscription(UInt16MultiArray, command_topic, self._on_motor_positions, 10)
+        self._force_state_pub = self.create_publisher(JointState, force_state_topic, 10)
+        self.create_subscription(JointTrajectory, teleop_topic, self._on_teleop_trajectory, 10)
         self.create_subscription(JointState, feedback_topic, self._on_feedback_joint_state, 10)
+        self.create_subscription(UInt16MultiArray, force_input_topic, self._on_force, 10)
         self.create_timer(1.0 / self._state_publish_rate_hz, self._publish_states)
 
-        self.get_logger().info(f"Loaded MuJoCo model from {self._model_path}")
+        self.get_logger().info(
+            f"Loaded MuJoCo model from {self._model_path} using state_source='{self._state_source}'"
+        )
 
     def destroy_node(self) -> bool:
         if self._viewer is not None:
@@ -129,43 +183,35 @@ class BananaHandMujocoVisualizer(Node):
             self._viewer = None
         return super().destroy_node()
 
-    def _on_motor_positions(self, msg: UInt16MultiArray) -> None:
-        if len(msg.data) < POSITION_COUNT:
-            self.get_logger().warn(
-                f"Expected {POSITION_COUNT} motor positions, got {len(msg.data)}"
-            )
-            return
-        self._apply_motor_positions([float(v) for v in msg.data[:POSITION_COUNT]])
-
-    def _on_actuator_commands(self, msg: Float32MultiArray) -> None:
-        if len(msg.data) < ACTUATOR_COUNT:
-            self.get_logger().warn(
-                f"Expected {ACTUATOR_COUNT} actuator command values, got {len(msg.data)}"
-            )
-            return
-
-        normalized_values = [clamp(float(v), 0.0, 1.0) for v in msg.data[:ACTUATOR_COUNT]]
-        for actuator_id, normalized in enumerate(normalized_values):
-            ctrl_min, ctrl_max = self._model.actuator_ctrlrange[actuator_id]
-            self._data.ctrl[actuator_id] = ctrl_min + normalized * (ctrl_max - ctrl_min)
-
-        self._publish_command_state(normalized_values)
-        for _ in range(SETTLE_STEPS):
-            mujoco.mj_step(self._model, self._data)
-
     def _on_feedback_joint_state(self, msg: JointState) -> None:
+        if self._state_source != "rx_positions":
+            return
         if len(msg.position) < POSITION_COUNT:
             return
         self._apply_motor_positions([float(v) for v in msg.position[:POSITION_COUNT]])
 
-    def _apply_motor_positions(self, values: Sequence[float]) -> None:
-        self._last_positions = list(values)
+    def _on_teleop_trajectory(self, msg: JointTrajectory) -> None:
+        if self._state_source != "teleop":
+            return
+        if not msg.points:
+            return
 
+        src_positions = list(msg.points[0].positions)
+        adc_values = []
+        for output_idx, src_idx in enumerate(self._teleop_source_indices):
+            ratio = self._resolve_teleop_ratio(src_positions, src_idx)
+            adc_values.append(self._teleop_ratio_to_adc(ratio, output_idx))
+
+        self._apply_motor_positions(adc_values)
+
+    def _apply_motor_positions(self, values: Sequence[float]) -> None:
         for idx, raw_value in enumerate(values):
             min_raw = self._motor_mins[idx]
             max_raw = self._motor_maxs[idx]
             span = max_raw - min_raw
             normalized = 0.0 if span <= 0.0 else clamp((raw_value - min_raw) / span, 0.0, 1.0)
+            if self._position_invert_mask[idx]:
+                normalized = 1.0 - normalized
 
             actuator_name = self._actuator_map[idx]
             if actuator_name:
@@ -185,24 +231,43 @@ class BananaHandMujocoVisualizer(Node):
         for _ in range(SETTLE_STEPS):
             mujoco.mj_step(self._model, self._data)
 
+    def _value_at(self, data: Sequence[int], index: int) -> float:
+        if index < 0 or index >= len(data):
+            return 0.0
+        return float(data[index]) * self._force_scale
+
+    def _resolve_teleop_ratio(self, source: Sequence[float], src_idx: int) -> float:
+        if src_idx < 0 or src_idx >= len(source):
+            return self._teleop_fill_ratio
+        return float(source[src_idx])
+
+    def _teleop_ratio_to_adc(self, ratio: float, output_idx: int) -> float:
+        span = self._teleop_input_max - self._teleop_input_min
+        normalized = 0.0
+        if span > 0.0:
+            normalized = clamp((ratio - self._teleop_input_min) / span, 0.0, 1.0)
+        min_adc = self._motor_mins[output_idx]
+        max_adc = self._motor_maxs[output_idx]
+        return min_adc + normalized * (max_adc - min_adc)
+
+    def _on_force(self, msg: UInt16MultiArray) -> None:
+        values = [
+            self._value_at(msg.data, sensor_idx)
+            for sensor_idx in self._force_sensor_indices
+        ]
+
+        state_msg = JointState()
+        state_msg.header.stamp = self.get_clock().now().to_msg()
+        state_msg.name = list(FORCE_SENSOR_NAMES)
+        state_msg.position = values
+        self._force_state_pub.publish(state_msg)
+
     def _publish_states(self) -> None:
         stamp = self.get_clock().now().to_msg()
         self._joint_pub.publish(self._build_joint_state_msg(stamp))
-        self._actuator_state_pub.publish(self._build_actuator_state_msg(stamp))
         if self._viewer is not None:
             with self._viewer.lock():
                 self._viewer.sync()
-
-    def _publish_command_state(self, values: Sequence[float]) -> None:
-        msg = JointState()
-        msg.header.stamp = self.get_clock().now().to_msg()
-        msg.name = [
-            mujoco.mj_id2name(self._model, mujoco.mjtObj.mjOBJ_ACTUATOR, actuator_id)
-            or f"actuator_{actuator_id}"
-            for actuator_id in range(ACTUATOR_COUNT)
-        ]
-        msg.position = [float(value) for value in values]
-        self._command_state_pub.publish(msg)
 
     def _build_joint_state_msg(self, stamp) -> JointState:
         msg = JointState()
@@ -217,20 +282,6 @@ class BananaHandMujocoVisualizer(Node):
             msg.name.append(joint_name)
             msg.position.append(float(self._data.qpos[qpos_adr]))
         return msg
-
-    def _build_actuator_state_msg(self, stamp) -> JointState:
-        msg = JointState()
-        msg.header.stamp = stamp
-        msg.name = []
-        msg.position = []
-        for actuator_id in range(self._model.nu):
-            actuator_name = mujoco.mj_id2name(
-                self._model, mujoco.mjtObj.mjOBJ_ACTUATOR, actuator_id
-            )
-            msg.name.append(actuator_name or f"actuator_{actuator_id}")
-            msg.position.append(float(self._data.ctrl[actuator_id]))
-        return msg
-
 
 def main(args: list[str] | None = None) -> None:
     rclpy.init(args=args)

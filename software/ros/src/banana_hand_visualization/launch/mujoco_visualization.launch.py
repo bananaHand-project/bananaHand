@@ -10,19 +10,22 @@ from ament_index_python.packages import PackageNotFoundError, get_package_share_
 
 def generate_launch_description() -> LaunchDescription:
     show_mujoco_viewer = LaunchConfiguration("show_mujoco_viewer")
+    state_source = LaunchConfiguration("state_source")
     launch_foxglove_bridge = LaunchConfiguration("launch_foxglove_bridge")
 
     actions = [
         DeclareLaunchArgument("show_mujoco_viewer", default_value="false"),
+        DeclareLaunchArgument("state_source", default_value="rx_positions"),
         DeclareLaunchArgument("launch_foxglove_bridge", default_value="true"),
         Node(
-            package="banana_hand_mujoco",
+            package="banana_hand_visualization",
             executable="mujoco_visualizer",
-            name="banana_hand_mujoco_visualizer",
+            name="banana_hand_visualization",
             output="screen",
             parameters=[
                 {
                     "show_mujoco_viewer": show_mujoco_viewer,
+                    "state_source": state_source,
                 }
             ],
         ),

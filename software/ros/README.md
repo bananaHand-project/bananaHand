@@ -5,7 +5,7 @@ End-to-end launch now runs:
 - hand mapping (`banana_hand_mapping`)  
   `/hand/teleop_joint_trajectory` -> `/tx_positions` (scaled to `0..4095`)
 - serial bridge (`banana_serial_bridge`) to hardware
-- MuJoCo visualization (`banana_hand_mujoco`) for local MuJoCo viewing and Foxglove
+- visualization (`banana_hand_visualization`) for MuJoCo, Foxglove, and force-debug tooling
 
 ## Build
 ```bash
@@ -15,7 +15,7 @@ pip install --user -r src/banana_hand_tracking/requirements.txt
 pip install --user mujoco
 colcon build --symlink-install --packages-select \
   banana_interfaces banana_hand_tracking banana_hand_mapping \
-  banana_serial_bridge banana_hand_mujoco banana_bringup
+  banana_serial_bridge banana_hand_visualization banana_bringup
 source install/setup.bash
 ```
 
@@ -54,6 +54,7 @@ Args:
 - `include_mapping` (default `true`)
 - `include_visualization` (default `true`)
 - `show_mujoco_viewer` (default `false`)
+- `show_fsr_debugger` (default `false`)
 - `launch_foxglove_bridge` (default `true`)
 
 ## Foxglove Visualization
@@ -88,31 +89,39 @@ Dependencies:
 Install GUI dependency if needed:
 ```bash
 sudo apt install python3-pyside6
-# or
-pip install -r src/banana_hand_fsr_visualizer/requirements.txt
 ```
 
-Build the package:
+Build the visualization package:
 ```bash
 cd software/ros
 source /opt/ros/humble/setup.bash
-colcon build --symlink-install --packages-select banana_hand_fsr_visualizer
+colcon build --symlink-install --packages-select banana_hand_visualization
 source install/setup.bash
 ```
 
 Run visualizer:
 ```bash
-ros2 run banana_hand_fsr_visualizer fsr_visualizer
+ros2 run banana_hand_visualization fsr_visualizer
 ```
 
 Run with launch file:
 ```bash
-ros2 launch banana_hand_fsr_visualizer fsr_visualizer.launch.py
+ros2 launch banana_hand_visualization fsr_visualizer.launch.py
+```
+
+Run visualizer plus a synthetic test publisher:
+```bash
+ros2 launch banana_hand_visualization fsr_visualizer_test.launch.py
 ```
 
 No-FSR test publisher:
 ```bash
-ros2 run banana_hand_fsr_visualizer fsr_test_publisher
+ros2 run banana_hand_visualization fsr_test_publisher
+```
+
+Explicit test-publisher alias:
+```bash
+ros2 run banana_hand_visualization fsr_visualizer_test_publisher
 ```
 
 Quick one-liner test publish:
@@ -132,7 +141,7 @@ Key visualizer parameters:
 
 Example overrides:
 ```bash
-ros2 run banana_hand_fsr_visualizer fsr_visualizer --ros-args \
+ros2 run banana_hand_visualization fsr_visualizer --ros-args \
   -p topic_name:=rx_force \
   -p finger_indices:="[0,2,4,6,8]" \
   -p alpha:=0.35 \
@@ -141,6 +150,6 @@ ros2 run banana_hand_fsr_visualizer fsr_visualizer --ros-args \
 ```
 
 Adapting to a different message type:
-- Edit `banana_hand_fsr_visualizer/fsr_visualizer_node.py`.
+- Edit `banana_hand_visualization/fsr_visualizer_node.py`.
 - Change `create_subscription(...)` message type.
 - Update `_on_force_msg()` to output 5 values ordered as thumb/index/middle/ring/pinky.
