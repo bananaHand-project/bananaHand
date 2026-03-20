@@ -4,7 +4,7 @@
 
 **BananaHand** is an open-source 16 DOF/6 DOA humanoid hand designed for physical AI research and deployment on light-weight robot arms.
 
-<img src="assets/images/bh-demo.gif" width="250"><img src="assets/images/bh-demo-telem-2.gif" width="450">
+![Hand teleop and telemetry demo](assets/images/bh-demo-combined.gif)
 
 BananaHand features human-like proportions with no fore-arm, up to 4lb payload capacity, integrated palm and finger tip FSR based force sensing, and a low BOM cost of $900USD.
 
