@@ -151,6 +151,8 @@ Important practical behavior:
 
 The recommended opening is:
 - `recommended_opening_m = grasp_span_basis_m + opening_margin_m`
+- for round-like `cylindrical` or `spherical` grasps, `grasp_span_basis_m` uses the cloud's `width_like` span by default
+- box-like power grasps still keep their existing thickness-like span logic
 
 By default:
 - `opening_margin_m = 0.03`
@@ -295,12 +297,14 @@ Useful overrides:
 ros2 launch banana_grasp_classification scan_to_grasp.launch.py \
   output_dir:=/tmp/banana_scans \
   show_preview:=true \
+  enable_roi_selection:=true \
   result_topic:=/grasp_classification/recommendation
 ```
 
 Exposed launch arguments:
 - `params_file`
 - `show_preview`
+- `enable_roi_selection`
 - `device_serial`
 - `output_dir`
 - `result_topic`
@@ -316,6 +320,7 @@ These are the only classifier-threshold arguments currently exposed through the 
 
 Behavior:
 - when `/object_scan/start_scan` finishes successfully, the scan node saves the usual `.ply` and metadata files
+- when ROI selection is enabled, the preview starts with a full-frame ROI and you can drag a box so only depth points inside that ROI feed the scan
 - the scan node then publishes the saved scan directory on `/object_scan/completed_scan_dir`
 - `scan_grasp_pipeline_node` immediately runs the same ground-removal and classification executables used by the manual pipeline
 - after the grasp JSON is saved, the pipeline node publishes `/grasp_classification/recommendation`

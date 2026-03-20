@@ -7,7 +7,7 @@ Burst-mode RGB-D tabletop object scanning package for Intel RealSense depth came
 - Starts aligned RealSense color and depth streams with `pyrealsense2`.
 - Shows a live OpenCV preview so you can always see the camera feed.
 - Captures a short burst while the camera is held mostly still.
-- Segments the tabletop object from the full frame on every burst frame.
+- Segments the tabletop object from the ROI-filtered frame on every burst frame when ROI selection is enabled, otherwise from the full frame.
 - Fuses only the selected object-only clouds.
 - Publishes the final clean cloud on `/object/point_cloud`.
 - Publishes the saved scan directory on `/object_scan/completed_scan_dir` after each successful scan save.
@@ -24,8 +24,9 @@ This package is intentionally optimized for one practical Demo 2 workflow:
 1. Put one object on a mostly clear desk.
 2. Hold the RealSense mostly still at a good diagonal angle.
 3. Start the burst scan.
-4. Let the node segment the tabletop object automatically from the full frame.
-5. Use the saved partial point cloud for downstream geometry features or classification.
+4. If needed, drag an ROI on the preview so only depth points inside that box are kept for the scan.
+5. Let the node segment the tabletop object automatically from the ROI-filtered frame.
+6. Use the saved partial point cloud for downstream geometry features or classification.
 
 This is not trying to be a full 360 reconstruction system.
 
@@ -83,6 +84,7 @@ Optional overrides:
 ros2 launch banana_3d_reconstruction object_scan.launch.py \
   output_dir:=/tmp/banana_scans \
   show_preview:=true \
+  enable_roi_selection:=true \
   device_serial:=<optional_camera_serial>
 ```
 
@@ -102,14 +104,13 @@ ros2 launch banana_grasp_classification scan_to_grasp.launch.py
 
 - `s`: start a burst scan
 - `e`: end the current burst early
+- `r`: reset the ROI to the full frame
 - `q`: quit the node
+- left mouse drag on the preview: set the ROI used for depth points during the next scan
 
-The preview overlays show:
-- burst mode only
-- one object on a mostly clear desk
-- hold the camera mostly still at a good diagonal angle
-- current node state
-- the basic controls
+The preview shows:
+- the live color feed
+- the active ROI rectangle when ROI selection is enabled
 
 ## Operator Instructions
 
@@ -125,10 +126,10 @@ If you are running the combined scan-to-grasp launch, the saved scan directory i
 
 ## Automatic Object Selection
 
-Each burst frame uses the same full-frame tabletop segmentation path:
+Each burst frame uses the same tabletop segmentation path:
 
-1. Build the aligned RGB-D point cloud from the full frame.
-2. Fit the dominant plane from the full frame.
+1. Build the aligned RGB-D point cloud from the current ROI selection.
+2. Fit the dominant plane from the ROI-filtered cloud.
 3. Remove the desk plane.
 4. Cluster the above-plane points.
 5. Reject degenerate clusters such as tiny slivers, line-like fragments, and sparse junk.
@@ -138,6 +139,8 @@ Each burst frame uses the same full-frame tabletop segmentation path:
    - more object-like in 3D extent
 
 This assumes there is one main tabletop object and minimal clutter.
+
+When `enable_roi_selection:=true` (the default), the preview starts with a full-frame ROI so behavior stays unchanged until you drag a smaller box.
 
 ## Burst Fusion
 

@@ -1686,6 +1686,8 @@ class GraspRuleClassifierNode(Node):
 
         if "thickness-like span" in basis_reason:
             decision_path.append("box thickness chosen as the wrap span")
+        elif "width-like span" in basis_reason:
+            decision_path.append("visible width-like span used for pre-contact aperture")
         elif "body diameter" in basis_reason:
             decision_path.append("body diameter chosen as the wrap span")
         elif "sphere diameter" in basis_reason:
@@ -1716,6 +1718,15 @@ class GraspRuleClassifierNode(Node):
         sphere = geometry.sphere
 
         basis_reason = "fallback span"
+        round_like_wrap = (
+            family_evidence.get("round_partial_shell", 0.0) >= 0.50
+            or family_evidence.get("tall_round_body_cylinder_support", 0.0) >= 0.35
+            or family_evidence["sphere_like"] >= 0.40
+            or (
+                family_evidence["cylinder_like"] >= 0.45
+                and family_evidence["box_like"] < 0.55
+            )
+        )
         if selected_grip == "cylindrical":
             strong_box_wrap = (
                 family_evidence["box_power_object"] >= 0.60
@@ -1728,18 +1739,9 @@ class GraspRuleClassifierNode(Node):
             if strong_box_wrap:
                 grasp_span_basis_m = dimensions.thickness_like_m
                 basis_reason = "box-like power grasp uses thickness-like span"
-            elif family_evidence.get("tall_round_body_cylinder_support", 0.0) >= 0.45:
-                grasp_span_basis_m = max(
-                    cylinder.diameter_estimate_m,
-                    dimensions.middle_extent_m,
-                )
-                basis_reason = "tall curved body uses visible cylindrical diameter span"
-            elif (
-                family_evidence.get("round_partial_shell", 0.0) >= 0.58
-                and sphere.diameter_estimate_m > 0.0
-            ):
-                grasp_span_basis_m = sphere.diameter_estimate_m
-                basis_reason = "partial round shell uses sphere diameter as wrap span"
+            elif round_like_wrap:
+                grasp_span_basis_m = dimensions.width_like_m
+                basis_reason = "round-like power grasp uses visible width-like span"
             elif cylinder.diameter_estimate_m > 0.0:
                 # For a single-view half-cylinder the algebraic circle fit tends to
                 # underestimate the true diameter because it only sees one arc.
@@ -1758,12 +1760,8 @@ class GraspRuleClassifierNode(Node):
                 )
                 basis_reason = "fallback to stable power-grasp span"
         elif selected_grip == "spherical":
-            if sphere.diameter_estimate_m > 0.0:
-                grasp_span_basis_m = sphere.diameter_estimate_m
-                basis_reason = "sphere diameter estimated from least-squares fit"
-            else:
-                grasp_span_basis_m = float(np.median(dimensions.pca_extents))
-                basis_reason = "fallback to median compact extent"
+            grasp_span_basis_m = dimensions.width_like_m
+            basis_reason = "sphere-like grasp uses visible width-like span"
         elif selected_grip == "tripod":
             if family_evidence["sphere_like"] >= 0.45 and sphere.diameter_estimate_m > 0.0:
                 grasp_span_basis_m = sphere.diameter_estimate_m

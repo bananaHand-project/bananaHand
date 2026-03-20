@@ -8,6 +8,7 @@ object_scan_node:
     depth_height: 480
     fps: 30
     show_preview: true
+    enable_roi_selection: true
     burst_duration_sec: 1.5
     burst_frame_limit: 40
     output_dir: "~/banana_scans"

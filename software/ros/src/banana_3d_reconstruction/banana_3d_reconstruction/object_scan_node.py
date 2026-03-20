@@ -73,6 +73,9 @@ class SavedScan:
     scan_dir: Path
 
 
+RoiRect = tuple[int, int, int, int]
+
+
 class ObjectScanNode(Node):
     """Capture, segment, fuse, and publish a burst-mode tabletop object cloud."""
 
@@ -99,6 +102,12 @@ class ObjectScanNode(Node):
         self._keyboard_stop = threading.Event()
         self._stdin_fd: Optional[int] = None
         self._stdin_term_settings: Optional[list[int]] = None
+        self._preview_frame_size: Optional[tuple[int, int]] = None
+        self._preview_roi_xyxy: Optional[RoiRect] = None
+        self._scan_roi_xyxy: Optional[RoiRect] = None
+        self._roi_drag_active = False
+        self._roi_drag_anchor: Optional[tuple[int, int]] = None
+        self._roi_drag_current: Optional[tuple[int, int]] = None
 
         self._final_cloud_publisher = self.create_publisher(
             PointCloud2, self._output_topic, 1
@@ -133,6 +142,15 @@ class ObjectScanNode(Node):
         self._preview_window = "object_scan_preview"
         if self._show_preview:
             cv2.namedWindow(self._preview_window, cv2.WINDOW_NORMAL)
+            if self._enable_roi_selection:
+                cv2.setMouseCallback(self._preview_window, self._on_preview_mouse)
+                self.get_logger().info(
+                    "Preview ROI enabled: drag with the left mouse button to set the depth ROI, press r to reset to the full frame"
+                )
+        elif self._enable_roi_selection:
+            self.get_logger().info(
+                "Preview ROI is enabled, but preview is hidden; scans will use the full-frame ROI"
+            )
 
         self._start_camera()
         self._start_keyboard_listener()
@@ -150,6 +168,7 @@ class ObjectScanNode(Node):
         self.declare_parameter("depth_height", 480)
         self.declare_parameter("fps", 30)
         self.declare_parameter("show_preview", True)
+        self.declare_parameter("enable_roi_selection", True)
         self.declare_parameter("burst_duration_sec", 1.5)
         self.declare_parameter("burst_frame_limit", 40)
         self.declare_parameter("output_dir", "~/banana_scans")
@@ -183,6 +202,9 @@ class ObjectScanNode(Node):
         self._depth_height = int(self.get_parameter("depth_height").value)
         self._fps = int(self.get_parameter("fps").value)
         self._show_preview = bool(self.get_parameter("show_preview").value)
+        self._enable_roi_selection = bool(
+            self.get_parameter("enable_roi_selection").value
+        )
         self._burst_duration_sec = float(
             self.get_parameter("burst_duration_sec").value
         )
@@ -359,6 +381,212 @@ class ObjectScanNode(Node):
             self._publish_status("shutdown requested from terminal")
             rclpy.shutdown()
 
+    @staticmethod
+    def _full_frame_roi(frame_width: int, frame_height: int) -> RoiRect:
+        return (0, 0, frame_width, frame_height)
+
+    @staticmethod
+    def _clamp_point_to_frame(
+        point_xy: tuple[int, int], frame_width: int, frame_height: int
+    ) -> tuple[int, int]:
+        max_x = max(frame_width - 1, 0)
+        max_y = max(frame_height - 1, 0)
+        return (
+            min(max(int(point_xy[0]), 0), max_x),
+            min(max(int(point_xy[1]), 0), max_y),
+        )
+
+    @classmethod
+    def _clamp_roi_to_frame(
+        cls, roi_xyxy: RoiRect, frame_width: int, frame_height: int
+    ) -> Optional[RoiRect]:
+        if frame_width <= 0 or frame_height <= 0:
+            return None
+        x0, y0, x1, y1 = roi_xyxy
+        x0, y0 = cls._clamp_point_to_frame((x0, y0), frame_width, frame_height)
+        x1 = min(max(int(x1), x0 + 1), frame_width)
+        y1 = min(max(int(y1), y0 + 1), frame_height)
+        if x1 <= x0 or y1 <= y0:
+            return None
+        return (x0, y0, x1, y1)
+
+    @classmethod
+    def _normalize_roi_points(
+        cls,
+        anchor_xy: tuple[int, int],
+        current_xy: tuple[int, int],
+        frame_width: int,
+        frame_height: int,
+    ) -> Optional[RoiRect]:
+        if frame_width <= 1 or frame_height <= 1:
+            return None
+        start_x, start_y = cls._clamp_point_to_frame(
+            anchor_xy, frame_width, frame_height
+        )
+        end_x, end_y = cls._clamp_point_to_frame(
+            current_xy, frame_width, frame_height
+        )
+        x0 = min(start_x, end_x)
+        y0 = min(start_y, end_y)
+        x1 = max(start_x, end_x) + 1
+        y1 = max(start_y, end_y) + 1
+        if (x1 - x0) < 2 or (y1 - y0) < 2:
+            return None
+        return (x0, y0, x1, y1)
+
+    @staticmethod
+    def _describe_roi(roi_xyxy: RoiRect) -> str:
+        x0, y0, x1, y1 = roi_xyxy
+        return f"x={x0}, y={y0}, w={x1 - x0}, h={y1 - y0}"
+
+    def _sync_roi_to_frame_locked(self, frame_width: int, frame_height: int) -> None:
+        self._preview_frame_size = (frame_width, frame_height)
+        full_frame_roi = self._full_frame_roi(frame_width, frame_height)
+        if not self._enable_roi_selection:
+            self._preview_roi_xyxy = full_frame_roi
+            return
+        if self._preview_roi_xyxy is None:
+            self._preview_roi_xyxy = full_frame_roi
+        else:
+            self._preview_roi_xyxy = self._clamp_roi_to_frame(
+                self._preview_roi_xyxy, frame_width, frame_height
+            )
+            if self._preview_roi_xyxy is None:
+                self._preview_roi_xyxy = full_frame_roi
+        if self._roi_drag_anchor is not None:
+            self._roi_drag_anchor = self._clamp_point_to_frame(
+                self._roi_drag_anchor, frame_width, frame_height
+            )
+        if self._roi_drag_current is not None:
+            self._roi_drag_current = self._clamp_point_to_frame(
+                self._roi_drag_current, frame_width, frame_height
+            )
+
+    def _selected_roi_locked(self, frame_width: int, frame_height: int) -> RoiRect:
+        self._sync_roi_to_frame_locked(frame_width, frame_height)
+        if self._preview_roi_xyxy is not None:
+            return self._preview_roi_xyxy
+        return self._full_frame_roi(frame_width, frame_height)
+
+    def _on_preview_mouse(
+        self, event: int, x: int, y: int, flags: int, param: object
+    ) -> None:
+        del flags, param
+        message = None
+        with self._state_lock:
+            if (
+                not self._enable_roi_selection
+                or self._preview_frame_size is None
+                or self._scanning
+                or self._processing
+                or self._pending_start
+            ):
+                return
+            frame_width, frame_height = self._preview_frame_size
+            point_xy = self._clamp_point_to_frame((x, y), frame_width, frame_height)
+            if event == cv2.EVENT_LBUTTONDOWN:
+                self._roi_drag_active = True
+                self._roi_drag_anchor = point_xy
+                self._roi_drag_current = point_xy
+                return
+            if event == cv2.EVENT_MOUSEMOVE:
+                if self._roi_drag_active and self._roi_drag_anchor is not None:
+                    self._roi_drag_current = point_xy
+                return
+            if event != cv2.EVENT_LBUTTONUP:
+                return
+            if not self._roi_drag_active or self._roi_drag_anchor is None:
+                return
+            roi_xyxy = self._normalize_roi_points(
+                self._roi_drag_anchor,
+                point_xy,
+                frame_width,
+                frame_height,
+            )
+            self._roi_drag_active = False
+            self._roi_drag_anchor = None
+            self._roi_drag_current = None
+            if roi_xyxy is None:
+                return
+            self._preview_roi_xyxy = roi_xyxy
+            message = f"roi updated: {self._describe_roi(roi_xyxy)}"
+
+        if message:
+            self.get_logger().info(message)
+            self._publish_status(message)
+
+    def _reset_preview_roi(self) -> Optional[str]:
+        with self._state_lock:
+            if (
+                not self._enable_roi_selection
+                or self._preview_frame_size is None
+                or self._scanning
+                or self._processing
+                or self._pending_start
+            ):
+                return None
+            frame_width, frame_height = self._preview_frame_size
+            roi_xyxy = self._full_frame_roi(frame_width, frame_height)
+            self._preview_roi_xyxy = roi_xyxy
+            self._roi_drag_active = False
+            self._roi_drag_anchor = None
+            self._roi_drag_current = None
+        return f"roi reset: {self._describe_roi(roi_xyxy)}"
+
+    def _draw_roi_overlay(self, preview_image_bgr: np.ndarray) -> None:
+        if not self._enable_roi_selection:
+            return
+        frame_height, frame_width = preview_image_bgr.shape[:2]
+        with self._state_lock:
+            roi_xyxy = self._selected_roi_locked(frame_width, frame_height)
+            drag_roi_xyxy = None
+            if (
+                self._roi_drag_active
+                and self._roi_drag_anchor is not None
+                and self._roi_drag_current is not None
+            ):
+                drag_roi_xyxy = self._normalize_roi_points(
+                    self._roi_drag_anchor,
+                    self._roi_drag_current,
+                    frame_width,
+                    frame_height,
+                )
+
+        x0, y0, x1, y1 = roi_xyxy
+        cv2.rectangle(preview_image_bgr, (x0, y0), (x1 - 1, y1 - 1), (0, 255, 0), 2)
+        label_x = min(max(x0 + 6, 6), max(frame_width - 64, 6))
+        label_y = min(max(y0 + 22, 22), max(frame_height - 6, 22))
+        cv2.putText(
+            preview_image_bgr,
+            "ROI",
+            (label_x, label_y),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            0.7,
+            (0, 255, 0),
+            2,
+            cv2.LINE_AA,
+        )
+        if drag_roi_xyxy is not None:
+            drag_x0, drag_y0, drag_x1, drag_y1 = drag_roi_xyxy
+            cv2.rectangle(
+                preview_image_bgr,
+                (drag_x0, drag_y0),
+                (drag_x1 - 1, drag_y1 - 1),
+                (0, 200, 255),
+                2,
+            )
+
+    def _apply_depth_roi(
+        self, depth_image_m: np.ndarray, roi_xyxy: RoiRect
+    ) -> np.ndarray:
+        frame_height, frame_width = depth_image_m.shape[:2]
+        if roi_xyxy == self._full_frame_roi(frame_width, frame_height):
+            return depth_image_m
+        x0, y0, x1, y1 = roi_xyxy
+        masked_depth_image_m = np.zeros_like(depth_image_m)
+        masked_depth_image_m[y0:y1, x0:x1] = depth_image_m[y0:y1, x0:x1]
+        return masked_depth_image_m
+
     def _apply_depth_filters(self, depth_frame: object) -> object:
         filtered = self._decimation_filter.process(depth_frame)
         filtered = self._spatial_filter.process(filtered)
@@ -418,6 +646,10 @@ class ObjectScanNode(Node):
         depth_image_m[
             (depth_image_m < self._min_depth_m) | (depth_image_m > self._max_depth_m)
         ] = 0.0
+        with self._state_lock:
+            self._sync_roi_to_frame_locked(
+                depth_image_m.shape[1], depth_image_m.shape[0]
+            )
 
         return FrameBundle(
             color_image_bgr=color_image_bgr,
@@ -436,6 +668,7 @@ class ObjectScanNode(Node):
 
     def _handle_capture_state(self, frame: FrameBundle) -> None:
         frames_to_process: Optional[list[FrameBundle]] = None
+        scan_roi_xyxy: Optional[RoiRect] = None
 
         with self._state_lock:
             if self._pending_start and not self._scanning and not self._processing:
@@ -454,24 +687,33 @@ class ObjectScanNode(Node):
                 if self._stop_scan_early or now >= self._scan_end_monotonic or burst_limit_hit:
                     frames_to_process = list(self._captured_frames)
                     self._captured_frames = []
+                    scan_roi_xyxy = self._scan_roi_xyxy
                     self._scanning = False
                     self._processing = True
                     self._pending_start = False
                     self._stop_scan_early = False
+                    self._scan_roi_xyxy = None
 
         if frames_to_process:
+            if scan_roi_xyxy is None:
+                scan_roi_xyxy = self._full_frame_roi(
+                    frame.depth_image_m.shape[1], frame.depth_image_m.shape[0]
+                )
             self._publish_status(
                 f"processing {len(frames_to_process)} burst frames"
             )
             self._processing_thread = threading.Thread(
                 target=self._process_scan,
-                args=(frames_to_process,),
+                args=(frames_to_process, scan_roi_xyxy),
                 daemon=True,
             )
             self._processing_thread.start()
 
     def _begin_scan_locked(self, frame: FrameBundle) -> None:
         now = time.monotonic()
+        self._scan_roi_xyxy = self._selected_roi_locked(
+            frame.depth_image_m.shape[1], frame.depth_image_m.shape[0]
+        )
         self._pending_start = False
         self._scanning = True
         self._stop_scan_early = False
@@ -479,12 +721,19 @@ class ObjectScanNode(Node):
         self._scan_started_monotonic = now
         self._scan_end_monotonic = now + self._burst_duration_sec
         self._last_keyframe_time = now
-        self.get_logger().info("Starting burst scan")
+        if self._enable_roi_selection and self._scan_roi_xyxy is not None:
+            self.get_logger().info(
+                f"Starting burst scan with ROI {self._describe_roi(self._scan_roi_xyxy)}"
+            )
+        else:
+            self.get_logger().info("Starting burst scan")
         self._publish_status(
             "burst scan started: keep one object on a mostly clear desk and hold the camera mostly still"
         )
 
-    def _process_scan(self, captured_frames: list[FrameBundle]) -> None:
+    def _process_scan(
+        self, captured_frames: list[FrameBundle], scan_roi_xyxy: RoiRect
+    ) -> None:
         scan_dir = self._make_scan_dir()
         debug_dir = scan_dir / "debug"
         if self._save_intermediate_debug_clouds:
@@ -500,9 +749,10 @@ class ObjectScanNode(Node):
         )
 
         for frame_index, frame in enumerate(captured_frames):
+            depth_image_m = self._apply_depth_roi(frame.depth_image_m, scan_roi_xyxy)
             raw_cloud = depth_image_to_point_cloud(
                 frame.color_image_bgr,
-                frame.depth_image_m,
+                depth_image_m,
                 frame.intrinsics,
                 self._min_depth_m,
                 self._max_depth_m,
@@ -836,6 +1086,7 @@ class ObjectScanNode(Node):
             self._processing = False
             if saved_scan is not None:
                 self._last_saved_scan = saved_scan
+            self._scan_roi_xyxy = None
 
         if success:
             self.get_logger().info(message)
@@ -854,6 +1105,7 @@ class ObjectScanNode(Node):
             "depth_width": self._depth_width,
             "depth_height": self._depth_height,
             "fps": self._fps,
+            "enable_roi_selection": self._enable_roi_selection,
             "burst_duration_sec": self._burst_duration_sec,
             "burst_frame_limit": self._burst_frame_limit,
             "output_dir": str(self._output_dir),
@@ -945,6 +1197,7 @@ class ObjectScanNode(Node):
 
     def _render_preview(self, frame: FrameBundle) -> None:
         preview = frame.color_image_bgr.copy()
+        self._draw_roi_overlay(preview)
 
         cv2.imshow(self._preview_window, preview)
         key = cv2.waitKey(1) & 0xFF
@@ -955,6 +1208,11 @@ class ObjectScanNode(Node):
                 if self._scanning:
                     self._stop_scan_early = True
             self._publish_status("early scan stop requested")
+        elif key == ord("r"):
+            message = self._reset_preview_roi()
+            if message:
+                self.get_logger().info(message)
+                self._publish_status(message)
         elif key == ord("q"):
             self._shutdown_requested = True
             self._publish_status("shutdown requested from preview")
