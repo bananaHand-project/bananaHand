@@ -18,7 +18,7 @@ The main board has the following sub-circuits:
 
 ### Schematic
 
-A full PDF of the schematic can be found in `bh_main_board/bananaHand_main_board_sch.pdf`
+A full PDF of the schematic can be found in `bh_main_board/bananaHand_main_board_sch.pdf` or linked [here](./bh_main_board/bananaHand_main_board_sch.pdf).
 
 ### Layout
 
