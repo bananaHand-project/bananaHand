@@ -25,5 +25,11 @@ install/
 **/*.swp
 **/*.swo
 
+# Node / Foxglove extension artifacts
+**/node_modules/
+**/dist/
+**/*.foxe
+**/package-lock.json
+
 # OS junk
 **/.DS_Store
