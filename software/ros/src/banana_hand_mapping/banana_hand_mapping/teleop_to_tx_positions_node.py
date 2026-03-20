@@ -54,7 +54,7 @@ class TeleopToTxPositionsNode(Node):
         )
         self.declare_parameter("source_indices", [0, 1, 2, 3, 4, 5, -1, -1])
         self.declare_parameter("fill_ratio", 0.0)
-        self.declare_parameter("safe_mode_enabled", True)
+        self.declare_parameter("safe_mode_enabled", False)
         self.declare_parameter("mode_topic", "/tx_positions_mode")
 
         input_topic = str(self.get_parameter("input_topic").value)
