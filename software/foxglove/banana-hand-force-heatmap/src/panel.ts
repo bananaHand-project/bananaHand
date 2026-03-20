@@ -82,7 +82,7 @@ export function initBananaHandForceHeatmapPanel(context: PanelExtensionContext):
   const root = document.createElement("div");
   root.style.height = "100%";
   root.style.display = "grid";
-  root.style.gridTemplateRows = "auto auto 1fr";
+  root.style.gridTemplateRows = "auto 1fr";
   root.style.gap = "10px";
   root.style.padding = "10px";
 
@@ -94,10 +94,6 @@ export function initBananaHandForceHeatmapPanel(context: PanelExtensionContext):
   heading.style.fontSize = "14px";
   heading.style.fontWeight = "700";
   heading.textContent = titleText;
-
-  const subheading = document.createElement("div");
-  subheading.style.fontSize = "11px";
-  subheading.style.opacity = "0.72";
 
   const pad = document.createElement("div");
   pad.style.height = "100%";
@@ -123,7 +119,6 @@ export function initBananaHandForceHeatmapPanel(context: PanelExtensionContext):
   pad.appendChild(padLabel);
   pad.appendChild(valueLabel);
   title.appendChild(heading);
-  title.appendChild(subheading);
   root.appendChild(title);
   root.appendChild(pad);
   context.panelElement.appendChild(root);
@@ -253,16 +248,12 @@ export function initBananaHandForceHeatmapPanel(context: PanelExtensionContext):
     padLabel.textContent = topic ? `index ${dataIndex}` : "no topic";
 
     if (!topic) {
-      subheading.textContent = "Choose a topic in panel settings";
       valueLabel.textContent = "--";
       pad.style.background = "#10192c";
       pad.style.borderColor = "rgba(255,255,255,0.12)";
       return;
     }
 
-    subheading.textContent = hasSeenData
-      ? `Live data from ${topic}`
-      : `Waiting for data on ${topic}`;
     valueLabel.textContent = hasSeenData ? currentValue.toFixed(0) : "--";
     pad.style.background = colorForValue(currentValue, minValue, maxValue);
     pad.style.borderColor = borderForValue(currentValue, minValue, maxValue);

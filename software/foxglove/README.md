@@ -2,10 +2,24 @@
 
 This folder contains custom Foxglove tooling for Banana Hand.
 
+## Requirements
+- Node.js 20+
+- npm 10+
+
+Check your versions:
+```bash
+node -v
+npm -v
+```
+
+If you see an error like `Unexpected token '?'` during `foxglove-extension build`, your Node version is too old.
+
 ## Quick Start
 Install the force-pad extension:
 ```bash
-cd /home/lokesh/BananaHand/software/foxglove/banana-hand-force-heatmap
+cd software/foxglove/banana-hand-force-heatmap
+# optional if you use nvm:
+# nvm use
 npm install
 npm run local-install
 ```
@@ -24,7 +38,9 @@ Foxglove extensions require Node.js and npm.
 
 Example:
 ```bash
-cd /home/lokesh/BananaHand/software/foxglove/banana-hand-force-heatmap
+cd software/foxglove/banana-hand-force-heatmap
+# optional if you use nvm:
+# nvm use
 npm install
 npm run local-install
 ```
