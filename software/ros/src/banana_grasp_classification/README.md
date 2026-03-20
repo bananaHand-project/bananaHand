@@ -89,6 +89,24 @@ Message fields:
 - `selected_grip`
 - `recommended_opening_m`
 
+### `grasp_executor`
+
+This node subscribes to:
+- `/grasp_classification/recommendation` (`banana_interfaces/msg/GraspRecommendation`)
+- `/grasp_classification/exeucte_grasp` (`std_msgs/msg/Empty`)
+- `/grasp_classification/release` (`std_msgs/msg/Empty`)
+
+It publishes:
+- `/tx_positions` (`std_msgs/msg/UInt16MultiArray`)
+
+Behavior:
+- caches the latest command derived from `selected_grip` and `recommended_opening_m`
+- waits for an execute trigger before publishing that cached command
+- publishes the open pose and clears the cached grasp when a release trigger arrives
+- keeps thumb revolve at the grip-specific preset
+- linearly interpolates the other actuators from an "open" pose at `0.15 m` to the full grip pose at `0.03 m`
+- clamps openings outside that range to the nearest endpoint
+
 By default it listens on:
 - `/object_scan/completed_scan_dir` (`std_msgs/msg/String`)
 

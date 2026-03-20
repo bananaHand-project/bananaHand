@@ -32,6 +32,10 @@ setup(
                 "banana_grasp_classification.ground_plane_removal_node:main"
             ),
             (
+                "grasp_executor = "
+                "banana_grasp_classification.grasp_executor:main"
+            ),
+            (
                 "grasp_rule_classifier_node = "
                 "banana_grasp_classification.grasp_rule_classifier_node:main"
             ),
