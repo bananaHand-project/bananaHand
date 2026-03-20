@@ -11,8 +11,7 @@ End-to-end launch now runs:
 ```bash
 cd software/ros
 source /opt/ros/humble/setup.bash
-pip install --user -r src/banana_hand_tracking/requirements.txt
-pip install --user mujoco
+pip install --user -r requirements.txt
 colcon build --symlink-install --packages-select \
   banana_interfaces banana_hand_tracking banana_hand_mapping \
   banana_serial_bridge banana_hand_visualization banana_bringup
@@ -88,7 +87,7 @@ Dependencies:
 
 Install GUI dependency if needed:
 ```bash
-sudo apt install python3-pyside6
+pip install --user -r requirements.txt
 ```
 
 Build the visualization package:
