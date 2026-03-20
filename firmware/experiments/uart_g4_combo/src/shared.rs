@@ -1,8 +1,13 @@
-use core::sync::atomic::{AtomicU16, AtomicU32, Ordering};
+use core::sync::atomic::{AtomicU8, AtomicU16, AtomicU32, Ordering};
 
 pub struct SharedData<const N: usize> {
     seq: AtomicU32,
     values: [AtomicU16; N],
+}
+
+pub struct SharedMode {
+    seq: AtomicU32,
+    value: AtomicU8,
 }
 
 impl<const N: usize> SharedData<N> {
@@ -44,5 +49,34 @@ impl<const N: usize> SharedData<N> {
 
     pub fn seq(&self) -> u32 {
         self.seq.load(Ordering::Acquire)
+    }
+}
+
+impl SharedMode {
+    pub const fn new(initial: u8) -> Self {
+        Self {
+            seq: AtomicU32::new(0),
+            value: AtomicU8::new(initial),
+        }
+    }
+
+    pub fn write(&self, mode: u8) {
+        self.seq.fetch_add(1, Ordering::AcqRel);
+        self.value.store(mode, Ordering::Relaxed);
+        self.seq.fetch_add(1, Ordering::Release);
+    }
+
+    pub fn read(&self) -> u8 {
+        loop {
+            let start = self.seq.load(Ordering::Acquire);
+            if start & 1 == 1 {
+                continue;
+            }
+            let value = self.value.load(Ordering::Relaxed);
+            let end = self.seq.load(Ordering::Acquire);
+            if start == end && (end & 1 == 0) {
+                return value;
+            }
+        }
     }
 }

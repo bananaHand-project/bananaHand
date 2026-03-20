@@ -902,17 +902,19 @@ fn enable_output(timer: HrtimSubTimer, channel: HrtimXChannel) {
 }
 
 fn set_cmp_for_dc(timer: HrtimSubTimer, cmp: HrtimXCompare, period: u16, percent: u8) {
-    let percent = percent.clamp(0, 100);
+    let p = percent.clamp(0, 100);
 
     // Output is configured as "set on PERIOD, reset on CMP".
-    // If CMP == PERIOD, both events happen together and reset wins, producing ~0%.
+    // If CMP == PERIOD, both events happen together and reset wins, producing 0%.
     // Map 100% to PERIOD+1 so CMP never matches within the counting window.
-    let cmp_set = if percent == 100 {
-        period.saturating_add(1)
-    } else {
-        ((u32::from(period) * u32::from(percent)) / 100) as u16
+    let cmp_set = match p {
+        0 => period, // true 0% in this set/reset scheme
+        100 => period.saturating_add(1), // true 100%
+        _ => {
+            let raw = ((u32::from(period) * u32::from(p)) / 100) as u16;
+            raw.clamp(1, period.saturating_sub(1))
+        }
     };
-
     pac::HRTIM1
         .tim(timer as usize)
         .cmp(cmp as usize)

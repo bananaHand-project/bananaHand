@@ -51,10 +51,13 @@ pub const CMD_PINKY: usize = 3;
 pub const CMD_THUMB_1: usize = 4; // (flex)
 pub const CMD_THUMB_2: usize = 5; // (revolve)
 
+pub const STARTUP_POSITION_COMMANDS: [u16; COMMAND_COUNT] = [500, 500, 500, 500, 300, 150, 0, 0];
+pub const STARTUP_FORCE_COMMANDS: [u16; COMMAND_COUNT] = [0; COMMAND_COUNT];
+
 // Per-motor output polarity compensation.
 // If true, ch1/ch2 duty values are swapped before writing to hardware.
 pub const MOTOR_PWM_SWAP: [bool; MAX_MOTORS] = [
-    true, // index-1
+    true,  // index-1
     false, // middle
     false, // ring
     false, // pinky
@@ -69,7 +72,24 @@ pub enum ControlMode {
 }
 
 // Flip this to switch the controller behavior.
-pub const CONTROL_MODE: ControlMode = ControlMode::Position;
+pub const DEFAULT_CONTROL_MODE: ControlMode = ControlMode::Position;
+
+impl ControlMode {
+    pub const fn from_wire(value: u8) -> Option<Self> {
+        match value {
+            0 => Some(Self::Position),
+            1 => Some(Self::Force),
+            _ => None,
+        }
+    }
+
+    pub const fn to_wire(self) -> u8 {
+        match self {
+            Self::Position => 0,
+            Self::Force => 1,
+        }
+    }
+}
 
 #[derive(Clone, Copy)]
 pub struct PositionMap {
@@ -118,7 +138,7 @@ pub const POSITION_MAPS: [PositionMap; MAX_MOTORS] = [
     },
 ];
 
-pub const FORCE_MAPS: [ForceMap; MAX_MOTORS-1] = [
+pub const FORCE_MAPS: [ForceMap; MAX_MOTORS - 1] = [
     ForceMap {
         motor_idx: MOTOR_RING,
         cmd_idx: CMD_RING,
@@ -154,7 +174,7 @@ pub const FORCE_MAPS: [ForceMap; MAX_MOTORS-1] = [
 ];
 
 pub const POSITION_PID_GAINS: (f32, f32, f32) = (40.0, 0.0, 0.0);
-pub const FORCE_PID_GAINS: (f32, f32, f32) = (100.0, 0.0, 0.0);
+pub const FORCE_PID_GAINS: (f32, f32, f32) = (50.0, 0.0, 0.0);
 
 pub fn position_bits_to_mm(raw: u16) -> f32 {
     const STROKE_MM: f32 = 20.0;

@@ -7,6 +7,8 @@ pub enum MessageType {
     PositionUpdate = 0x01,
     ForceReadings = 0x02,
     TelemetryCombined = 0x03,
+    ControlModeUpdate = 0x04,
+    ForceCommand = 0x05,
 }
 
 fn checksum(data: &[u8]) -> u8 {
@@ -65,16 +67,17 @@ pub fn build_frame<const N: usize>(msg_type: u8, values: [u16; N]) -> BuiltFrame
     framed
 }
 
-pub fn build_telemetry_frame<const P: usize, const F: usize>(
+pub fn build_telemetry_frame<const P: usize, const F: usize, const C: usize>(
     positions: [u16; P],
     forces: [u16; F],
+    currents: [u16; C],
 ) -> BuiltFrame {
-    let payload_len = (P + F) * 2;
+    let payload_len = (P + F + C) * 2;
 
     let mut body = [0u8; MAX_FRAME];
     let mut body_len = 0usize;
 
-    // body: [type][positions...][forces...][chk]
+    // body: [type][positions...][forces...][currents...][chk]
     body[body_len] = MessageType::TelemetryCombined as u8;
     body_len += 1;
 
@@ -87,6 +90,12 @@ pub fn build_telemetry_frame<const P: usize, const F: usize>(
     }
 
     for v in forces {
+        let bytes = v.to_le_bytes();
+        body[body_len..body_len + 2].copy_from_slice(&bytes);
+        body_len += 2;
+    }
+
+    for v in currents {
         let bytes = v.to_le_bytes();
         body[body_len..body_len + 2].copy_from_slice(&bytes);
         body_len += 2;
@@ -113,13 +122,13 @@ pub fn build_telemetry_frame<const P: usize, const F: usize>(
     framed
 }
 
-pub struct FrameParser<const N: usize> {
+pub struct FrameParser {
     enc_buf: [u8; MAX_FRAME],
     enc_len: usize,
     dec_buf: [u8; MAX_FRAME],
 }
 
-impl<const N: usize> FrameParser<N> {
+impl FrameParser {
     pub fn new() -> Self {
         Self {
             enc_buf: [0; MAX_FRAME],
@@ -129,12 +138,6 @@ impl<const N: usize> FrameParser<N> {
     }
 
     pub fn parse_byte(&mut self, byte: u8) -> Option<(u8, &[u8])> {
-        const fn payload_len(n: usize) -> usize {
-            n * 2
-        }
-
-        let payload_len = payload_len(N);
-
         // accumulate until delimiter
         if byte != COBS_DELIM {
             if self.enc_len < MAX_FRAME {
@@ -173,13 +176,8 @@ impl<const N: usize> FrameParser<N> {
 
         let msg_type = self.dec_buf[0];
 
-        if dec_len != 1 + payload_len + 1 {
-            defmt::error!("Length mismatch");
-            return None;
-        }
-
         let payload_start = 1;
-        let payload_end = payload_start + payload_len;
+        let payload_end = dec_len - 1;
         let payload = &self.dec_buf[payload_start..payload_end];
 
         let chk = self.dec_buf[payload_end];

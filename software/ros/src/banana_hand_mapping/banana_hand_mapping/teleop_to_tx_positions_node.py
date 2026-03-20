@@ -5,7 +5,7 @@ from typing import List, Optional
 
 import rclpy
 from rclpy.node import Node
-from std_msgs.msg import UInt16MultiArray
+from std_msgs.msg import String, UInt16MultiArray
 from trajectory_msgs.msg import JointTrajectory
 
 POS_INDEX_1 = 0
@@ -28,9 +28,16 @@ POSITION_NAMES = [
     "thumb_3",
 ]
 
+SAFE_MODE_THRESHOLD = 1500
+SAFE_RETRACT_THRESHOLD = 2000
+
 
 def _clamp(value: float, lo: float, hi: float) -> float:
     return max(lo, min(hi, value))
+
+
+def _is_moving_in(new_value: int, old_value: int) -> bool:
+    return new_value > old_value
 
 
 class TeleopToTxPositionsNode(Node):
@@ -47,6 +54,8 @@ class TeleopToTxPositionsNode(Node):
         )
         self.declare_parameter("source_indices", [0, 1, 2, 3, 4, 5, -1, -1])
         self.declare_parameter("fill_ratio", 0.0)
+        self.declare_parameter("safe_mode_enabled", False)
+        self.declare_parameter("mode_topic", "/tx_positions_mode")
 
         input_topic = str(self.get_parameter("input_topic").value)
         output_topic = str(self.get_parameter("output_topic").value)
@@ -62,6 +71,9 @@ class TeleopToTxPositionsNode(Node):
             int(v) for v in self.get_parameter("source_indices").value
         ]
         self._fill_ratio = float(self.get_parameter("fill_ratio").value)
+        self._safe_mode_enabled = bool(self.get_parameter("safe_mode_enabled").value)
+        mode_topic = str(self.get_parameter("mode_topic").value)
+        self._last_published = [0] * len(POSITION_NAMES)
 
         if self._input_max <= self._input_min:
             self.get_logger().warn(
@@ -97,12 +109,16 @@ class TeleopToTxPositionsNode(Node):
         self._sub = self.create_subscription(
             JointTrajectory, input_topic, self._on_teleop, 10
         )
+        self._mode_sub = self.create_subscription(
+            String, mode_topic, self._on_mode_cmd, 10
+        )
         self._pub = self.create_publisher(UInt16MultiArray, output_topic, 10)
 
         self.get_logger().info(
             f"Mapping {input_topic} -> {output_topic} with positions "
             f"{list(enumerate(POSITION_NAMES))}, mins={self._min_motor_positions}, "
-            f"maxes={self._max_motor_positions}"
+            f"maxes={self._max_motor_positions}, safe_mode={self._safe_mode_enabled}, "
+            f"mode_topic={mode_topic}"
         )
 
     def _ratio_to_adc(self, ratio: float, output_idx: int) -> int:
@@ -121,6 +137,73 @@ class TeleopToTxPositionsNode(Node):
             return self._fill_ratio
         return float(source[src_idx])
 
+    def _on_mode_cmd(self, msg: String) -> None:
+        mode = msg.data.strip().lower()
+        if mode == "safe":
+            self._safe_mode_enabled = True
+        elif mode == "regular":
+            self._safe_mode_enabled = False
+        else:
+            self.get_logger().warn(
+                f"Unknown mode '{msg.data}'. Expected 'safe' or 'regular'."
+            )
+            return
+
+        self.get_logger().info(
+            f"Switched teleop safety mode to {'safe' if self._safe_mode_enabled else 'regular'}"
+        )
+
+    def _apply_safe_mode(self, values: List[int]) -> List[int]:
+        if not self._safe_mode_enabled:
+            return values
+
+        out_values = list(values)
+        last_index = self._last_published[POS_INDEX_1]
+        last_middle = self._last_published[POS_MIDDLE]
+        last_thumb = self._last_published[POS_THUMB_1]
+
+        index_moving_in = _is_moving_in(out_values[POS_INDEX_1], last_index)
+        middle_moving_in = _is_moving_in(out_values[POS_MIDDLE], last_middle)
+        thumb_moving_in = _is_moving_in(out_values[POS_THUMB_1], last_thumb)
+
+        thumb_not_clear = last_thumb > SAFE_RETRACT_THRESHOLD
+        index_not_clear = last_index > SAFE_RETRACT_THRESHOLD
+        middle_not_clear = last_middle > SAFE_RETRACT_THRESHOLD
+
+        if thumb_not_clear:
+            if index_moving_in:
+                out_values[POS_INDEX_1] = last_index
+            if middle_moving_in:
+                out_values[POS_MIDDLE] = last_middle
+
+        if index_not_clear or middle_not_clear:
+            if thumb_moving_in:
+                out_values[POS_THUMB_1] = last_thumb
+
+        last_index_or_middle_past = (
+            last_index > SAFE_MODE_THRESHOLD
+            or last_middle > SAFE_MODE_THRESHOLD
+        )
+        last_thumb_past = last_thumb > SAFE_MODE_THRESHOLD
+        index_or_middle_past = (
+            out_values[POS_INDEX_1] > SAFE_MODE_THRESHOLD
+            or out_values[POS_MIDDLE] > SAFE_MODE_THRESHOLD
+        )
+        thumb_past = out_values[POS_THUMB_1] > SAFE_MODE_THRESHOLD
+
+        if last_thumb_past:
+            out_values[POS_INDEX_1] = min(out_values[POS_INDEX_1], SAFE_MODE_THRESHOLD)
+            out_values[POS_MIDDLE] = min(out_values[POS_MIDDLE], SAFE_MODE_THRESHOLD)
+        elif last_index_or_middle_past:
+            out_values[POS_THUMB_1] = min(out_values[POS_THUMB_1], SAFE_MODE_THRESHOLD)
+        elif index_or_middle_past:
+            out_values[POS_THUMB_1] = min(out_values[POS_THUMB_1], SAFE_MODE_THRESHOLD)
+        elif thumb_past:
+            out_values[POS_INDEX_1] = min(out_values[POS_INDEX_1], SAFE_MODE_THRESHOLD)
+            out_values[POS_MIDDLE] = min(out_values[POS_MIDDLE], SAFE_MODE_THRESHOLD)
+
+        return out_values
+
     def _on_teleop(self, msg: JointTrajectory) -> None:
         if not msg.points:
             return
@@ -132,9 +215,12 @@ class TeleopToTxPositionsNode(Node):
             ratio = self._resolve_ratio(src_positions, src_idx)
             out_values.append(self._ratio_to_adc(ratio, output_idx))
 
+        out_values = self._apply_safe_mode(out_values)
+
         out_msg = UInt16MultiArray()
         out_msg.data = out_values
         self._pub.publish(out_msg)
+        self._last_published = list(out_values)
 
 
 def main(args: Optional[list[str]] = None) -> None:

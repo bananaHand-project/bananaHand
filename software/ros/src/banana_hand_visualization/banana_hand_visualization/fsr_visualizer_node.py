@@ -28,8 +28,8 @@ FINGER_NAMES = ["middle", "index", "ring", "pinky", "thumb"]
 PALM_NAMES = ["palm_1", "palm_2", "palm_3", "palm_4", "palm_5"]
 ALL_SENSOR_NAMES = FINGER_NAMES + PALM_NAMES
 DISPLAY_NAMES = {
-    "middle": "Middle",
     "index": "Index",
+    "middle": "Middle",
     "ring": "Ring",
     "pinky": "Pinky",
     "thumb": "Thumb",
