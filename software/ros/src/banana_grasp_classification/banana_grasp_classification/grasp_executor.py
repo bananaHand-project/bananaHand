@@ -42,7 +42,7 @@ class GraspExecutorNode(Node):
             "input_topic", "/grasp_classification/recommendation"
         )
         self.declare_parameter(
-            "execute_topic", "/grasp_classification/exeucte_grasp"
+            "execute_topic", "/grasp_classification/execute_grasp"
         )
         self.declare_parameter("release_topic", "/grasp_classification/release")
         self.declare_parameter("output_topic", "/tx_positions")

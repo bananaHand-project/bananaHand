@@ -93,7 +93,7 @@ Message fields:
 
 This node subscribes to:
 - `/grasp_classification/recommendation` (`banana_interfaces/msg/GraspRecommendation`)
-- `/grasp_classification/exeucte_grasp` (`std_msgs/msg/Empty`)
+- `/grasp_classification/execute_grasp` (`std_msgs/msg/Empty`)
 - `/grasp_classification/release` (`std_msgs/msg/Empty`)
 
 It publishes:
