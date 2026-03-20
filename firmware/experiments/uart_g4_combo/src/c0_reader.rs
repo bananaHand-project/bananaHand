@@ -10,7 +10,7 @@ pub async fn c0_reader_task(
     mut rx: UartRx<'static, Async>,
     shared: &'static SharedData<FORCE_COUNT>,
 ) {
-    let mut parser = FrameParser::<FORCE_COUNT>::new();
+    let mut parser = FrameParser::new();
     let mut readings = [0u16; FORCE_COUNT];
     let mut rx_buf = [0u8; 64];
 
@@ -24,6 +24,10 @@ pub async fn c0_reader_task(
             if let Some((msg_type, payload)) = parser.parse_byte(b) {
                 if msg_type != MessageType::ForceReadings as u8 {
                     info!("Received COBS frame type {} not ForceReadings", msg_type);
+                    continue;
+                }
+                if payload.len() != FORCE_COUNT * 2 {
+                    info!("ForceReadings payload wrong size {}", payload.len());
                     continue;
                 }
                 for idx in 0..FORCE_COUNT {

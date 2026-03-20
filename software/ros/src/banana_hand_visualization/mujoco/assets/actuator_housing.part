@@ -1,0 +1,13 @@
+{
+    "configuration": "default",
+    "documentId": "0a0f899ce59c60b61859c991",
+    "documentMicroversion": "4a4fa238fca07822ee845b8b",
+    "elementId": "3b50154aca29cea2130db440",
+    "fullConfiguration": "default",
+    "id": "M5e2o2keAQHHMdgSI",
+    "isStandardContent": false,
+    "name": "actuator-housing <7>",
+    "partId": "JHD",
+    "suppressed": false,
+    "type": "Part"
+}

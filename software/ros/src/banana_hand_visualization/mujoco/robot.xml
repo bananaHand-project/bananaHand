@@ -1,0 +1,853 @@
+<?xml version="1.0" ?>
+<!-- Generated using onshape-to-robot -->
+<!-- Onshape https://cad.onshape.com/documents/0a0f899ce59c60b61859c991/w/d22d541f278fbcb2dfd45b88/e/3d0f6edf0206f9f0b58d8fd9 -->
+<mujoco model="newbanana">
+  <compiler angle="radian" meshdir="assets" autolimits="true"/>
+  <default>
+    <default class="newbanana">
+      <joint damping="0.0005"/>
+      <position kp="2000" dampratio="0.0001"/>
+      <default class="visual">
+        <geom type="mesh" contype="0" conaffinity="0" group="2"/>
+      </default>
+      <default class="collision">
+        <geom group="3"/>
+      </default>
+    </default>
+  </default>
+  <worldbody>
+    <!-- Link wrist_mount -->
+    <body name="wrist_mount" pos="0 0 0" quat="1 0 0 0" childclass="newbanana">
+      <inertial pos="-4.88573e-06 -0.00187167 0.0129427" mass="0.131729" fullinertia="7.23325e-05 7.07738e-05 7.75665e-05 -3.408e-09 3.0974e-08 7.13635e-06"/>
+      <!-- Part wrist_mount -->
+      <geom type="mesh" class="visual" pos="-0.00291653 -0 0.0813183" quat="1 -0 -0 -0" mesh="wrist_mount" material="wrist_mount_material"/>
+      <!-- Link hand_base -->
+      <body name="hand_base" pos="-0.01886 -0.003 0.05977" quat="0.707107 0.707107 -0 0">
+        <!-- Joint from wrist_mount to hand_base -->
+        <!-- Joint is "fixed", skipping it -->
+        <inertial pos="0.0227711 0.0368198 -0.00970441" mass="0.24691" fullinertia="0.00031481 0.000210808 0.000492602 4.41066e-06 -8.72699e-06 6.42656e-06"/>
+        <!-- Part hand_base -->
+        <geom type="mesh" class="visual" pos="0.0159435 0.0215483 -0.003" quat="0.707107 -0.707107 0 -0" mesh="hand_base" material="hand_base_material"/>
+        <!-- Frame closing_thumbpivot_1 -->
+        <site group="3" name="closing_thumbpivot_1" pos="0.058502 0.0313007 0.0215" quat="0.704416 0.704416 0.0616284 0.0616284"/>
+        <!-- Frame closing_thumbpivot_1_z -->
+        <site group="3" name="closing_thumbpivot_1_z" pos="0.0758669 -0.0671801 0.0215" quat="0.704416 0.704416 0.0616284 0.0616284"/>
+        <!-- Link index_base -->
+        <body name="index_base" pos="0.0607318 0.108855 -0.008" quat="0 -1 0 -0">
+          <!-- Joint from hand_base to index_base -->
+          <!-- Joint is "fixed", skipping it -->
+          <inertial pos="-0.000915189 0.0173428 0.00659471" mass="0.00908632" fullinertia="3.91326e-06 7.16004e-07 3.97477e-06 9.919e-08 2.4255e-08 -8.53174e-07"/>
+          <!-- Part index_base -->
+          <geom type="mesh" class="visual" pos="-0.0447883 0.0873066 -0.005" quat="0.707107 0.707107 -0 -0" mesh="index_base" material="index_base_material"/>
+          <site group="3" name="closing_indexrev3_2" pos="-0.00379499 -0.0116902 0.003" quat="0.0293023 -0.706499 -0.0293023 -0.706499"/>
+          <!-- Frame closing_indexrev3_2_z -->
+          <site group="3" name="closing_indexrev3_2_z" pos="0.0958616 -0.00340937 0.003" quat="0.0293023 -0.706499 -0.0293023 -0.706499"/>
+          <!-- Link actuator_housing -->
+          <body name="actuator_housing" pos="-0.000613381 0.0375721 0.0185" quat="0.706541 -0.030325 0.706456 0.0282795">
+            <!-- Joint from index_base to actuator_housing -->
+            <joint axis="0 0 1" name="indexrev1" type="hinge"/>
+            <inertial pos="-0.00615503 -0.0206966 -0.0025" mass="0.012849" fullinertia="1.75829e-06 7.16933e-07 1.97489e-06 -4.3769e-08 0 0"/>
+            <!-- Part actuator_housing -->
+            <geom type="mesh" class="visual" pos="-0 -0.003 -0.0025" quat="0.707107 0.707107 -0 -0" mesh="actuator_housing" material="actuator_housing_material"/>
+            <!-- Link actuator_piston -->
+            <body name="actuator_piston" pos="-0 -0.00975 -0.0025" quat="0 0 0.707107 0.707107">
+              <!-- Joint from actuator_housing to actuator_piston -->
+              <joint axis="0 0 1" name="indexpiston" type="slide" range="-0.018249999999999232 7.686993402922226e-16"/>
+              <inertial pos="0 0 -0.0184461" mass="0.00107731" fullinertia="1.20116e-07 1.20153e-07 4.363e-09 0 -0 -0"/>
+              <!-- Part actuator_piston -->
+              <geom type="mesh" class="visual" pos="0 0 0" quat="0 1 0 0" mesh="actuator_piston" material="actuator_piston_material"/>
+              <!-- Link mcp_1 -->
+              <body name="mcp_1" pos="0 -0.00314 -0.0341" quat="0.696301 -0.696301 0.123148 0.123148">
+                <!-- Joint from actuator_piston to mcp_1 -->
+                <joint axis="0 0 1" name="indexrev2" type="hinge"/>
+                <inertial pos="-0.00399802 0.0250212 0.00314" mass="0.00631644" fullinertia="1.7563e-06 3.51669e-07 1.67536e-06 1.96427e-07 -6.34e-10 1.61e-09"/>
+                <!-- Part mcp_1 -->
+                <geom type="mesh" class="visual" pos="-0.013 0.01 0.00314" quat="0.707107 -0.707107 0 0" mesh="mcp_1" material="mcp_1_material"/>
+                <!-- Frame closing_indexrev3_1 -->
+                <site group="3" name="closing_indexrev3_1" pos="-0.013 0.01 -0.00161" quat="1 0 0 0"/>
+                <!-- Frame closing_indexrev3_1_z -->
+                <site group="3" name="closing_indexrev3_1_z" pos="-0.013 0.01 0.09839" quat="1 0 0 0"/>
+                <!-- Frame closing_indexrev7_2 -->
+                <site group="3" name="closing_indexrev7_2" pos="0 0.05 0.00774" quat="1 0 0 0"/>
+                <!-- Frame closing_indexrev7_2_z -->
+                <site group="3" name="closing_indexrev7_2_z" pos="0 0.05 0.10774" quat="1 0 0 0"/>
+                <!-- Link pip_2 -->
+                <body name="pip_2" pos="-0.0106252 0.047153 0.00464" quat="0.973728 0 -0 -0.227713">
+                  <!-- Joint from mcp_1 to pip_2 -->
+                  <joint axis="0 0 1" name="indexrev5" type="hinge"/>
+                  <inertial pos="-0.000165532 0.0185904 -0.0015" mass="0.00109766" fullinertia="1.49177e-07 6.342e-09 1.54003e-07 -1.509e-09 0 -0"/>
+                  <!-- Part pip_2 -->
+                  <geom type="mesh" class="visual" pos="0 0.015 -0.0015" quat="0.707107 -0.707107 -0 0" mesh="pip_2" material="pip_2_material"/>
+                  <!-- Link dip_1 -->
+                  <body name="dip_1" pos="-0 0.0365 0.0001" quat="0 0.918852 0.394602 -0">
+                    <!-- Joint from pip_2 to dip_1 -->
+                    <joint axis="0 0 1" name="indexrev8" type="hinge" range="-1.283124704645382 0.08370581700095858"/>
+                    <inertial pos="-0.00485498 -0.0149142 0.0016" mass="0.00216187" fullinertia="1.75757e-07 5.3677e-08 1.95113e-07 -5.3219e-08 0 -0"/>
+                    <!-- Part dip_1 -->
+                    <geom type="mesh" class="visual" pos="-0.0075 -0.01 0.0016" quat="0.707107 0.707107 -0 -0" mesh="dip_1" material="dip_1_material"/>
+                    <!-- Frame closing_indexrev9_1 -->
+                    <site group="3" name="closing_indexrev9_1" pos="-0.0075 -0.01 0.0001" quat="0 1 0 0"/>
+                    <!-- Frame closing_indexrev9_1_z -->
+                    <site group="3" name="closing_indexrev9_1_z" pos="-0.0075 -0.01 -0.0999" quat="0 1 0 0"/>
+                    <!-- Link fingertip -->
+                    <body name="fingertip" pos="-0.01125 -0.025 0.0016" quat="0 -0.707107 0 -0.707107">
+                      <!-- Joint from dip_1 to fingertip -->
+                      <!-- Joint is "fixed", skipping it -->
+                      <inertial pos="-1.53291e-05 8.9755e-06 0.00556374" mass="0.00195277" fullinertia="1.25657e-07 1.08494e-07 1.27514e-07 1.8e-10 -4.5e-11 -8.679e-09"/>
+                      <!-- Part fingertip -->
+                      <geom type="mesh" class="visual" pos="-0 -0.015 0.00375" quat="0.5 -0.5 -0.5 -0.5" mesh="fingertip" material="fingertip_material"/>
+                    </body>
+                  </body>
+                </body>
+                <!-- Link mcp_shell_a -->
+                <body name="mcp_shell_a" pos="-0.00183227 0.0248419 -0.00561" quat="1 0 -0 0">
+                  <!-- Joint from mcp_1 to mcp_shell_a -->
+                  <!-- Joint is "fixed", skipping it -->
+                  <inertial pos="-0.00210081 0.000899501 0.000749709" mass="0.00287674" fullinertia="3.67204e-07 2.59935e-07 5.58987e-07 1.04558e-07 -1.31e-08 9.211e-09"/>
+                  <!-- Part mcp_shell_a -->
+                  <geom type="mesh" class="visual" pos="-0.0111677 -0.0148419 0.00875" quat="0.707107 -0.707107 0 -0" mesh="mcp_shell_a" material="mcp_shell_a_material"/>
+                </body>
+                <!-- Link mcp_shell_b -->
+                <body name="mcp_shell_b" pos="-0.00700145 0.0379582 0.01189" quat="0 1 0 0">
+                  <!-- Joint from mcp_1 to mcp_shell_b -->
+                  <!-- Joint is "fixed", skipping it -->
+                  <inertial pos="0.00319467 0.011403 0.000809275" mass="0.00278046" fullinertia="3.86254e-07 2.55766e-07 5.74541e-07 -1.08115e-07 -9.775e-09 -1.0119e-08"/>
+                  <!-- Part mcp_shell_b -->
+                  <geom type="mesh" class="visual" pos="-0.00599855 0.0279582 0.00875" quat="0.707107 0.707107 -0 0" mesh="mcp_shell_b" material="mcp_shell_b_material"/>
+                </body>
+              </body>
+            </body>
+          </body>
+          <!-- Link mcp_2 -->
+          <body name="mcp_2" pos="-0.000183516 -0.0159056 -0.006" quat="0.677803 -0.144632 -0.692157 0.201452">
+            <!-- Joint from index_base to mcp_2 -->
+            <joint axis="0 0 1" name="indexrev4" type="hinge"/>
+            <inertial pos="-0.0010236 -0.0147621 -0.0015" mass="0.00124532" fullinertia="1.43754e-07 1.3387e-08 1.55402e-07 -1.8082e-08 -0 -0"/>
+            <!-- Part mcp_2 -->
+            <geom type="mesh" class="visual" pos="0 0 -0.0015" quat="0.5 0.5 0.5 -0.5" mesh="mcp_2" material="mcp_2_material"/>
+            <!-- Link pip_1 -->
+            <body name="pip_1" pos="-0.005 -0.0325 -0.0031" quat="0.883363 0 0 -0.46869">
+              <!-- Joint from mcp_2 to pip_1 -->
+              <joint axis="0 0 1" name="indexrev6" type="hinge" range="-0.9878811485522565 0.10779664540577816"/>
+              <inertial pos="0.000159546 -0.0240179 0.0016" mass="0.00293121" fullinertia="5.03928e-07 5.484e-08 4.75801e-07 -2.839e-09 0 7.37e-10"/>
+              <!-- Part pip_1 -->
+              <geom type="mesh" class="visual" pos="0 -0.0074 0.0016" quat="0.707107 0.707107 0 -0" mesh="pip_1" material="pip_1_material"/>
+              <!-- Frame closing_indexrev7_1 -->
+              <site group="3" name="closing_indexrev7_1" pos="0 -0.0074 -0.003" quat="0 1 0 0"/>
+              <!-- Frame closing_indexrev7_1_z -->
+              <site group="3" name="closing_indexrev7_1_z" pos="-0 -0.0074 -0.103" quat="0 1 0 0"/>
+              <!-- Frame closing_indexrev9_2 -->
+              <site group="3" name="closing_indexrev9_2" pos="0 -0.0444 0.0001" quat="0 1 0 0"/>
+              <!-- Frame closing_indexrev9_2_z -->
+              <site group="3" name="closing_indexrev9_2_z" pos="0 -0.0444 -0.0999" quat="0 1 0 0"/>
+              <!-- Link pip_shell_a -->
+              <body name="pip_shell_a" pos="0 -0.0234 0.0082" quat="0 -1 0 0">
+                <!-- Joint from pip_1 to pip_shell_a -->
+                <!-- Joint is "fixed", skipping it -->
+                <inertial pos="0.000950206 0.000347234 0.000969168" mass="0.00156225" fullinertia="1.5107e-07 6.8794e-08 1.95961e-07 4.9385e-08 -1.725e-09 8.462e-09"/>
+                <!-- Part pip_shell_a -->
+                <geom type="mesh" class="visual" pos="0 -0.016 0.0066" quat="0.707107 -0.707107 -0 0" mesh="pip_shell_a" material="pip_shell_a_material"/>
+              </body>
+              <!-- Link pip_shell_b -->
+              <body name="pip_shell_b" pos="-0 -0.03255 -0.005" quat="1 -0 -0 -0">
+                <!-- Joint from pip_1 to pip_shell_b -->
+                <!-- Joint is "fixed", skipping it -->
+                <inertial pos="0.000862039 0.00821021 0.000964796" mass="0.00156476" fullinertia="1.58144e-07 6.8853e-08 2.03054e-07 -5.0112e-08 -7.65e-10 -8.669e-09"/>
+                <!-- Part pip_shell_b -->
+                <geom type="mesh" class="visual" pos="0 0.02515 0.0066" quat="0.707107 0.707107 -0 0" mesh="pip_shell_b" material="pip_shell_b_material"/>
+              </body>
+            </body>
+          </body>
+        </body>
+        <!-- Link middle_base -->
+        <body name="middle_base" pos="0.0343032 0.108855 -0.008" quat="0 -1 0 -0">
+          <!-- Joint from hand_base to middle_base -->
+          <!-- Joint is "fixed", skipping it -->
+          <inertial pos="-0.00110743 0.0165611 0.00645915" mass="0.00951968" fullinertia="4.19962e-06 7.54185e-07 4.25616e-06 -1.1399e-08 1.5511e-08 -9.14817e-07"/>
+          <!-- Part middle_base -->
+          <geom type="mesh" class="visual" pos="-0.0183597 0.0873066 -0.005" quat="0.707107 0.707107 -0 0" mesh="middle_base" material="middle_base_material"/>
+          <!-- Frame closing_middlerev3_2 -->
+          <site group="3" name="closing_middlerev3_2" pos="0.00496225 -0.0121185 0.003" quat="0.70708 0.00617059 -0.70708 0.00617059"/>
+          <!-- Frame closing_middlerev3_2_z -->
+          <site group="3" name="closing_middlerev3_2_z" pos="-0.0950225 -0.0138638 0.003" quat="0.70708 0.00617059 -0.70708 0.00617059"/>
+          <!-- Link actuator_housing_2 -->
+          <body name="actuator_housing_2" pos="0.0018604 0.0366644 0.0185" quat="0.707088 -0.00719421 0.70707 0.00514696">
+            <!-- Joint from middle_base to actuator_housing_2 -->
+            <joint axis="0 0 1" name="middlerev1" type="hinge"/>
+            <inertial pos="-0.00615503 -0.0206966 -0.0025" mass="0.012849" fullinertia="1.75829e-06 7.16933e-07 1.97489e-06 -4.3769e-08 0 -0"/>
+            <!-- Part actuator_housing_2 -->
+            <geom type="mesh" class="visual" pos="0 -0.003 -0.0025" quat="0.707107 0.707107 -0 -0" mesh="actuator_housing" material="actuator_housing_material"/>
+            <!-- Link actuator_piston_2 -->
+            <body name="actuator_piston_2" pos="-0 -0.00975 -0.0025" quat="0 0 -0.707107 -0.707107">
+              <!-- Joint from actuator_housing_2 to actuator_piston_2 -->
+              <joint axis="0 0 1" name="middlepiston" type="slide" range="-0.018249999999999877 1.222980050563649e-16"/>
+              <inertial pos="0 -0 -0.0184461" mass="0.00107731" fullinertia="1.20116e-07 1.20153e-07 4.363e-09 0 -0 -0"/>
+              <!-- Part actuator_piston_2 -->
+              <geom type="mesh" class="visual" pos="0 0 0" quat="0 1 0 0" mesh="actuator_piston" material="actuator_piston_material"/>
+              <!-- Link mcp_1_2 -->
+              <body name="mcp_1_2" pos="0 0.0036 -0.0341" quat="0.696301 0.696301 0.123148 -0.123148">
+                <!-- Joint from actuator_piston_2 to mcp_1_2 -->
+                <joint axis="0 0 1" name="middlerev2" type="hinge"/>
+                <inertial pos="-0.00399802 -0.0250212 0.0036" mass="0.00631644" fullinertia="1.7563e-06 3.51669e-07 1.67536e-06 -1.96427e-07 6.34e-10 1.61e-09"/>
+                <!-- Part mcp_1_2 -->
+                <geom type="mesh" class="visual" pos="-0.013 -0.01 0.0036" quat="0.707107 0.707107 0 -0" mesh="mcp_1" material="mcp_1_material"/>
+                <!-- Frame closing_middlerev3_1 -->
+                <site group="3" name="closing_middlerev3_1" pos="-0.013 -0.01 -0.00115" quat="1 -0 -0 -0"/>
+                <!-- Frame closing_middlerev3_1_z -->
+                <site group="3" name="closing_middlerev3_1_z" pos="-0.013 -0.01 0.09885" quat="1 -0 -0 -0"/>
+                <!-- Frame closing_middlerev7_2 -->
+                <site group="3" name="closing_middlerev7_2" pos="0 -0.05 -0.001" quat="0 1 0 0"/>
+                <!-- Frame closing_middlerev7_2_z -->
+                <site group="3" name="closing_middlerev7_2_z" pos="0 -0.05 -0.101" quat="0 1 0 0"/>
+                <!-- Link pip_2_2 -->
+                <body name="pip_2_2" pos="-0.0106252 -0.047153 0.0021" quat="0 -0.973728 -0.227713 0">
+                  <!-- Joint from mcp_1_2 to pip_2_2 -->
+                  <joint axis="0 0 1" name="middlerev5" type="hinge"/>
+                  <inertial pos="-0.000165532 0.0185904 -0.0015" mass="0.00109766" fullinertia="1.49177e-07 6.342e-09 1.54003e-07 -1.509e-09 -0 0"/>
+                  <!-- Part pip_2_2 -->
+                  <geom type="mesh" class="visual" pos="0 0.015 -0.0015" quat="0.707107 -0.707107 0 0" mesh="pip_2" material="pip_2_material"/>
+                  <!-- Link dip_1_2 -->
+                  <body name="dip_1_2" pos="-0 0.0365 0.0001" quat="0 -0.918852 -0.394602 -0">
+                    <!-- Joint from pip_2_2 to dip_1_2 -->
+                    <joint axis="0 0 1" name="middlerev8" type="hinge" range="-1.2831247046433738 0.08370581700296675"/>
+                    <inertial pos="-0.00485498 -0.0149142 0.0016" mass="0.00216187" fullinertia="1.75757e-07 5.3677e-08 1.95113e-07 -5.3219e-08 0 -0"/>
+                    <!-- Part dip_1_2 -->
+                    <geom type="mesh" class="visual" pos="-0.0075 -0.01 0.0016" quat="0.707107 0.707107 -0 0" mesh="dip_1" material="dip_1_material"/>
+                    <!-- Frame closing_middlerev9_1 -->
+                    <site group="3" name="closing_middlerev9_1" pos="-0.0075 -0.01 0.0001" quat="0 1 0 0"/>
+                    <!-- Frame closing_middlerev9_1_z -->
+                    <site group="3" name="closing_middlerev9_1_z" pos="-0.0075 -0.01 -0.0999" quat="0 1 0 0"/>
+                    <!-- Link fingertip_2 -->
+                    <body name="fingertip_2" pos="-0.01125 -0.025 0.0016" quat="0 0.707107 -0 0.707107">
+                      <!-- Joint from dip_1_2 to fingertip_2 -->
+                      <!-- Joint is "fixed", skipping it -->
+                      <inertial pos="-1.53291e-05 8.9755e-06 0.00556374" mass="0.00195277" fullinertia="1.25657e-07 1.08494e-07 1.27514e-07 1.8e-10 -4.5e-11 -8.679e-09"/>
+                      <!-- Part fingertip_2 -->
+                      <geom type="mesh" class="visual" pos="-0 -0.015 0.00375" quat="0.5 -0.5 -0.5 -0.5" mesh="fingertip" material="fingertip_material"/>
+                    </body>
+                  </body>
+                </body>
+                <!-- Link mcp_shell_a_2 -->
+                <body name="mcp_shell_a_2" pos="-0.00183227 -0.0248419 0.01235" quat="0 -1 0 0">
+                  <!-- Joint from mcp_1_2 to mcp_shell_a_2 -->
+                  <!-- Joint is "fixed", skipping it -->
+                  <inertial pos="-0.00210081 0.000899501 0.000749709" mass="0.00287674" fullinertia="3.67204e-07 2.59935e-07 5.58987e-07 1.04558e-07 -1.31e-08 9.211e-09"/>
+                  <!-- Part mcp_shell_a_2 -->
+                  <geom type="mesh" class="visual" pos="-0.0111677 -0.0148419 0.00875" quat="0.707107 -0.707107 -0 0" mesh="mcp_shell_a" material="mcp_shell_a_material"/>
+                </body>
+                <!-- Link mcp_shell_b_2 -->
+                <body name="mcp_shell_b_2" pos="-0.00700145 -0.0379582 -0.00515" quat="1 0 -0 -0">
+                  <!-- Joint from mcp_1_2 to mcp_shell_b_2 -->
+                  <!-- Joint is "fixed", skipping it -->
+                  <inertial pos="0.00319467 0.011403 0.000809275" mass="0.00278046" fullinertia="3.86254e-07 2.55766e-07 5.74541e-07 -1.08115e-07 -9.775e-09 -1.0119e-08"/>
+                  <!-- Part mcp_shell_b_2 -->
+                  <geom type="mesh" class="visual" pos="-0.00599855 0.0279582 0.00875" quat="0.707107 0.707107 0 0" mesh="mcp_shell_b" material="mcp_shell_b_material"/>
+                </body>
+              </body>
+            </body>
+          </body>
+          <!-- Link mcp_2_2 -->
+          <body name="mcp_2_2" pos="0.00179128 -0.0166746 -0.006" quat="0.167202 0.684032 0.179167 0.687054">
+            <!-- Joint from middle_base to mcp_2_2 -->
+            <joint axis="0 0 1" name="middlerev4" type="hinge"/>
+            <inertial pos="-0.0010236 0.0147621 -0.0015" mass="0.00124532" fullinertia="1.43754e-07 1.3387e-08 1.55402e-07 1.8082e-08 -0 0"/>
+            <!-- Part mcp_2_2 -->
+            <geom type="mesh" class="visual" pos="0 0 -0.0015" quat="0.5 -0.5 -0.5 -0.5" mesh="mcp_2" material="mcp_2_material"/>
+            <!-- Link pip_1_2 -->
+            <body name="pip_1_2" pos="-0.005 0.0325 0.0001" quat="0 -0.883363 -0.46869 0">
+              <!-- Joint from mcp_2_2 to pip_1_2 -->
+              <joint axis="0 0 1" name="middlerev6" type="hinge" range="-0.9878811485467844 0.10779664541125022"/>
+              <inertial pos="0.000159546 -0.0240179 0.0016" mass="0.00293121" fullinertia="5.03928e-07 5.484e-08 4.75801e-07 -2.839e-09 0 7.37e-10"/>
+              <!-- Part pip_1_2 -->
+              <geom type="mesh" class="visual" pos="0 -0.0074 0.0016" quat="0.707107 0.707107 0 0" mesh="pip_1" material="pip_1_material"/>
+              <!-- Frame closing_middlerev7_1 -->
+              <site group="3" name="closing_middlerev7_1" pos="0 -0.0074 -0.003" quat="0 1 0 0"/>
+              <!-- Frame closing_middlerev7_1_z -->
+              <site group="3" name="closing_middlerev7_1_z" pos="0 -0.0074 -0.103" quat="0 1 0 0"/>
+              <!-- Frame closing_middlerev9_2 -->
+              <site group="3" name="closing_middlerev9_2" pos="0 -0.0444 0.0001" quat="0 1 0 0"/>
+              <!-- Frame closing_middlerev9_2_z -->
+              <site group="3" name="closing_middlerev9_2_z" pos="0 -0.0444 -0.0999" quat="0 1 0 0"/>
+              <!-- Link pip_shell_a_2 -->
+              <body name="pip_shell_a_2" pos="0 -0.0234 0.0082" quat="0 1 0 0">
+                <!-- Joint from pip_1_2 to pip_shell_a_2 -->
+                <!-- Joint is "fixed", skipping it -->
+                <inertial pos="0.000950206 0.000347234 0.000969168" mass="0.00156225" fullinertia="1.5107e-07 6.8794e-08 1.95961e-07 4.9385e-08 -1.725e-09 8.462e-09"/>
+                <!-- Part pip_shell_a_2 -->
+                <geom type="mesh" class="visual" pos="0 -0.016 0.0066" quat="0.707107 -0.707107 0 0" mesh="pip_shell_a" material="pip_shell_a_material"/>
+              </body>
+              <!-- Link pip_shell_b_2 -->
+              <body name="pip_shell_b_2" pos="0 -0.03255 -0.005" quat="1 -0 -0 -0">
+                <!-- Joint from pip_1_2 to pip_shell_b_2 -->
+                <!-- Joint is "fixed", skipping it -->
+                <inertial pos="0.000862039 0.00821021 0.000964796" mass="0.00156476" fullinertia="1.58144e-07 6.8853e-08 2.03054e-07 -5.0112e-08 -7.65e-10 -8.669e-09"/>
+                <!-- Part pip_shell_b_2 -->
+                <geom type="mesh" class="visual" pos="0 0.02515 0.0066" quat="0.707107 0.707107 -0 0" mesh="pip_shell_b" material="pip_shell_b_material"/>
+              </body>
+            </body>
+          </body>
+        </body>
+        <!-- Link ring_base -->
+        <body name="ring_base" pos="0.00840738 0.108855 -0.008" quat="0 -1 0 -0">
+          <!-- Joint from hand_base to ring_base -->
+          <!-- Joint is "fixed", skipping it -->
+          <inertial pos="0.000885706 0.0164993 0.00649729" mass="0.00986702" fullinertia="4.24391e-06 7.83956e-07 4.32174e-06 1.1066e-08 -1.1259e-08 -9.22392e-07"/>
+          <!-- Part ring_base -->
+          <geom type="mesh" class="visual" pos="0.00753608 0.0873066 -0.005" quat="0.707107 0.707107 -0 0" mesh="ring_base" material="ring_base_material"/>
+          <!-- Frame closing_ringrev3_2 -->
+          <site group="3" name="closing_ringrev3_2" pos="0.00464272 -0.0123136 0.003" quat="0.7071 -0.00308533 -0.7071 -0.00308533"/>
+          <!-- Frame closing_ringrev3_2_z -->
+          <site group="3" name="closing_ringrev3_2_z" pos="-0.0953535 -0.011441 0.003" quat="0.7071 -0.00308533 -0.7071 -0.00308533"/>
+          <!-- Link actuator_housing_3 -->
+          <body name="actuator_housing_3" pos="0.00281892 0.0365337 0.0185" quat="0.707095 0.00206167 0.707104 -0.00410898">
+            <!-- Joint from ring_base to actuator_housing_3 -->
+            <joint axis="0 0 1" name="ringrev1" type="hinge"/>
+            <inertial pos="-0.00615503 -0.0206966 -0.0025" mass="0.012849" fullinertia="1.75829e-06 7.16933e-07 1.97489e-06 -4.3769e-08 -0 0"/>
+            <!-- Part actuator_housing_3 -->
+            <geom type="mesh" class="visual" pos="-0 -0.003 -0.0025" quat="0.707107 0.707107 -0 -0" mesh="actuator_housing" material="actuator_housing_material"/>
+            <!-- Link actuator_piston_3 -->
+            <body name="actuator_piston_3" pos="-0 -0.00975 -0.0025" quat="0 -0 0.707107 0.707107">
+              <!-- Joint from actuator_housing_3 to actuator_piston_3 -->
+              <joint axis="0 0 1" name="ringpiston" type="slide" range="-0.018249999999995402 4.5985350943800185e-15"/>
+              <inertial pos="-0 -0 -0.0184461" mass="0.00107731" fullinertia="1.20116e-07 1.20153e-07 4.363e-09 0 -0 0"/>
+              <!-- Part actuator_piston_3 -->
+              <geom type="mesh" class="visual" pos="-0 -0 -0" quat="0 1 0 0" mesh="actuator_piston" material="actuator_piston_material"/>
+              <!-- Link mcp_1_3 -->
+              <body name="mcp_1_3" pos="-0 0.0036 -0.0341" quat="0.696301 0.696301 0.123148 -0.123148">
+                <!-- Joint from actuator_piston_3 to mcp_1_3 -->
+                <joint axis="0 0 1" name="ringrev2" type="hinge"/>
+                <inertial pos="-0.00399802 -0.0250212 0.0036" mass="0.00631644" fullinertia="1.7563e-06 3.51669e-07 1.67536e-06 -1.96427e-07 6.34e-10 1.61e-09"/>
+                <!-- Part mcp_1_3 -->
+                <geom type="mesh" class="visual" pos="-0.013 -0.01 0.0036" quat="0.707107 0.707107 -0 -0" mesh="mcp_1" material="mcp_1_material"/>
+                <!-- Frame closing_ringrev3_1 -->
+                <site group="3" name="closing_ringrev3_1" pos="-0.013 -0.01 -0.00115" quat="1 0 -0 0"/>
+                <!-- Frame closing_ringrev3_1_z -->
+                <site group="3" name="closing_ringrev3_1_z" pos="-0.013 -0.01 0.09885" quat="1 0 -0 0"/>
+                <!-- Frame closing_ringrev7_2 -->
+                <site group="3" name="closing_ringrev7_2" pos="0 -0.05 -0.001" quat="0 1 0 0"/>
+                <!-- Frame closing_ringrev7_2_z -->
+                <site group="3" name="closing_ringrev7_2_z" pos="0 -0.05 -0.101" quat="0 1 0 0"/>
+                <!-- Link pip_2_3 -->
+                <body name="pip_2_3" pos="-0.0106252 -0.047153 0.0021" quat="0 -0.973728 -0.227713 -0">
+                  <!-- Joint from mcp_1_3 to pip_2_3 -->
+                  <joint axis="0 0 1" name="ringrev5" type="hinge"/>
+                  <inertial pos="-0.000165532 0.0185904 -0.0015" mass="0.00109766" fullinertia="1.49177e-07 6.342e-09 1.54003e-07 -1.509e-09 0 -0"/>
+                  <!-- Part pip_2_3 -->
+                  <geom type="mesh" class="visual" pos="-0 0.015 -0.0015" quat="0.707107 -0.707107 0 -0" mesh="pip_2" material="pip_2_material"/>
+                  <!-- Link dip_1_3 -->
+                  <body name="dip_1_3" pos="-0 0.0365 0.0001" quat="0 -0.918852 -0.394602 -0">
+                    <!-- Joint from pip_2_3 to dip_1_3 -->
+                    <joint axis="0 0 1" name="ringrev8" type="hinge" range="-1.2831247046442877 0.08370581700205282"/>
+                    <inertial pos="-0.00485498 -0.0149142 0.0016" mass="0.00216187" fullinertia="1.75757e-07 5.3677e-08 1.95113e-07 -5.3219e-08 0 -0"/>
+                    <!-- Part dip_1_3 -->
+                    <geom type="mesh" class="visual" pos="-0.0075 -0.01 0.0016" quat="0.707107 0.707107 0 -0" mesh="dip_1" material="dip_1_material"/>
+                    <!-- Frame closing_ringrev9_1 -->
+                    <site group="3" name="closing_ringrev9_1" pos="-0.0075 -0.01 0.0001" quat="0 1 0 0"/>
+                    <!-- Frame closing_ringrev9_1_z -->
+                    <site group="3" name="closing_ringrev9_1_z" pos="-0.0075 -0.01 -0.0999" quat="0 1 0 0"/>
+                    <!-- Link fingertip_3 -->
+                    <body name="fingertip_3" pos="-0.01125 -0.025 0.0016" quat="0 0.707107 0 0.707107">
+                      <!-- Joint from dip_1_3 to fingertip_3 -->
+                      <!-- Joint is "fixed", skipping it -->
+                      <inertial pos="-1.53291e-05 8.9755e-06 0.00556374" mass="0.00195277" fullinertia="1.25657e-07 1.08494e-07 1.27514e-07 1.8e-10 -4.5e-11 -8.679e-09"/>
+                      <!-- Part fingertip_3 -->
+                      <geom type="mesh" class="visual" pos="0 -0.015 0.00375" quat="0.5 -0.5 -0.5 -0.5" mesh="fingertip" material="fingertip_material"/>
+                    </body>
+                  </body>
+                </body>
+                <!-- Link mcp_shell_a_3 -->
+                <body name="mcp_shell_a_3" pos="-0.00183227 -0.0248419 0.01235" quat="0 1 0 0">
+                  <!-- Joint from mcp_1_3 to mcp_shell_a_3 -->
+                  <!-- Joint is "fixed", skipping it -->
+                  <inertial pos="-0.00210081 0.000899501 0.000749709" mass="0.00287674" fullinertia="3.67204e-07 2.59935e-07 5.58987e-07 1.04558e-07 -1.31e-08 9.211e-09"/>
+                  <!-- Part mcp_shell_a_3 -->
+                  <geom type="mesh" class="visual" pos="-0.0111677 -0.0148419 0.00875" quat="0.707107 -0.707107 0 0" mesh="mcp_shell_a" material="mcp_shell_a_material"/>
+                </body>
+                <!-- Link mcp_shell_b_3 -->
+                <body name="mcp_shell_b_3" pos="-0.00700145 -0.0379582 -0.00515" quat="1 -0 -0 0">
+                  <!-- Joint from mcp_1_3 to mcp_shell_b_3 -->
+                  <!-- Joint is "fixed", skipping it -->
+                  <inertial pos="0.00319467 0.011403 0.000809275" mass="0.00278046" fullinertia="3.86254e-07 2.55766e-07 5.74541e-07 -1.08115e-07 -9.775e-09 -1.0119e-08"/>
+                  <!-- Part mcp_shell_b_3 -->
+                  <geom type="mesh" class="visual" pos="-0.00599855 0.0279582 0.00875" quat="0.707107 0.707107 -0 0" mesh="mcp_shell_b" material="mcp_shell_b_material"/>
+                </body>
+              </body>
+            </body>
+          </body>
+          <!-- Link mcp_2_3 -->
+          <body name="mcp_2_3" pos="0.00135358 -0.0167851 -0.006" quat="0.176181 0.686318 0.170198 0.684807">
+            <!-- Joint from ring_base to mcp_2_3 -->
+            <joint axis="0 0 1" name="ringrev4" type="hinge"/>
+            <inertial pos="-0.0010236 0.0147621 -0.0015" mass="0.00124532" fullinertia="1.43754e-07 1.3387e-08 1.55402e-07 1.8082e-08 -0 -0"/>
+            <!-- Part mcp_2_3 -->
+            <geom type="mesh" class="visual" pos="0 0 -0.0015" quat="0.5 -0.5 -0.5 -0.5" mesh="mcp_2" material="mcp_2_material"/>
+            <!-- Link pip_1_3 -->
+            <body name="pip_1_3" pos="-0.005 0.0325 0.0001" quat="0 0.883363 0.46869 -0">
+              <!-- Joint from mcp_2_3 to pip_1_3 -->
+              <joint axis="0 0 1" name="ringrev6" type="hinge" range="-0.9878811485505663 0.10779664540746836"/>
+              <inertial pos="0.000159546 -0.0240179 0.0016" mass="0.00293121" fullinertia="5.03928e-07 5.484e-08 4.75801e-07 -2.839e-09 0 7.37e-10"/>
+              <!-- Part pip_1_3 -->
+              <geom type="mesh" class="visual" pos="-0 -0.0074 0.0016" quat="0.707107 0.707107 -0 -0" mesh="pip_1" material="pip_1_material"/>
+              <!-- Frame closing_ringrev7_1 -->
+              <site group="3" name="closing_ringrev7_1" pos="-0 -0.0074 -0.003" quat="0 1 0 0"/>
+              <!-- Frame closing_ringrev7_1_z -->
+              <site group="3" name="closing_ringrev7_1_z" pos="-0 -0.0074 -0.103" quat="0 1 0 0"/>
+              <!-- Frame closing_ringrev9_2 -->
+              <site group="3" name="closing_ringrev9_2" pos="-0 -0.0444 0.0001" quat="0 1 0 0"/>
+              <!-- Frame closing_ringrev9_2_z -->
+              <site group="3" name="closing_ringrev9_2_z" pos="-0 -0.0444 -0.0999" quat="0 1 0 0"/>
+              <!-- Link pip_shell_a_3 -->
+              <body name="pip_shell_a_3" pos="-0 -0.0234 0.0082" quat="0 1 0 0">
+                <!-- Joint from pip_1_3 to pip_shell_a_3 -->
+                <!-- Joint is "fixed", skipping it -->
+                <inertial pos="0.000950206 0.000347234 0.000969168" mass="0.00156225" fullinertia="1.5107e-07 6.8794e-08 1.95961e-07 4.9385e-08 -1.725e-09 8.462e-09"/>
+                <!-- Part pip_shell_a_3 -->
+                <geom type="mesh" class="visual" pos="-0 -0.016 0.0066" quat="0.707107 -0.707107 0 0" mesh="pip_shell_a" material="pip_shell_a_material"/>
+              </body>
+              <!-- Link pip_shell_b_3 -->
+              <body name="pip_shell_b_3" pos="-0 -0.03255 -0.005" quat="1 0 -0 0">
+                <!-- Joint from pip_1_3 to pip_shell_b_3 -->
+                <!-- Joint is "fixed", skipping it -->
+                <inertial pos="0.000862039 0.00821021 0.000964796" mass="0.00156476" fullinertia="1.58144e-07 6.8853e-08 2.03054e-07 -5.0112e-08 -7.65e-10 -8.669e-09"/>
+                <!-- Part pip_shell_b_3 -->
+                <geom type="mesh" class="visual" pos="-0 0.02515 0.0066" quat="0.707107 0.707107 0 -0" mesh="pip_shell_b" material="pip_shell_b_material"/>
+              </body>
+            </body>
+          </body>
+        </body>
+        <!-- Link pinky_base -->
+        <body name="pinky_base" pos="-0.0181011 0.108855 -0.008" quat="0 -1 0 -0">
+          <!-- Joint from hand_base to pinky_base -->
+          <!-- Joint is "fixed", skipping it -->
+          <inertial pos="0.00108912 0.0171044 0.00656354" mass="0.0094602" fullinertia="4.07813e-06 7.5829e-07 4.15727e-06 -1.11179e-07 -2.491e-08 -8.89574e-07"/>
+          <!-- Part pinky_base -->
+          <geom type="mesh" class="visual" pos="0.0340445 0.0873066 -0.005" quat="0.707107 0.707107 -0 0" mesh="pinky_base" material="pinky_base_material"/>
+          <!-- Frame closing_pinkyrev3_2 -->
+          <site group="3" name="closing_pinkyrev3_2" pos="0.00412758 -0.0120009 0.003" quat="0.706864 -0.0185099 -0.706864 -0.0185099"/>
+          <!-- Frame closing_pinkyrev3_2_z -->
+          <site group="3" name="closing_pinkyrev3_2_z" pos="-0.0957354 -0.00676726 0.003" quat="0.706864 -0.0185099 -0.706864 -0.0185099"/>
+          <!-- Link actuator_housing_4 -->
+          <body name="actuator_housing_4" pos="0.00444357 0.0370201 0.0185" quat="0.706847 0.0178533 0.706881 -0.0191664">
+            <!-- Joint from pinky_base to actuator_housing_4 -->
+            <joint axis="0 0 1" name="pinkyrev1" type="hinge"/>
+            <inertial pos="-0.00615503 -0.0206966 -0.0025" mass="0.012849" fullinertia="1.75829e-06 7.16933e-07 1.97489e-06 -4.3769e-08 -0 -0"/>
+            <!-- Part actuator_housing_4 -->
+            <geom type="mesh" class="visual" pos="0 -0.003 -0.0025" quat="0.707107 0.707107 -0 -0" mesh="actuator_housing" material="actuator_housing_material"/>
+            <!-- Link actuator_piston_4 -->
+            <body name="actuator_piston_4" pos="0 -0.00975 -0.0025" quat="0 -0 0.707107 0.707107">
+              <!-- Joint from actuator_housing_4 to actuator_piston_4 -->
+              <joint axis="0 0 1" name="pinkypiston" type="slide" range="-0.018250000000000124 -1.233822072288504e-16"/>
+              <inertial pos="0 -0 -0.0184461" mass="0.00107731" fullinertia="1.20116e-07 1.20153e-07 4.363e-09 0 -0 0"/>
+              <!-- Part actuator_piston_4 -->
+              <geom type="mesh" class="visual" pos="0 0 0" quat="0 1 0 0" mesh="actuator_piston" material="actuator_piston_material"/>
+              <!-- Link mcp_1_4 -->
+              <body name="mcp_1_4" pos="-0 0.0036 -0.0341" quat="0.696911 0.696911 0.119648 -0.119648">
+                <!-- Joint from actuator_piston_4 to mcp_1_4 -->
+                <joint axis="0 0 1" name="pinkyrev2" type="hinge"/>
+                <inertial pos="-0.00399802 -0.0250212 0.0036" mass="0.00631644" fullinertia="1.7563e-06 3.51669e-07 1.67536e-06 -1.96427e-07 6.34e-10 1.61e-09"/>
+                <!-- Part mcp_1_4 -->
+                <geom type="mesh" class="visual" pos="-0.013 -0.01 0.0036" quat="0.707107 0.707107 0 0" mesh="mcp_1" material="mcp_1_material"/>
+                <!-- Frame closing_pinkyrev3_1 -->
+                <site group="3" name="closing_pinkyrev3_1" pos="-0.013 -0.01 -0.00115" quat="1 0 0 0"/>
+                <!-- Frame closing_pinkyrev3_1_z -->
+                <site group="3" name="closing_pinkyrev3_1_z" pos="-0.013 -0.01 0.09885" quat="1 0 0 0"/>
+                <!-- Frame closing_pinkyrev7_2 -->
+                <site group="3" name="closing_pinkyrev7_2" pos="0 -0.05 -0.001" quat="0 1 0 0"/>
+                <!-- Frame closing_pinkyrev7_2_z -->
+                <site group="3" name="closing_pinkyrev7_2_z" pos="0 -0.05 -0.101" quat="0 1 0 0"/>
+                <!-- Link pip_2_4 -->
+                <body name="pip_2_4" pos="-0.0106252 -0.047153 0.0021" quat="0 -0.972237 -0.233998 -0">
+                  <!-- Joint from mcp_1_4 to pip_2_4 -->
+                  <joint axis="0 0 1" name="pinkyrev5" type="hinge"/>
+                  <inertial pos="-0.000165532 0.0185904 -0.0015" mass="0.00109766" fullinertia="1.49177e-07 6.342e-09 1.54003e-07 -1.509e-09 0 -0"/>
+                  <!-- Part pip_2_4 -->
+                  <geom type="mesh" class="visual" pos="0 0.015 -0.0015" quat="0.707107 -0.707107 -0 0" mesh="pip_2" material="pip_2_material"/>
+                  <!-- Link dip_1_4 -->
+                  <body name="dip_1_4" pos="0 0.0365 0.0001" quat="0 -0.921768 -0.387741 -0">
+                    <!-- Joint from pip_2_4 to dip_1_4 -->
+                    <joint axis="0 0 1" name="pinkyrev8" type="hinge" range="-1.2980350555543971 0.06879546609194342"/>
+                    <inertial pos="-0.00485498 -0.0149142 0.0016" mass="0.00216187" fullinertia="1.75757e-07 5.3677e-08 1.95113e-07 -5.3219e-08 0 -0"/>
+                    <!-- Part dip_1_4 -->
+                    <geom type="mesh" class="visual" pos="-0.0075 -0.01 0.0016" quat="0.707107 0.707107 -0 -0" mesh="dip_1" material="dip_1_material"/>
+                    <!-- Frame closing_pinkyrev9_1 -->
+                    <site group="3" name="closing_pinkyrev9_1" pos="-0.0075 -0.01 0.0001" quat="0 1 0 0"/>
+                    <!-- Frame closing_pinkyrev9_1_z -->
+                    <site group="3" name="closing_pinkyrev9_1_z" pos="-0.0075 -0.01 -0.0999" quat="0 1 0 0"/>
+                    <!-- Link fingertip_4 -->
+                    <body name="fingertip_4" pos="-0.01125 -0.025 0.0016" quat="0 0.707107 0 0.707107">
+                      <!-- Joint from dip_1_4 to fingertip_4 -->
+                      <!-- Joint is "fixed", skipping it -->
+                      <inertial pos="-1.53291e-05 8.9755e-06 0.00556374" mass="0.00195277" fullinertia="1.25657e-07 1.08494e-07 1.27514e-07 1.8e-10 -4.5e-11 -8.679e-09"/>
+                      <!-- Part fingertip_4 -->
+                      <geom type="mesh" class="visual" pos="0 -0.015 0.00375" quat="0.5 -0.5 -0.5 -0.5" mesh="fingertip" material="fingertip_material"/>
+                    </body>
+                  </body>
+                </body>
+                <!-- Link mcp_shell_a_4 -->
+                <body name="mcp_shell_a_4" pos="-0.00183227 -0.0248419 0.01235" quat="0 -1 0 -0">
+                  <!-- Joint from mcp_1_4 to mcp_shell_a_4 -->
+                  <!-- Joint is "fixed", skipping it -->
+                  <inertial pos="-0.00210081 0.000899501 0.000749709" mass="0.00287674" fullinertia="3.67204e-07 2.59935e-07 5.58987e-07 1.04558e-07 -1.31e-08 9.211e-09"/>
+                  <!-- Part mcp_shell_a_4 -->
+                  <geom type="mesh" class="visual" pos="-0.0111677 -0.0148419 0.00875" quat="0.707107 -0.707107 -0 0" mesh="mcp_shell_a" material="mcp_shell_a_material"/>
+                </body>
+                <!-- Link mcp_shell_b_4 -->
+                <body name="mcp_shell_b_4" pos="-0.00700145 -0.0379582 -0.00515" quat="1 0 0 0">
+                  <!-- Joint from mcp_1_4 to mcp_shell_b_4 -->
+                  <!-- Joint is "fixed", skipping it -->
+                  <inertial pos="0.00319467 0.011403 0.000809275" mass="0.00278046" fullinertia="3.86254e-07 2.55766e-07 5.74541e-07 -1.08115e-07 -9.775e-09 -1.0119e-08"/>
+                  <!-- Part mcp_shell_b_4 -->
+                  <geom type="mesh" class="visual" pos="-0.00599855 0.0279582 0.00875" quat="0.707107 0.707107 -0 -0" mesh="mcp_shell_b" material="mcp_shell_b_material"/>
+                </body>
+              </body>
+            </body>
+          </body>
+          <!-- Link mcp_2_4 -->
+          <body name="mcp_2_4" pos="0.000646523 -0.0163246 -0.006" quat="0.193373 0.68934 0.157512 0.680152">
+            <!-- Joint from pinky_base to mcp_2_4 -->
+            <joint axis="0 0 1" name="pinkyrev4" type="hinge"/>
+            <inertial pos="-0.0010236 0.0147621 -0.0015" mass="0.00124532" fullinertia="1.43754e-07 1.3387e-08 1.55402e-07 1.8082e-08 -0 0"/>
+            <!-- Part mcp_2_4 -->
+            <geom type="mesh" class="visual" pos="0 0 -0.0015" quat="0.5 -0.5 -0.5 -0.5" mesh="mcp_2" material="mcp_2_material"/>
+            <!-- Link pip_1_4 -->
+            <body name="pip_1_4" pos="-0.005 0.0325 0.0001" quat="0 0.887777 0.460274 -0">
+              <!-- Joint from mcp_2_4 to pip_1_4 -->
+              <joint axis="0 0 1" name="pinkyrev6" type="hinge" range="-1.0068885018780485 0.0887892920799862"/>
+              <inertial pos="0.000159546 -0.0240179 0.0016" mass="0.00293121" fullinertia="5.03928e-07 5.484e-08 4.75801e-07 -2.839e-09 -0 7.37e-10"/>
+              <!-- Part pip_1_4 -->
+              <geom type="mesh" class="visual" pos="0 -0.0074 0.0016" quat="0.707107 0.707107 0 0" mesh="pip_1" material="pip_1_material"/>
+              <!-- Frame closing_pinkyrev7_1 -->
+              <site group="3" name="closing_pinkyrev7_1" pos="0 -0.0074 -0.003" quat="0 1 0 0"/>
+              <!-- Frame closing_pinkyrev7_1_z -->
+              <site group="3" name="closing_pinkyrev7_1_z" pos="0 -0.0074 -0.103" quat="0 1 0 0"/>
+              <!-- Frame closing_pinkyrev9_2 -->
+              <site group="3" name="closing_pinkyrev9_2" pos="-0 -0.0444 0.0001" quat="0 1 0 0"/>
+              <!-- Frame closing_pinkyrev9_2_z -->
+              <site group="3" name="closing_pinkyrev9_2_z" pos="0 -0.0444 -0.0999" quat="0 1 0 0"/>
+              <!-- Link pip_shell_a_4 -->
+              <body name="pip_shell_a_4" pos="0 -0.0234 0.0082" quat="0 1 0 0">
+                <!-- Joint from pip_1_4 to pip_shell_a_4 -->
+                <!-- Joint is "fixed", skipping it -->
+                <inertial pos="0.000950206 0.000347234 0.000969168" mass="0.00156225" fullinertia="1.5107e-07 6.8794e-08 1.95961e-07 4.9385e-08 -1.725e-09 8.462e-09"/>
+                <!-- Part pip_shell_a_4 -->
+                <geom type="mesh" class="visual" pos="0 -0.016 0.0066" quat="0.707107 -0.707107 -0 -0" mesh="pip_shell_a" material="pip_shell_a_material"/>
+              </body>
+              <!-- Link pip_shell_b_4 -->
+              <body name="pip_shell_b_4" pos="0 -0.03255 -0.005" quat="1 0 -0 0">
+                <!-- Joint from pip_1_4 to pip_shell_b_4 -->
+                <!-- Joint is "fixed", skipping it -->
+                <inertial pos="0.000862039 0.00821021 0.000964796" mass="0.00156476" fullinertia="1.58144e-07 6.8853e-08 2.03054e-07 -5.0112e-08 -7.65e-10 -8.669e-09"/>
+                <!-- Part pip_shell_b_4 -->
+                <geom type="mesh" class="visual" pos="0 0.02515 0.0066" quat="0.707107 0.707107 -0 -0" mesh="pip_shell_b" material="pip_shell_b_material"/>
+              </body>
+            </body>
+          </body>
+        </body>
+        <!-- Link actuator_housing_5 -->
+        <body name="actuator_housing_5" pos="-0.00280284 0.0161755 0.004" quat="0 -0.766044 0.642788 0">
+          <!-- Joint from hand_base to actuator_housing_5 -->
+          <!-- Joint is "fixed", skipping it -->
+          <inertial pos="-0.00615503 -0.0206966 -0.0025" mass="0.012849" fullinertia="1.75829e-06 7.16933e-07 1.97489e-06 -4.3769e-08 -0 0"/>
+          <!-- Part actuator_housing_5 -->
+          <geom type="mesh" class="visual" pos="0 -0.003 -0.0025" quat="0.707107 0.707107 0 -0" mesh="actuator_housing" material="actuator_housing_material"/>
+          <!-- Link actuator_piston_5 -->
+          <body name="actuator_piston_5" pos="-0 -0.008 -0.0025" quat="0.707107 -0.707107 0 -0">
+            <!-- Joint from actuator_housing_5 to actuator_piston_5 -->
+            <joint axis="0 0 1" name="tmpiston" type="slide" range="-0.018250000000000006 -4.336808689942018e-18"/>
+            <inertial pos="0 0 -0.0201961" mass="0.00107731" fullinertia="1.20116e-07 1.20153e-07 4.363e-09 0 0 0"/>
+            <!-- Part actuator_piston_5 -->
+            <geom type="mesh" class="visual" pos="0 0 -0.00175" quat="0 -1 -0 -0" mesh="actuator_piston" material="actuator_piston_material"/>
+            <!-- Link clevis_1 -->
+            <body name="clevis_1" pos="0 0 -0.03585" quat="0.707107 -0.707107 -0 0">
+              <!-- Joint from actuator_piston_5 to clevis_1 -->
+              <!-- Joint is "fixed", skipping it -->
+              <inertial pos="5.3e-11 0.00537033 -1.5e-11" mass="0.000506548" fullinertia="1.1958e-08 7.212e-09 9.774e-09 -0 -0 0"/>
+              <!-- Part clevis_1 -->
+              <geom type="mesh" class="visual" pos="0 0 0" quat="0.5 0.5 0.5 0.5" mesh="clevis_1" material="clevis_1_material"/>
+              <!-- Link clevis_link -->
+              <body name="clevis_link" pos="-0 0.0095 0" quat="0.58574 -0.396117 -0.58574 0.396117">
+                <!-- Joint from clevis_1 to clevis_link -->
+                <joint axis="0 0 1" name="clevisrev1" type="hinge"/>
+                <inertial pos="0.00416495 0 -0" mass="0.000383686" fullinertia="2.764e-09 6.373e-09 8.562e-09 -0 -0 0"/>
+                <!-- Part clevis_link -->
+                <geom type="mesh" class="visual" pos="-0 -0 -0" quat="0 1 0 0" mesh="clevis_link" material="clevis_link_material"/>
+                <!-- Link thumb_base -->
+                <body name="thumb_base" pos="0.0075 -0 0.00165" quat="0 0.884115 -0.467269 -0">
+                  <!-- Joint from clevis_link to thumb_base -->
+                  <joint axis="0 0 1" name="clevisrev2" type="hinge"/>
+                  <inertial pos="0.0254141 -0.0188732 -0.00893547" mass="0.0133736" fullinertia="4.96322e-06 4.36148e-06 3.51223e-06 1.093e-06 1.2143e-06 -1.6763e-06"/>
+                  <!-- Part thumb_base -->
+                  <geom type="mesh" class="visual" pos="0 -0 0.00165" quat="0 1 0 0" mesh="thumb_base" material="thumb_base_material"/>
+                  <!-- Frame closing_thumbpivot_2 -->
+                  <site group="3" name="closing_thumbpivot_2" pos="0.0125 0 -0.0026" quat="0.707107 0 0 -0.707107"/>
+                  <!-- Frame closing_thumbpivot_2_z -->
+                  <site group="3" name="closing_thumbpivot_2_z" pos="0.0125 0 0.0974" quat="0.707107 0 0 -0.707107"/>
+                  <!-- Frame closing_thumbrev3_2 -->
+                  <site group="3" name="closing_thumbrev3_2" pos="0.0417117 -0.0334372 -0.0306244" quat="0.627211 0.627211 -0.326506 -0.326506"/>
+                  <!-- Frame closing_thumbrev3_2_z -->
+                  <site group="3" name="closing_thumbrev3_2_z" pos="-0.0402035 -0.0907949 -0.0306244" quat="0.627211 0.627211 -0.326506 -0.326506"/>
+                  <!-- Link actuator_housing_6 -->
+                  <body name="actuator_housing_6" pos="0.0230205 -0.0106663 0.0141002" quat="0.422786 -0.706788 0.0212283 -0.566791">
+                    <!-- Joint from thumb_base to actuator_housing_6 -->
+                    <joint axis="0 0 1" name="thumbrev1" type="hinge"/>
+                    <inertial pos="-0.00615503 0.0206966 -0.0025" mass="0.012849" fullinertia="1.75829e-06 7.16933e-07 1.97489e-06 4.3769e-08 0 0"/>
+                    <!-- Part actuator_housing_6 -->
+                    <geom type="mesh" class="visual" pos="0 0.003 -0.0025" quat="0.707107 -0.707107 -0 0" mesh="actuator_housing" material="actuator_housing_material"/>
+                    <!-- Link actuator_piston_6 -->
+                    <body name="actuator_piston_6" pos="-0 0.008 -0.0025" quat="0.707107 0.707107 -0 -0">
+                      <!-- Joint from actuator_housing_6 to actuator_piston_6 -->
+                      <joint axis="0 0 1" name="thumbpiston" type="slide" range="-0.017924846119905885 0.0005751538800941145"/>
+                      <inertial pos="0 -0 -0.0205212" mass="0.00107731" fullinertia="1.20116e-07 1.20153e-07 4.363e-09 0 0 0"/>
+                      <!-- Part actuator_piston_6 -->
+                      <geom type="mesh" class="visual" pos="0 -0 -0.00207515" quat="0 -1 -0 -0" mesh="actuator_piston" material="actuator_piston_material"/>
+                      <!-- Link tm_1 -->
+                      <body name="tm_1" pos="0 0.0036 -0.0361752" quat="0.693781 0.693781 0.136632 -0.136632">
+                        <!-- Joint from actuator_piston_6 to tm_1 -->
+                        <joint axis="0 0 1" name="thumbrev2" type="hinge"/>
+                        <inertial pos="-0.00385684 -0.0265649 0.0036" mass="0.00655236" fullinertia="1.92615e-06 3.64081e-07 1.84257e-06 -2.19771e-07 6.34e-10 1.61e-09"/>
+                        <!-- Part tm_1 -->
+                        <geom type="mesh" class="visual" pos="-0.013 -0.0125 0.0036" quat="0.707107 0.707107 -0 -0" mesh="tm_1" material="tm_1_material"/>
+                        <!-- Frame closing_thumbrev3_1 -->
+                        <site group="3" name="closing_thumbrev3_1" pos="-0.013 -0.0125 -0.00115" quat="1 -0 -0 0"/>
+                        <!-- Frame closing_thumbrev3_1_z -->
+                        <site group="3" name="closing_thumbrev3_1_z" pos="-0.013 -0.0125 0.09885" quat="1 -0 -0 0"/>
+                        <!-- Frame closing_thumbrev7_2 -->
+                        <site group="3" name="closing_thumbrev7_2" pos="0 -0.0525 -0.001" quat="0 1 0 0"/>
+                        <!-- Frame closing_thumbrev7_2_z -->
+                        <site group="3" name="closing_thumbrev7_2_z" pos="0 -0.0525 -0.101" quat="0 1 0 0"/>
+                        <!-- Link pipt_2 -->
+                        <body name="pipt_2" pos="-0.0106252 -0.049653 0.0021" quat="0 -0.93656 -0.350508 0">
+                          <!-- Joint from tm_1 to pipt_2 -->
+                          <joint axis="0 0 1" name="thumbrev5" type="hinge"/>
+                          <inertial pos="-0.000173862 0.0153854 -0.0015" mass="0.000915658" fullinertia="9.0128e-08 5.242e-09 9.4123e-08 -1.255e-09 0 0"/>
+                          <!-- Part pipt_2 -->
+                          <geom type="mesh" class="visual" pos="-0 0.015 -0.0015" quat="0.707107 -0.707107 0 0" mesh="pipt_2" material="pipt_2_material"/>
+                          <!-- Link dipt_1 -->
+                          <body name="dipt_1" pos="-0 0.03 0.0001" quat="0 -0.918793 -0.394739 -0">
+                            <!-- Joint from pipt_2 to dipt_1 -->
+                            <joint axis="0 0 1" name="thumbrev8" type="hinge" range="-1.2828273622857145 0.08400315936062608"/>
+                            <inertial pos="-0.00433696 -0.0181489 0.0016" mass="0.00252119" fullinertia="2.66844e-07 6.5642e-08 2.91906e-07 -7.6924e-08 -0 -0"/>
+                            <!-- Part dipt_1 -->
+                            <geom type="mesh" class="visual" pos="-0.0075 -0.015 0.0016" quat="0.707107 0.707107 0 0" mesh="dipt_1" material="dipt_1_material"/>
+                            <!-- Frame closing_thumbrev9_1 -->
+                            <site group="3" name="closing_thumbrev9_1" pos="-0.0075 -0.015 0.0001" quat="0 1 0 0"/>
+                            <!-- Frame closing_thumbrev9_1_z -->
+                            <site group="3" name="closing_thumbrev9_1_z" pos="-0.0075 -0.015 -0.0999" quat="0 1 0 0"/>
+                            <!-- Link fingertip_5 -->
+                            <body name="fingertip_5" pos="-0.01125 -0.03 0.0016" quat="0 -0.707107 0 -0.707107">
+                              <!-- Joint from dipt_1 to fingertip_5 -->
+                              <!-- Joint is "fixed", skipping it -->
+                              <inertial pos="-1.53291e-05 8.9755e-06 0.00556374" mass="0.00195277" fullinertia="1.25657e-07 1.08494e-07 1.27514e-07 1.8e-10 -4.5e-11 -8.679e-09"/>
+                              <!-- Part fingertip_5 -->
+                              <geom type="mesh" class="visual" pos="-0 -0.015 0.00375" quat="0.5 -0.5 -0.5 -0.5" mesh="fingertip" material="fingertip_material"/>
+                            </body>
+                          </body>
+                        </body>
+                        <!-- Link mcp_shell_a_5 -->
+                        <body name="mcp_shell_a_5" pos="-0.00183227 -0.0273419 0.01235" quat="0 -1 -0 -0">
+                          <!-- Joint from tm_1 to mcp_shell_a_5 -->
+                          <!-- Joint is "fixed", skipping it -->
+                          <inertial pos="-0.00210081 0.000899501 0.000749709" mass="0.00287674" fullinertia="3.67204e-07 2.59935e-07 5.58987e-07 1.04558e-07 -1.31e-08 9.211e-09"/>
+                          <!-- Part mcp_shell_a_5 -->
+                          <geom type="mesh" class="visual" pos="-0.0111677 -0.0148419 0.00875" quat="0.707107 -0.707107 -0 0" mesh="mcp_shell_a" material="mcp_shell_a_material"/>
+                        </body>
+                        <!-- Link mcp_shell_b_5 -->
+                        <body name="mcp_shell_b_5" pos="-0.00700145 -0.0404582 -0.00515" quat="1 0 -0 0">
+                          <!-- Joint from tm_1 to mcp_shell_b_5 -->
+                          <!-- Joint is "fixed", skipping it -->
+                          <inertial pos="0.00319467 0.011403 0.000809275" mass="0.00278046" fullinertia="3.86254e-07 2.55766e-07 5.74541e-07 -1.08115e-07 -9.775e-09 -1.0119e-08"/>
+                          <!-- Part mcp_shell_b_5 -->
+                          <geom type="mesh" class="visual" pos="-0.00599855 0.0279582 0.00875" quat="0.707107 0.707107 0 0" mesh="mcp_shell_b" material="mcp_shell_b_material"/>
+                        </body>
+                      </body>
+                    </body>
+                  </body>
+                  <!-- Link tm_2 -->
+                  <body name="tm_2" pos="0.0377085 -0.0333863 -0.0404114" quat="0.274595 -0.69127 -0.148813 -0.651611">
+                    <!-- Joint from thumb_base to tm_2 -->
+                    <joint axis="0 0 1" name="thumbrev4" type="hinge"/>
+                    <inertial pos="-0.00110629 0.0135445 -0.0015" mass="0.00115224" fullinertia="1.17273e-07 1.2448e-08 1.2812e-07 1.6448e-08 -0 -0"/>
+                    <!-- Part tm_2 -->
+                    <geom type="mesh" class="visual" pos="0 -0 -0.0015" quat="0.5 -0.5 -0.5 -0.5" mesh="tm_2" material="tm_2_material"/>
+                    <!-- Link pipt_1 -->
+                    <body name="pipt_1" pos="-0.005 0.03 0.0001" quat="0 0.907329 0.420421 -0">
+                      <!-- Joint from tm_2 to pipt_1 -->
+                      <joint axis="0 0 1" name="thumbrev6" type="hinge" range="-1.9247091886553345 7.105427357601002e-15"/>
+                      <inertial pos="0.000204855 -0.0234626 0.0016" mass="0.00287551" fullinertia="4.73334e-07 5.4081e-08 4.45014e-07 -2.081e-09 6e-11 8.57e-10"/>
+                      <!-- Part pipt_1 -->
+                      <geom type="mesh" class="visual" pos="0 -0.0095 0.0016" quat="0.707107 0.707107 0 0" mesh="pipt_1" material="pipt_1_material"/>
+                      <!-- Frame closing_thumbrev7_1 -->
+                      <site group="3" name="closing_thumbrev7_1" pos="0 -0.0095 -0.003" quat="0 1 0 0"/>
+                      <!-- Frame closing_thumbrev7_1_z -->
+                      <site group="3" name="closing_thumbrev7_1_z" pos="0 -0.0095 -0.103" quat="0 1 0 0"/>
+                      <!-- Frame closing_thumbrev9_2 -->
+                      <site group="3" name="closing_thumbrev9_2" pos="-0 -0.0435 0.0001" quat="0 1 0 0"/>
+                      <!-- Frame closing_thumbrev9_2_z -->
+                      <site group="3" name="closing_thumbrev9_2_z" pos="-0 -0.0435 -0.0999" quat="0 1 0 0"/>
+                      <!-- Link pipt_shell_a -->
+                      <body name="pipt_shell_a" pos="0.00075 -0.021 0.0082" quat="0 1 0 0">
+                        <!-- Joint from pipt_1 to pipt_shell_a -->
+                        <!-- Joint is "fixed", skipping it -->
+                        <inertial pos="-0.000451066 0.00224601 0.000942392" mass="0.00141265" fullinertia="1.35053e-07 6.1282e-08 1.74669e-07 5.0413e-08 -3.71e-10 8.207e-09"/>
+                        <!-- Part pipt_shell_a -->
+                        <geom type="mesh" class="visual" pos="-0.00075 -0.0145 0.0066" quat="0.707107 -0.707107 0 0" mesh="pipt_shell_a" material="pipt_shell_a_material"/>
+                      </body>
+                      <!-- Link pipt_shell_b -->
+                      <body name="pipt_shell_b" pos="0 -0.03165 -0.005" quat="1 0 0 0">
+                        <!-- Joint from pipt_1 to pipt_shell_b -->
+                        <!-- Joint is "fixed", skipping it -->
+                        <inertial pos="0.000186493 0.00764668 0.000952904" mass="0.00140676" fullinertia="1.39212e-07 6.1113e-08 1.78731e-07 -5.0391e-08 5.99e-10 -8.273e-09"/>
+                        <!-- Part pipt_shell_b -->
+                        <geom type="mesh" class="visual" pos="-0 0.02515 0.0066" quat="0.707107 0.707107 0 0" mesh="pipt_shell_b" material="pipt_shell_b_material"/>
+                      </body>
+                    </body>
+                  </body>
+                  <!-- Link tm_shell_a -->
+                  <body name="tm_shell_a" pos="0.0158199 -0.0247909 -0.00128068" quat="0.627211 -0.627211 0.326506 -0.326506">
+                    <!-- Joint from thumb_base to tm_shell_a -->
+                    <!-- Joint is "fixed", skipping it -->
+                    <inertial pos="0.00549847 0.00519122 0.00176773" mass="0.00486407" fullinertia="1.0066e-06 6.83739e-07 1.51936e-06 -9.9731e-08 1.3394e-08 1.8282e-08"/>
+                    <!-- Part tm_shell_a -->
+                    <geom type="mesh" class="visual" pos="-0.0293815 -0.00293068 0.0012606" quat="0.627211 -0.627211 -0.326506 -0.326506" mesh="tm_shell_a" material="tm_shell_a_material"/>
+                  </body>
+                  <!-- Link tm_shell_b -->
+                  <body name="tm_shell_b" pos="0.0425693 -0.0228938 -0.0128509" quat="0.627211 0.627211 -0.326506 -0.326506">
+                    <!-- Joint from thumb_base to tm_shell_b -->
+                    <!-- Joint is "fixed", skipping it -->
+                    <inertial pos="-0.00770225 0.00589301 0.00170763" mass="0.00497785" fullinertia="1.02238e-06 6.97478e-07 1.54709e-06 1.07531e-07 1.9477e-08 -2.8956e-08"/>
+                    <!-- Part tm_shell_b -->
+                    <geom type="mesh" class="visual" pos="-0.0431703 0.0145009 0.0217394" quat="0.627211 0.627211 0.326506 -0.326506" mesh="tm_shell_b" material="tm_shell_b_material"/>
+                  </body>
+                </body>
+              </body>
+            </body>
+          </body>
+        </body>
+        <!-- Link palm_shell -->
+        <body name="palm_shell" pos="0.0359559 0.01125 0.0156" quat="0 -1 0 -0">
+          <!-- Joint from hand_base to palm_shell -->
+          <!-- Joint is "fixed", skipping it -->
+          <inertial pos="-0.0175527 -0.0548535 0.00280774" mass="0.028424" fullinertia="3.00902e-05 3.64167e-05 6.34815e-05 5.07385e-06 -2.04422e-07 2.9256e-06"/>
+          <!-- Part palm_shell -->
+          <geom type="mesh" class="visual" pos="-0.0200124 -0.0102983 0.0186" quat="0.707107 0.707107 0 0" mesh="palm_shell" material="palm_shell_material"/>
+        </body>
+        <!-- Link back_shell -->
+        <body name="back_shell" pos="0.0760748 0.06198 -0.0205" quat="1 0 -0 -0">
+          <!-- Joint from hand_base to back_shell -->
+          <!-- Joint is "fixed", skipping it -->
+          <inertial pos="-0.0547578 0.0105116 -0.0194617" mass="0.0364649" fullinertia="4.57434e-05 5.56411e-05 9.61144e-05 -3.1685e-08 -9.133e-09 3.43716e-06"/>
+          <!-- Part back_shell -->
+          <geom type="mesh" class="visual" pos="-0.0601314 -0.0404316 0.0176" quat="0.707107 -0.707107 -0 0" mesh="back_shell" material="back_shell_material"/>
+        </body>
+      </body>
+    </body>
+  </worldbody>
+  <asset>
+    <mesh file="dip_1.stl"/>
+    <mesh file="index_base.stl"/>
+    <mesh file="thumb_base.stl"/>
+    <mesh file="pipt_shell_b.stl"/>
+    <mesh file="back_shell.stl"/>
+    <mesh file="hand_base.stl"/>
+    <mesh file="mcp_1.stl"/>
+    <mesh file="pip_shell_a.stl"/>
+    <mesh file="pipt_1.stl"/>
+    <mesh file="mcp_shell_b.stl"/>
+    <mesh file="wrist_mount.stl"/>
+    <mesh file="ring_base.stl"/>
+    <mesh file="actuator_housing.stl"/>
+    <mesh file="middle_base.stl"/>
+    <mesh file="tm_2.stl"/>
+    <mesh file="clevis_link.stl"/>
+    <mesh file="mcp_2.stl"/>
+    <mesh file="tm_shell_a.stl"/>
+    <mesh file="clevis_1.stl"/>
+    <mesh file="mcp_shell_a.stl"/>
+    <mesh file="tm_1.stl"/>
+    <mesh file="dipt_1.stl"/>
+    <mesh file="tm_shell_b.stl"/>
+    <mesh file="palm_shell.stl"/>
+    <mesh file="pip_shell_b.stl"/>
+    <mesh file="pip_2.stl"/>
+    <mesh file="pinky_base.stl"/>
+    <mesh file="pipt_2.stl"/>
+    <mesh file="fingertip.stl"/>
+    <mesh file="pipt_shell_a.stl"/>
+    <mesh file="actuator_piston.stl"/>
+    <mesh file="pip_1.stl"/>
+    <material name="wrist_mount_material" rgba="0.901961 0.878431 0.811765 1"/>
+    <material name="hand_base_material" rgba="0.901961 0.878431 0.811765 1"/>
+    <material name="index_base_material" rgba="0.654902 0.823529 0.576471 1"/>
+    <material name="actuator_housing_material" rgba="0.301961 0.290196 0.262745 1"/>
+    <material name="actuator_piston_material" rgba="0.301961 0.290196 0.262745 1"/>
+    <material name="mcp_1_material" rgba="0.901961 0.878431 0.811765 1"/>
+    <material name="pip_2_material" rgba="0.901961 0.878431 0.811765 1"/>
+    <material name="dip_1_material" rgba="0.901961 0.878431 0.811765 1"/>
+    <material name="fingertip_material" rgba="0.980392 0.713725 0.00392157 1"/>
+    <material name="mcp_shell_a_material" rgba="0.980392 0.713725 0.00392157 1"/>
+    <material name="mcp_shell_b_material" rgba="0.980392 0.713725 0.00392157 1"/>
+    <material name="mcp_2_material" rgba="0.901961 0.878431 0.811765 1"/>
+    <material name="pip_1_material" rgba="0.901961 0.878431 0.811765 1"/>
+    <material name="pip_shell_a_material" rgba="0.980392 0.713725 0.00392157 1"/>
+    <material name="pip_shell_b_material" rgba="0.980392 0.713725 0.00392157 1"/>
+    <material name="middle_base_material" rgba="0.882353 0.572549 0.478431 1"/>
+    <material name="ring_base_material" rgba="0.737255 0.937255 0.917647 1"/>
+    <material name="pinky_base_material" rgba="0.541176 0.682353 0.839216 1"/>
+    <material name="clevis_1_material" rgba="0.901961 0.878431 0.811765 1"/>
+    <material name="clevis_link_material" rgba="0.901961 0.878431 0.811765 1"/>
+    <material name="thumb_base_material" rgba="0.901961 0.878431 0.811765 1"/>
+    <material name="tm_1_material" rgba="0.901961 0.878431 0.811765 1"/>
+    <material name="pipt_2_material" rgba="0.901961 0.878431 0.811765 1"/>
+    <material name="dipt_1_material" rgba="0.901961 0.878431 0.811765 1"/>
+    <material name="tm_2_material" rgba="0.901961 0.878431 0.811765 1"/>
+    <material name="pipt_1_material" rgba="0.901961 0.878431 0.811765 1"/>
+    <material name="pipt_shell_a_material" rgba="0.980392 0.713725 0.00392157 1"/>
+    <material name="pipt_shell_b_material" rgba="0.980392 0.713725 0.00392157 1"/>
+    <material name="tm_shell_a_material" rgba="0.980392 0.713725 0.00392157 1"/>
+    <material name="tm_shell_b_material" rgba="0.980392 0.713725 0.00392157 1"/>
+    <material name="palm_shell_material" rgba="0.980392 0.713725 0.00392157 1"/>
+    <material name="back_shell_material" rgba="0.301961 0.301961 0.301961 1"/>
+  </asset>
+  <actuator>
+    <position class="newbanana" name="indexpiston" joint="indexpiston" inheritrange="1"/>
+    <position class="newbanana" name="middlepiston" joint="middlepiston" inheritrange="1"/>
+    <position class="newbanana" name="ringpiston" joint="ringpiston" inheritrange="1"/>
+    <position class="newbanana" name="pinkypiston" joint="pinkypiston" inheritrange="1"/>
+    <position class="newbanana" name="tmpiston" joint="tmpiston" inheritrange="1"/>
+    <position class="newbanana" name="thumbpiston" joint="thumbpiston" inheritrange="1"/>
+  </actuator>
+  <equality>
+    <connect site1="closing_indexrev3_1" site2="closing_indexrev3_2"/>
+    <connect site1="closing_indexrev3_1_z" site2="closing_indexrev3_2_z"/>
+    <connect site1="closing_indexrev7_1" site2="closing_indexrev7_2"/>
+    <connect site1="closing_indexrev7_1_z" site2="closing_indexrev7_2_z"/>
+    <connect site1="closing_indexrev9_1" site2="closing_indexrev9_2"/>
+    <connect site1="closing_indexrev9_1_z" site2="closing_indexrev9_2_z"/>
+    <connect site1="closing_middlerev3_1" site2="closing_middlerev3_2"/>
+    <connect site1="closing_middlerev3_1_z" site2="closing_middlerev3_2_z"/>
+    <connect site1="closing_middlerev7_1" site2="closing_middlerev7_2"/>
+    <connect site1="closing_middlerev7_1_z" site2="closing_middlerev7_2_z"/>
+    <connect site1="closing_middlerev9_1" site2="closing_middlerev9_2"/>
+    <connect site1="closing_middlerev9_1_z" site2="closing_middlerev9_2_z"/>
+    <connect site1="closing_ringrev3_1" site2="closing_ringrev3_2"/>
+    <connect site1="closing_ringrev3_1_z" site2="closing_ringrev3_2_z"/>
+    <connect site1="closing_ringrev7_1" site2="closing_ringrev7_2"/>
+    <connect site1="closing_ringrev7_1_z" site2="closing_ringrev7_2_z"/>
+    <connect site1="closing_ringrev9_1" site2="closing_ringrev9_2"/>
+    <connect site1="closing_ringrev9_1_z" site2="closing_ringrev9_2_z"/>
+    <connect site1="closing_pinkyrev3_1" site2="closing_pinkyrev3_2"/>
+    <connect site1="closing_pinkyrev3_1_z" site2="closing_pinkyrev3_2_z"/>
+    <connect site1="closing_pinkyrev7_1" site2="closing_pinkyrev7_2"/>
+    <connect site1="closing_pinkyrev7_1_z" site2="closing_pinkyrev7_2_z"/>
+    <connect site1="closing_pinkyrev9_1" site2="closing_pinkyrev9_2"/>
+    <connect site1="closing_pinkyrev9_1_z" site2="closing_pinkyrev9_2_z"/>
+    <connect site1="closing_thumbpivot_1" site2="closing_thumbpivot_2"/>
+    <connect site1="closing_thumbpivot_1_z" site2="closing_thumbpivot_2_z"/>
+    <connect site1="closing_thumbrev3_1" site2="closing_thumbrev3_2"/>
+    <connect site1="closing_thumbrev3_1_z" site2="closing_thumbrev3_2_z"/>
+    <connect site1="closing_thumbrev7_1" site2="closing_thumbrev7_2"/>
+    <connect site1="closing_thumbrev7_1_z" site2="closing_thumbrev7_2_z"/>
+    <connect site1="closing_thumbrev9_1" site2="closing_thumbrev9_2"/>
+    <connect site1="closing_thumbrev9_1_z" site2="closing_thumbrev9_2_z"/>
+  </equality>
+</mujoco>

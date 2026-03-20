@@ -1,8 +1,8 @@
 use crate::config::{COMMAND_COUNT, FORCE_COUNT, POSITION_COUNT};
 use crate::control_config::{
-    CONTROL_DT_S, CONTROL_MODE, FORCE_MAPS, FORCE_PID_GAINS, MAX_MOTORS, OUTPUT_DEADBAND_PERCENT,
-    POSITION_MAPS, POSITION_PID_GAINS, ControlMode, force_bits_to_newtons,
-    position_bits_to_mm
+    CONTROL_DT_S, ControlMode, DEFAULT_CONTROL_MODE, FORCE_MAPS, FORCE_PID_GAINS, MAX_MOTORS,
+    MOTOR_INDEX_1, MOTOR_THUMB_2, OUTPUT_DEADBAND_PERCENT, POSITION_MAPS, POSITION_PID_GAINS,
+    force_bits_to_newtons, position_bits_to_mm,
 };
 use crate::pid::Pid;
 
@@ -33,7 +33,7 @@ impl Controller {
         Self {
             position_pids: core::array::from_fn(|_| Pid::new(pkp, pki, pkd)),
             force_pids: core::array::from_fn(|_| Pid::new(fkp, fki, fkd)),
-            mode: CONTROL_MODE,
+            mode: DEFAULT_CONTROL_MODE,
         }
     }
 
@@ -70,12 +70,14 @@ impl Controller {
         match self.mode {
             ControlMode::Position => {
                 for map in POSITION_MAPS {
-                    
                     active[map.motor_idx] = true;
                     let setpoint_mm = position_bits_to_mm(commands[map.cmd_idx]);
                     let feedback_mm = position_bits_to_mm(positions[map.pos_idx]);
-                    let u =
-                        self.position_pids[map.motor_idx].update(setpoint_mm, feedback_mm, CONTROL_DT_S);
+                    let u = self.position_pids[map.motor_idx].update(
+                        setpoint_mm,
+                        feedback_mm,
+                        CONTROL_DT_S,
+                    );
                     outputs[map.motor_idx] = motor_command_from_output(u);
                 }
                 apply_inactive_policy(&mut outputs, &active, ControlMode::Position);
@@ -86,10 +88,20 @@ impl Controller {
                     let setpoint = force_bits_to_newtons(commands[map.cmd_idx]);
                     let feedback = force_bits_to_newtons(forces[map.force_idx]);
                     let u = self.force_pids[map.motor_idx].update(setpoint, feedback, CONTROL_DT_S);
-                    // defmt::info!("setpoint: {}, force: {}, u: {}, idx: {}", setpoint, feedback, u, map.motor_idx);
+                    // if map.motor_idx == MOTOR_INDEX_1 {
+                    //     defmt::info!(
+                    //         "setpoint: {}, force: {}, u: {}, idx: {}",
+                    //         setpoint,
+                    //         feedback,
+                    //         u,
+                    //         map.motor_idx
+                    //     );
+                    // }
+
                     outputs[map.motor_idx] = motor_command_from_output(u);
                 }
                 apply_inactive_policy(&mut outputs, &active, ControlMode::Force);
+                outputs[MOTOR_THUMB_2] = MotorCommand::Brake;
             }
         }
 
@@ -141,7 +153,7 @@ pub fn pwm_command_from_motor_command(cmd: MotorCommand) -> MotorPwmCommand {
             ch2_percent: 101 - duty, // MUST BE 101 SO CH2 WILL NEVER BE 0, OR ELSE MOTOR JUST COASTS
         },
         MotorCommand::MoveIn(duty) => MotorPwmCommand {
-            ch1_percent: 101 - duty,  // MUST BE 101 SO CH1 WILL NEVER BE 0, OR ELSE MOTOR JUST COASTS (maybe)
+            ch1_percent: 101 - duty, // MUST BE 101 SO CH1 WILL NEVER BE 0, OR ELSE MOTOR JUST COASTS (maybe)
             ch2_percent: 100,
         },
     }

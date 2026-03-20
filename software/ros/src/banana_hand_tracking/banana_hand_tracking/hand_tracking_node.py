@@ -142,22 +142,25 @@ class HandTrackingNode(Node):
         self._calib_samples = {}
         self._last_hand_detected = False
 
-    def _dist2d(self, a: Point, b: Point) -> float:
-        return math.hypot(a.x - b.x, a.y - b.y)
+    def _dist3d(self, a: Point, b: Point) -> float:
+        dx = a.x - b.x
+        dy = a.y - b.y
+        dz = a.z - b.z
+        return math.sqrt(dx * dx + dy * dy + dz * dz)
 
     def _clip01(self, value: float) -> float:
         return max(0.0, min(1.0, value))
 
     def _compute_hand_metrics(self, landmarks: list[Point]) -> tuple[dict, float]:
-        hand_scale = self._dist2d(landmarks[0], landmarks[9]) + 1e-6
+        hand_scale = self._dist3d(landmarks[0], landmarks[9]) + 1e-6
         metrics = {
-            "index": self._dist2d(landmarks[8], landmarks[5]) / hand_scale,
-            "middle": self._dist2d(landmarks[12], landmarks[9]) / hand_scale,
-            "ring": self._dist2d(landmarks[16], landmarks[13]) / hand_scale,
-            "pinky": self._dist2d(landmarks[20], landmarks[17]) / hand_scale,
-            "thumb": self._dist2d(landmarks[4], landmarks[2]) / hand_scale,
+            "index": self._dist3d(landmarks[8], landmarks[5]) / hand_scale,
+            "middle": self._dist3d(landmarks[12], landmarks[9]) / hand_scale,
+            "ring": self._dist3d(landmarks[16], landmarks[13]) / hand_scale,
+            "pinky": self._dist3d(landmarks[20], landmarks[17]) / hand_scale,
+            "thumb": self._dist3d(landmarks[4], landmarks[2]) / hand_scale,
         }
-        thumb_opp = self._dist2d(landmarks[3], landmarks[17]) / hand_scale
+        thumb_opp = self._dist3d(landmarks[3], landmarks[17]) / hand_scale
         return metrics, thumb_opp
 
     def _compute_curl(self, d_norm: float, d_open: float, d_closed: float) -> float:
