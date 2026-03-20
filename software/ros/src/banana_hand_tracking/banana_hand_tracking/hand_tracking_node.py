@@ -303,6 +303,8 @@ class HandTrackingNode(Node):
         return response
 
     def _publish_teleop(self, outputs: list[float]) -> None:
+        if not rclpy.ok():
+            return
         msg = JointTrajectory()
         msg.joint_names = list(self._joint_names)
         point = JointTrajectoryPoint()
@@ -525,7 +527,8 @@ def main(args: Optional[list[str]] = None) -> None:
         except Exception:
             pass
         node.destroy_node()
-        rclpy.shutdown()
+        if rclpy.ok():
+            rclpy.shutdown()
 
 
 if __name__ == "__main__":

@@ -3,10 +3,13 @@
 
 from __future__ import annotations
 
+import contextlib
 from pathlib import Path
+import threading
 from typing import Sequence
 
 from ament_index_python.packages import get_package_share_directory
+import glfw
 import mujoco
 import mujoco.viewer
 import rclpy
@@ -30,6 +33,99 @@ FORCE_SENSOR_NAMES = [
     "palm_4",
     "palm_5",
 ]
+
+
+class EglGlfwMujocoViewer:
+    """Minimal MuJoCo desktop viewer that forces GLFW EGL context creation."""
+
+    def __init__(self, model: mujoco.MjModel, data: mujoco.MjData, title: str) -> None:
+        self._model = model
+        self._data = data
+        self._lock = threading.RLock()
+        self._closed = False
+        self._glfw_initialized = False
+        self._window = None
+
+        if not glfw.init():
+            raise RuntimeError("GLFW initialization failed")
+        self._glfw_initialized = True
+
+        glfw.default_window_hints()
+        if not hasattr(glfw, "EGL_CONTEXT_API"):
+            raise RuntimeError("GLFW EGL context API is unavailable in this environment")
+        glfw.window_hint(glfw.CONTEXT_CREATION_API, glfw.EGL_CONTEXT_API)
+        self._window = glfw.create_window(1280, 720, title, None, None)
+        if not self._window:
+            raise RuntimeError("Failed to create EGL GLFW window")
+
+        glfw.make_context_current(self._window)
+        glfw.swap_interval(1)
+
+        self._camera = mujoco.MjvCamera()
+        self._option = mujoco.MjvOption()
+        self._perturb = mujoco.MjvPerturb()
+        self._scene = mujoco.MjvScene(self._model, maxgeom=10000)
+        self._context = mujoco.MjrContext(self._model, mujoco.mjtFontScale.mjFONTSCALE_150.value)
+        self._cat_mask = int(mujoco.mjtCatBit.mjCAT_ALL.value)
+
+    @contextlib.contextmanager
+    def lock(self):
+        with self._lock:
+            yield
+
+    def sync(self) -> None:
+        if self._closed:
+            return
+        if self._window is None:
+            return
+        if glfw.window_should_close(self._window):
+            self.close()
+            return
+
+        glfw.make_context_current(self._window)
+        width, height = glfw.get_framebuffer_size(self._window)
+        viewport = mujoco.MjrRect(0, 0, max(1, width), max(1, height))
+        mujoco.mjv_updateScene(
+            self._model,
+            self._data,
+            self._option,
+            self._perturb,
+            self._camera,
+            self._cat_mask,
+            self._scene,
+        )
+        mujoco.mjr_render(viewport, self._scene, self._context)
+        glfw.swap_buffers(self._window)
+        glfw.poll_events()
+
+    def close(self) -> None:
+        if self._closed:
+            return
+        self._closed = True
+
+        if self._window is not None:
+            glfw.destroy_window(self._window)
+            self._window = None
+        if self._glfw_initialized:
+            glfw.terminate()
+            self._glfw_initialized = False
+
+
+def glfw_native_context_available() -> bool:
+    """Probe whether default GLFW (GLX on Linux) can create a context."""
+    if not glfw.init():
+        return False
+    window = None
+    try:
+        glfw.default_window_hints()
+        window = glfw.create_window(16, 16, "glfw_probe", None, None)
+        return bool(window)
+    finally:
+        if window is not None:
+            glfw.destroy_window(window)
+        glfw.terminate()
+
+
 
 
 def clamp(value: float, lo: float, hi: float) -> float:
@@ -149,7 +245,15 @@ class BananaHandMujocoVisualizer(Node):
 
         self._viewer = None
         if self._show_mujoco_viewer:
-            self._viewer = mujoco.viewer.launch_passive(self._model, self._data)
+            if glfw_native_context_available():
+                self._viewer = mujoco.viewer.launch_passive(self._model, self._data)
+                self.get_logger().info("MuJoCo desktop viewer started with default backend")
+            else:
+                self.get_logger().warn(
+                    "Default GLFW/GLX context is unavailable; using GLFW EGL fallback viewer"
+                )
+                self._viewer = EglGlfwMujocoViewer(self._model, self._data, "Banana Hand MuJoCo")
+                self.get_logger().info("MuJoCo desktop viewer started with GLFW EGL fallback")
 
         self._joint_name_to_id = {
             mujoco.mj_id2name(self._model, mujoco.mjtObj.mjOBJ_JOINT, joint_id): joint_id
@@ -251,10 +355,7 @@ class BananaHandMujocoVisualizer(Node):
         return min_adc + normalized * (max_adc - min_adc)
 
     def _on_force(self, msg: UInt16MultiArray) -> None:
-        values = [
-            self._value_at(msg.data, sensor_idx)
-            for sensor_idx in self._force_sensor_indices
-        ]
+        values = [self._value_at(msg.data, sensor_idx) for sensor_idx in self._force_sensor_indices]
 
         state_msg = JointState()
         state_msg.header.stamp = self.get_clock().now().to_msg()
@@ -282,6 +383,7 @@ class BananaHandMujocoVisualizer(Node):
             msg.name.append(joint_name)
             msg.position.append(float(self._data.qpos[qpos_adr]))
         return msg
+
 
 def main(args: list[str] | None = None) -> None:
     rclpy.init(args=args)
