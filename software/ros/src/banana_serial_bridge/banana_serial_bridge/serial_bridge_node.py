@@ -14,11 +14,17 @@ from cobs import cobs  # pip install cobs
 
 COBS_DELIM = b"\x00"
 MSG_TYPE_POSITION = 0x01
+MSG_TYPE_FORCE = 0x05
 MSG_TYPE_TELEMETRY = 0x03
+MSG_TYPE_CONTROL_MODE = 0x04
+CONTROL_MODE_POSITION = 0
+CONTROL_MODE_FORCE = 1
 POSITION_COUNT = 8
 FORCE_COUNT = 10
+CURRENT_COUNT = 8
 POSITION_LEN = POSITION_COUNT * 2
 FORCE_LEN = FORCE_COUNT * 2
+CURRENT_LEN = CURRENT_COUNT * 2
 
 MAX_ENC_FRAME = 512  # cap to avoid runaway buffer on noise
 
@@ -27,13 +33,9 @@ def checksum(data: bytes) -> int:
     return sum(data) & 0xFF
 
 
-def build_frame(msg_type: int, positions: List[int]) -> bytes:
-    if len(positions) != POSITION_COUNT:
-        raise ValueError(f"expected {POSITION_COUNT} uint16 values, got {len(positions)}")
-
-    payload = b"".join(struct.pack("<H", int(p)) for p in positions)
-    if len(payload) != POSITION_LEN:
-        raise ValueError(f"payload must be {POSITION_LEN} bytes, got {len(payload)}")
+def build_frame(msg_type: int, payload: bytes) -> bytes:
+    if len(payload) > 255:
+        raise ValueError(f"payload too large: {len(payload)} bytes")
 
     chk = checksum(payload)
 
@@ -43,11 +45,39 @@ def build_frame(msg_type: int, positions: List[int]) -> bytes:
     return cobs.encode(body) + COBS_DELIM
 
 
+def build_u16_array_frame(msg_type: int, values: List[int]) -> bytes:
+    if len(values) != POSITION_COUNT:
+        raise ValueError(f"expected {POSITION_COUNT} uint16 values, got {len(values)}")
+
+    payload = b"".join(struct.pack("<H", int(v)) for v in values)
+    if len(payload) != POSITION_LEN:
+        raise ValueError(f"payload must be {POSITION_LEN} bytes, got {len(payload)}")
+
+    return build_frame(msg_type, payload)
+
+
+def build_mode_frame(mode: int) -> bytes:
+    if mode not in (CONTROL_MODE_POSITION, CONTROL_MODE_FORCE):
+        raise ValueError(f"mode must be 0 or 1, got {mode}")
+
+    values = [0] * POSITION_COUNT
+    values[0] = mode
+    return build_u16_array_frame(MSG_TYPE_CONTROL_MODE, values)
+
+
+def control_mode_name(mode: int) -> str:
+    if mode == CONTROL_MODE_POSITION:
+        return "position"
+    if mode == CONTROL_MODE_FORCE:
+        return "force"
+    return f"unknown({mode})"
+
+
 def parse_u16_le(payload: bytes) -> List[int]:
     return [struct.unpack("<H", payload[i : i + 2])[0] for i in range(0, len(payload), 2)]
 
 
-def parse_body(body: bytes) -> Optional[Tuple[int, List[int], List[int]]]:
+def parse_body(body: bytes) -> Optional[Tuple[int, List[int], List[int], List[int]]]:
     # body: [type][payload][chk]
     if len(body) < 3:
         return None
@@ -63,14 +93,17 @@ def parse_body(body: bytes) -> Optional[Tuple[int, List[int], List[int]]]:
         if len(payload) != POSITION_LEN:
             return None
         positions = parse_u16_le(payload)
-        return (msg_type, positions, [])
+        return (msg_type, positions, [], [])
 
     if msg_type == MSG_TYPE_TELEMETRY:
-        if len(payload) != POSITION_LEN + FORCE_LEN:
+        if len(payload) != POSITION_LEN + FORCE_LEN + CURRENT_LEN:
             return None
         positions = parse_u16_le(payload[:POSITION_LEN])
-        forces = parse_u16_le(payload[POSITION_LEN:])
-        return (msg_type, positions, forces)
+        force_start = POSITION_LEN
+        force_end = force_start + FORCE_LEN
+        forces = parse_u16_le(payload[force_start:force_end])
+        currents = parse_u16_le(payload[force_end:])
+        return (msg_type, positions, forces, currents)
 
     return None
 
@@ -99,7 +132,16 @@ class SerialBridgeNode(Node):
         # ROS interfaces
         self.pub_js = self.create_publisher(JointState, "rx_positions", 10)
         self.pub_force = self.create_publisher(UInt16MultiArray, "rx_force", 10)
-        self.sub_cmd = self.create_subscription(UInt16MultiArray, "tx_positions", self.on_cmd, 10)
+        self.pub_current = self.create_publisher(UInt16MultiArray, "rx_current", 10)
+        self.sub_pos_cmd = self.create_subscription(
+            UInt16MultiArray, "tx_positions", self.on_position_cmd, 10
+        )
+        self.sub_force_cmd = self.create_subscription(
+            UInt16MultiArray, "tx_force", self.on_force_cmd, 10
+        )
+        self.sub_mode = self.create_subscription(
+            UInt16MultiArray, "tx_control_mode", self.on_control_mode, 10
+        )
 
         # Serial
         self.ser = serial.Serial(self.port, baudrate=self.baud, timeout=self.timeout_s)
@@ -120,12 +162,14 @@ class SerialBridgeNode(Node):
             pass
         super().destroy_node()
 
-    def _send_positions(self, positions: List[int]):
-        if len(positions) != 8:
-            self.get_logger().warn(f"tx_positions must have 8 values; got {len(positions)}")
+    def _send_u16_array(self, msg_type: int, topic_name: str, values: List[int]):
+        if len(values) != POSITION_COUNT:
+            self.get_logger().warn(
+                f"{topic_name} must have {POSITION_COUNT} values; got {len(values)}"
+            )
             return
 
-        frame = build_frame(MSG_TYPE_POSITION, positions)
+        frame = build_u16_array_frame(msg_type, values)
 
         try:
             self.ser.write(frame)
@@ -137,8 +181,46 @@ class SerialBridgeNode(Node):
         except Exception as e:
             self.get_logger().error(f"Serial write failed: {e}")
 
-    def on_cmd(self, msg: UInt16MultiArray):
-        self._send_positions([int(x) for x in msg.data])
+    def _send_control_mode(self, values: List[int]):
+        if len(values) != POSITION_COUNT:
+            self.get_logger().warn(
+                f"tx_control_mode must have {POSITION_COUNT} values; got {len(values)}"
+            )
+            return
+
+        mode = int(values[0])
+        try:
+            frame = build_mode_frame(mode)
+        except ValueError as e:
+            self.get_logger().warn(str(e))
+            return
+
+        try:
+            self.ser.write(frame)
+            try:
+                self.ser.flush()
+            except Exception:
+                pass
+        except Exception as e:
+            self.get_logger().error(f"Serial write failed: {e}")
+
+    def on_position_cmd(self, msg: UInt16MultiArray):
+        self._send_u16_array(MSG_TYPE_POSITION, "tx_positions", [int(x) for x in msg.data])
+
+    def on_force_cmd(self, msg: UInt16MultiArray):
+        self._send_u16_array(MSG_TYPE_FORCE, "tx_force", [int(x) for x in msg.data])
+
+    def on_control_mode(self, msg: UInt16MultiArray):
+        values = [int(x) for x in msg.data]
+        if len(values) != POSITION_COUNT:
+            self.get_logger().warn(
+                f"tx_control_mode must have {POSITION_COUNT} values; got {len(values)}"
+            )
+            return
+
+        mode = values[0]
+        self.get_logger().info(f"Switching control mode to {control_mode_name(mode)} ({mode})")
+        self._send_control_mode(values)
 
     def poll_serial(self):
         # Read whatever is available, append to buffer
@@ -168,7 +250,7 @@ class SerialBridgeNode(Node):
             if parsed is None:
                 continue
 
-            msg_type, positions, forces = parsed
+            msg_type, positions, forces, currents = parsed
 
             if msg_type == MSG_TYPE_POSITION or msg_type == MSG_TYPE_TELEMETRY:
                 js = JointState()
@@ -181,6 +263,10 @@ class SerialBridgeNode(Node):
                 force_msg = UInt16MultiArray()
                 force_msg.data = [int(v) for v in forces]
                 self.pub_force.publish(force_msg)
+
+                current_msg = UInt16MultiArray()
+                current_msg.data = [int(v) for v in currents]
+                self.pub_current.publish(current_msg)
 
     def _extract_one_cobs_encoded_frame(self) -> Optional[bytes]:
         """
