@@ -1,4 +1,6 @@
-# BananaHand
+<img src="assets/images/bananaHand_banner.png" height="100">
+
+---
 
 **BananaHand** is an open-source 16 DOF/6 DOA humanoid hand designed for physical AI research and deployment on light-weight robot arms.
 
