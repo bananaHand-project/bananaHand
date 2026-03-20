@@ -1,0 +1,19 @@
+# Python dependencies for the ROS workspace in software/ros.
+#
+# Install with:
+#   pip install --user -r requirements.txt
+#
+# Notes:
+# - ROS packages like rclpy, cv_bridge, sensor_msgs, trajectory_msgs, etc. come
+#   from your ROS installation, not pip.
+# - foxglove_bridge is optional and is typically installed via apt:
+#     sudo apt install ros-$ROS_DISTRO-foxglove-bridge
+# - Kinova's kortex_api is only needed for the optional Kortex serial bridge and
+#   is typically installed separately from Kinova's SDK/docs.
+
+numpy<2
+mediapipe
+mujoco
+PySide6
+pyserial
+cobs
