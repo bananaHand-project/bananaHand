@@ -1,6 +1,6 @@
 # Electrical
 
-The electrical system for bananaHand is built around the main board. The main board is responsible for communication with the controlling device, motor control, and FSR sensing. A simplified block diagram descibing the main board can be seen below. It requires a single +12V 24W input source and exposes UART, CAN bus, and UART over RS485 options for interfacing. Depending on the device you are trying to interface with, a buck converter may be needed to drop your source voltage down to the required 12V.
+The electrical system for bananaHand is built around the main board. The main board is responsible for the following functions: communication with the controlling device, motor control, and FSR sensing. A simplified block diagram describing the main board can be seen below. It requires a single +12V 24W input source and exposes UART, CAN bus, and half-duplex RS485 options for interfacing. Depending on the device you are trying to interface with, a buck converter may be needed to drop your source voltage down to the required 12V.
 
 <img src="../../assets/images/simplified-elec-block-diagram.png" width="500">
 
@@ -31,3 +31,12 @@ A full PDF of the schematic can be found in `bh_main_board/bananaHand_main_board
 <img src="../../assets/images/pcb_In2_cu.png" width="500">
 
 <img src="../../assets/images/pcb_B_cu.png" width="500">
+
+### Known Flaws
+
+#### V0.1.0
+
+No issues that impact the performance of the board or require re-work.
+
+- The silkscreen on the back labelling the PQ12P connectors for Index1 and Index 2 are flipped.
+- Index 2 breaks the convention of the HRTIM channel connections to DRV8876 with `IN1 <-> CH1` and `IN2 <-> CH2` (instead of `IN1 <-> CH2` and `IN2 <-> CH1` like all other fingers).
