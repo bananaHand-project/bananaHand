@@ -1,0 +1,3519 @@
+{
+  "aabb": {
+    "extent": [
+      0.39245044977054944,
+      0.17045803160852632,
+      0.26919130793659385
+    ],
+    "max_bound": [
+      0.2383942570427334,
+      0.09214475985365286,
+      0.500669306728665
+    ],
+    "min_bound": [
+      -0.15405619272781607,
+      -0.07831327175487346,
+      0.2314779987920712
+    ]
+  },
+  "accepted_frame_count": 34,
+  "burst_duration_sec": 1.5,
+  "burst_frame_limit": 40,
+  "captured_frame_count": 34,
+  "centroid": [
+    0.04585378943600999,
+    0.03469770892134334,
+    0.3460462575645644
+  ],
+  "files": {
+    "final_object_cloud": "final_object_cloud.ply",
+    "final_object_cloud_downsampled": "final_object_cloud_downsampled.ply",
+    "metadata": "metadata.json"
+  },
+  "frame_id": "object_scan_frame",
+  "frame_logs": [
+    {
+      "accepted": true,
+      "candidate_clusters": [
+        {
+          "bbox_uv": [
+            0,
+            29,
+            319,
+            239
+          ],
+          "centroid": [
+            0.03913016582290513,
+            0.03681190888356755,
+            0.3376854823113506
+          ],
+          "degeneracy_reason": "ok",
+          "degenerate": false,
+          "extent_xyz": [
+            0.3904574180491801,
+            0.17789998723553363,
+            0.2678333483636379
+          ],
+          "image_centroid": [
+            198.39731712097512,
+            152.95449384111834
+          ],
+          "label": 0,
+          "metrics": {
+            "center_distance_px": 50.59992713841627,
+            "center_score": 0.8029129555085928,
+            "extent_reasonable_score": 0.23266410147115546,
+            "size_score": 3.0
+          },
+          "point_count": 2402,
+          "score": 6.917324830284905
+        }
+      ],
+      "frame_index": 0,
+      "icp_attempted": false,
+      "icp_fitness": null,
+      "icp_rmse": null,
+      "reason": "initialized_from_segmented_object_cloud",
+      "segmentation_succeeded": true,
+      "selected_cluster": {
+        "bbox_uv": [
+          0,
+          29,
+          319,
+          239
+        ],
+        "centroid": [
+          0.03913016582290513,
+          0.03681190888356755,
+          0.3376854823113506
+        ],
+        "degeneracy_reason": "ok",
+        "degenerate": false,
+        "extent_xyz": [
+          0.3904574180491801,
+          0.17789998723553363,
+          0.2678333483636379
+        ],
+        "image_centroid": [
+          198.39731712097512,
+          152.95449384111834
+        ],
+        "label": 0,
+        "metrics": {
+          "center_distance_px": 50.59992713841627,
+          "center_score": 0.8029129555085928,
+          "extent_reasonable_score": 0.23266410147115546,
+          "size_score": 3.0
+        },
+        "point_count": 2402,
+        "score": 6.917324830284905
+      },
+      "selected_cluster_bbox_extents_m": [
+        0.3904574180491801,
+        0.17789998723553363,
+        0.2678333483636379
+      ],
+      "selected_cluster_degeneracy_reason": "ok",
+      "selected_cluster_point_count": 2402,
+      "selection_reason": "largest_nondegenerate_near_center"
+    },
+    {
+      "accepted": true,
+      "candidate_clusters": [
+        {
+          "bbox_uv": [
+            0,
+            29,
+            319,
+            239
+          ],
+          "centroid": [
+            0.035824164924308614,
+            0.037242526207862156,
+            0.33791214541689624
+          ],
+          "degeneracy_reason": "ok",
+          "degenerate": false,
+          "extent_xyz": [
+            0.3863417494085776,
+            0.17630396098876233,
+            0.26855558405319846
+          ],
+          "image_centroid": [
+            195.35993516851994,
+            153.32467686573273
+          ],
+          "label": 0,
+          "metrics": {
+            "center_distance_px": 48.588672582479916,
+            "center_score": 0.8167635684916598,
+            "extent_reasonable_score": 0.24501424396825794,
+            "size_score": 3.0
+          },
+          "point_count": 2515,
+          "score": 6.951835953554914
+        }
+      ],
+      "frame_index": 1,
+      "icp_attempted": true,
+      "icp_fitness": 1.0,
+      "icp_rmse": 0.002850403353078646,
+      "reason": "registered_segmented_object_cloud",
+      "segmentation_succeeded": true,
+      "selected_cluster": {
+        "bbox_uv": [
+          0,
+          29,
+          319,
+          239
+        ],
+        "centroid": [
+          0.035824164924308614,
+          0.037242526207862156,
+          0.33791214541689624
+        ],
+        "degeneracy_reason": "ok",
+        "degenerate": false,
+        "extent_xyz": [
+          0.3863417494085776,
+          0.17630396098876233,
+          0.26855558405319846
+        ],
+        "image_centroid": [
+          195.35993516851994,
+          153.32467686573273
+        ],
+        "label": 0,
+        "metrics": {
+          "center_distance_px": 48.588672582479916,
+          "center_score": 0.8167635684916598,
+          "extent_reasonable_score": 0.24501424396825794,
+          "size_score": 3.0
+        },
+        "point_count": 2515,
+        "score": 6.951835953554914
+      },
+      "selected_cluster_bbox_extents_m": [
+        0.3863417494085776,
+        0.17630396098876233,
+        0.26855558405319846
+      ],
+      "selected_cluster_degeneracy_reason": "ok",
+      "selected_cluster_point_count": 2515,
+      "selection_reason": "largest_nondegenerate_near_center"
+    },
+    {
+      "accepted": true,
+      "candidate_clusters": [
+        {
+          "bbox_uv": [
+            0,
+            29,
+            319,
+            239
+          ],
+          "centroid": [
+            0.0330961000700155,
+            0.03879260670053132,
+            0.33333723361542883
+          ],
+          "degeneracy_reason": "ok",
+          "degenerate": false,
+          "extent_xyz": [
+            0.3920973246019583,
+            0.17398202885621966,
+            0.266222240196334
+          ],
+          "image_centroid": [
+            193.2873199821325,
+            155.22388294284684
+          ],
+          "label": 0,
+          "metrics": {
+            "center_distance_px": 48.46408568377468,
+            "center_score": 0.8176107066223707,
+            "extent_reasonable_score": 0.2281660294829226,
+            "size_score": 3.0
+          },
+          "point_count": 2391,
+          "score": 6.936343160078716
+        },
+        {
+          "bbox_uv": [
+            202,
+            110,
+            236,
+            124
+          ],
+          "centroid": [
+            0.0830601061890752,
+            -0.0032427511008147653,
+            0.46045439725179405
+          ],
+          "degeneracy_reason": "ok",
+          "degenerate": false,
+          "extent_xyz": [
+            0.04893402863375694,
+            0.019469509102258434,
+            0.04213334520657852
+          ],
+          "image_centroid": [
+            218.26689436552792,
+            117.18967941169684
+          ],
+          "label": 1,
+          "metrics": {
+            "center_distance_px": 58.33462848782556,
+            "center_score": 0.7469580127766572,
+            "extent_reasonable_score": 1.5517105844219985,
+            "size_score": 0.36666666666666664
+          },
+          "point_count": 66,
+          "score": 3.4068434048646496
+        }
+      ],
+      "frame_index": 2,
+      "icp_attempted": true,
+      "icp_fitness": 1.0,
+      "icp_rmse": 0.00176923236725138,
+      "reason": "registered_segmented_object_cloud",
+      "segmentation_succeeded": true,
+      "selected_cluster": {
+        "bbox_uv": [
+          0,
+          29,
+          319,
+          239
+        ],
+        "centroid": [
+          0.0330961000700155,
+          0.03879260670053132,
+          0.33333723361542883
+        ],
+        "degeneracy_reason": "ok",
+        "degenerate": false,
+        "extent_xyz": [
+          0.3920973246019583,
+          0.17398202885621966,
+          0.266222240196334
+        ],
+        "image_centroid": [
+          193.2873199821325,
+          155.22388294284684
+        ],
+        "label": 0,
+        "metrics": {
+          "center_distance_px": 48.46408568377468,
+          "center_score": 0.8176107066223707,
+          "extent_reasonable_score": 0.2281660294829226,
+          "size_score": 3.0
+        },
+        "point_count": 2391,
+        "score": 6.936343160078716
+      },
+      "selected_cluster_bbox_extents_m": [
+        0.3920973246019583,
+        0.17398202885621966,
+        0.266222240196334
+      ],
+      "selected_cluster_degeneracy_reason": "ok",
+      "selected_cluster_point_count": 2391,
+      "selection_reason": "largest_nondegenerate_near_center"
+    },
+    {
+      "accepted": true,
+      "candidate_clusters": [
+        {
+          "bbox_uv": [
+            0,
+            29,
+            319,
+            239
+          ],
+          "centroid": [
+            0.03822423542260552,
+            0.037624219602858576,
+            0.33737629085697207
+          ],
+          "degeneracy_reason": "ok",
+          "degenerate": false,
+          "extent_xyz": [
+            0.39431305986257165,
+            0.17424897778418202,
+            0.2779666622479756
+          ],
+          "image_centroid": [
+            197.60295381693675,
+            153.72727527106233
+          ],
+          "label": 0,
+          "metrics": {
+            "center_distance_px": 50.51248591159111,
+            "center_score": 0.8035217998602228,
+            "extent_reasonable_score": 0.21991601660322432,
+            "size_score": 3.0
+          },
+          "point_count": 2505,
+          "score": 6.905550896379581
+        }
+      ],
+      "frame_index": 3,
+      "icp_attempted": true,
+      "icp_fitness": 1.0,
+      "icp_rmse": 0.0020338828625235434,
+      "reason": "registered_segmented_object_cloud",
+      "segmentation_succeeded": true,
+      "selected_cluster": {
+        "bbox_uv": [
+          0,
+          29,
+          319,
+          239
+        ],
+        "centroid": [
+          0.03822423542260552,
+          0.037624219602858576,
+          0.33737629085697207
+        ],
+        "degeneracy_reason": "ok",
+        "degenerate": false,
+        "extent_xyz": [
+          0.39431305986257165,
+          0.17424897778418202,
+          0.2779666622479756
+        ],
+        "image_centroid": [
+          197.60295381693675,
+          153.72727527106233
+        ],
+        "label": 0,
+        "metrics": {
+          "center_distance_px": 50.51248591159111,
+          "center_score": 0.8035217998602228,
+          "extent_reasonable_score": 0.21991601660322432,
+          "size_score": 3.0
+        },
+        "point_count": 2505,
+        "score": 6.905550896379581
+      },
+      "selected_cluster_bbox_extents_m": [
+        0.39431305986257165,
+        0.17424897778418202,
+        0.2779666622479756
+      ],
+      "selected_cluster_degeneracy_reason": "ok",
+      "selected_cluster_point_count": 2505,
+      "selection_reason": "largest_nondegenerate_near_center"
+    },
+    {
+      "accepted": true,
+      "candidate_clusters": [
+        {
+          "bbox_uv": [
+            0,
+            29,
+            319,
+            239
+          ],
+          "centroid": [
+            0.03633119860686421,
+            0.037862099822435394,
+            0.3363329778664083
+          ],
+          "degeneracy_reason": "ok",
+          "degenerate": false,
+          "extent_xyz": [
+            0.3901296530568962,
+            0.17560146483028524,
+            0.2702833719551563
+          ],
+          "image_centroid": [
+            195.97758811342032,
+            154.05184572381535
+          ],
+          "label": 0,
+          "metrics": {
+            "center_distance_px": 49.53700680963117,
+            "center_score": 0.8102733145462828,
+            "extent_reasonable_score": 0.2332267182264179,
+            "size_score": 3.0
+          },
+          "point_count": 2492,
+          "score": 6.929664021500471
+        }
+      ],
+      "frame_index": 4,
+      "icp_attempted": true,
+      "icp_fitness": 1.0,
+      "icp_rmse": 0.0019777671873306263,
+      "reason": "registered_segmented_object_cloud",
+      "segmentation_succeeded": true,
+      "selected_cluster": {
+        "bbox_uv": [
+          0,
+          29,
+          319,
+          239
+        ],
+        "centroid": [
+          0.03633119860686421,
+          0.037862099822435394,
+          0.3363329778664083
+        ],
+        "degeneracy_reason": "ok",
+        "degenerate": false,
+        "extent_xyz": [
+          0.3901296530568962,
+          0.17560146483028524,
+          0.2702833719551563
+        ],
+        "image_centroid": [
+          195.97758811342032,
+          154.05184572381535
+        ],
+        "label": 0,
+        "metrics": {
+          "center_distance_px": 49.53700680963117,
+          "center_score": 0.8102733145462828,
+          "extent_reasonable_score": 0.2332267182264179,
+          "size_score": 3.0
+        },
+        "point_count": 2492,
+        "score": 6.929664021500471
+      },
+      "selected_cluster_bbox_extents_m": [
+        0.3901296530568962,
+        0.17560146483028524,
+        0.2702833719551563
+      ],
+      "selected_cluster_degeneracy_reason": "ok",
+      "selected_cluster_point_count": 2492,
+      "selection_reason": "largest_nondegenerate_near_center"
+    },
+    {
+      "accepted": true,
+      "candidate_clusters": [
+        {
+          "bbox_uv": [
+            0,
+            29,
+            319,
+            239
+          ],
+          "centroid": [
+            0.03752999390288053,
+            0.03757250536340336,
+            0.3377767698707868
+          ],
+          "degeneracy_reason": "ok",
+          "degenerate": false,
+          "extent_xyz": [
+            0.38961186157212657,
+            0.17432422649208457,
+            0.2704000348846118
+          ],
+          "image_centroid": [
+            196.9285196098037,
+            153.6393466812371
+          ],
+          "label": 0,
+          "metrics": {
+            "center_distance_px": 49.95319014549634,
+            "center_score": 0.8074020158262858,
+            "extent_reasonable_score": 0.23477104211383387,
+            "size_score": 3.0
+          },
+          "point_count": 2519,
+          "score": 6.926614267435891
+        }
+      ],
+      "frame_index": 5,
+      "icp_attempted": true,
+      "icp_fitness": 1.0,
+      "icp_rmse": 0.0019419695440274878,
+      "reason": "registered_segmented_object_cloud",
+      "segmentation_succeeded": true,
+      "selected_cluster": {
+        "bbox_uv": [
+          0,
+          29,
+          319,
+          239
+        ],
+        "centroid": [
+          0.03752999390288053,
+          0.03757250536340336,
+          0.3377767698707868
+        ],
+        "degeneracy_reason": "ok",
+        "degenerate": false,
+        "extent_xyz": [
+          0.38961186157212657,
+          0.17432422649208457,
+          0.2704000348846118
+        ],
+        "image_centroid": [
+          196.9285196098037,
+          153.6393466812371
+        ],
+        "label": 0,
+        "metrics": {
+          "center_distance_px": 49.95319014549634,
+          "center_score": 0.8074020158262858,
+          "extent_reasonable_score": 0.23477104211383387,
+          "size_score": 3.0
+        },
+        "point_count": 2519,
+        "score": 6.926614267435891
+      },
+      "selected_cluster_bbox_extents_m": [
+        0.38961186157212657,
+        0.17432422649208457,
+        0.2704000348846118
+      ],
+      "selected_cluster_degeneracy_reason": "ok",
+      "selected_cluster_point_count": 2519,
+      "selection_reason": "largest_nondegenerate_near_center"
+    },
+    {
+      "accepted": true,
+      "candidate_clusters": [
+        {
+          "bbox_uv": [
+            0,
+            29,
+            319,
+            239
+          ],
+          "centroid": [
+            0.03421664479590248,
+            0.03845726581429355,
+            0.33491785570156923
+          ],
+          "degeneracy_reason": "ok",
+          "degenerate": false,
+          "extent_xyz": [
+            0.3889285486686401,
+            0.17605981635793655,
+            0.26350001990795135
+          ],
+          "image_centroid": [
+            194.1735086910429,
+            154.74606495076458
+          ],
+          "label": 0,
+          "metrics": {
+            "center_distance_px": 48.735179550500646,
+            "center_score": 0.8157657282974118,
+            "extent_reasonable_score": 0.23818661512382197,
+            "size_score": 3.0
+          },
+          "point_count": 2425,
+          "score": 6.943411780399681
+        }
+      ],
+      "frame_index": 6,
+      "icp_attempted": true,
+      "icp_fitness": 1.0,
+      "icp_rmse": 0.0016816732439315814,
+      "reason": "registered_segmented_object_cloud",
+      "segmentation_succeeded": true,
+      "selected_cluster": {
+        "bbox_uv": [
+          0,
+          29,
+          319,
+          239
+        ],
+        "centroid": [
+          0.03421664479590248,
+          0.03845726581429355,
+          0.33491785570156923
+        ],
+        "degeneracy_reason": "ok",
+        "degenerate": false,
+        "extent_xyz": [
+          0.3889285486686401,
+          0.17605981635793655,
+          0.26350001990795135
+        ],
+        "image_centroid": [
+          194.1735086910429,
+          154.74606495076458
+        ],
+        "label": 0,
+        "metrics": {
+          "center_distance_px": 48.735179550500646,
+          "center_score": 0.8157657282974118,
+          "extent_reasonable_score": 0.23818661512382197,
+          "size_score": 3.0
+        },
+        "point_count": 2425,
+        "score": 6.943411780399681
+      },
+      "selected_cluster_bbox_extents_m": [
+        0.3889285486686401,
+        0.17605981635793655,
+        0.26350001990795135
+      ],
+      "selected_cluster_degeneracy_reason": "ok",
+      "selected_cluster_point_count": 2425,
+      "selection_reason": "largest_nondegenerate_near_center"
+    },
+    {
+      "accepted": true,
+      "candidate_clusters": [
+        {
+          "bbox_uv": [
+            0,
+            29,
+            319,
+            239
+          ],
+          "centroid": [
+            0.036708641150572485,
+            0.03702649671381621,
+            0.3391931922017907
+          ],
+          "degeneracy_reason": "ok",
+          "degenerate": false,
+          "extent_xyz": [
+            0.388074479596644,
+            0.17886298438879328,
+            0.2601666748523712
+          ],
+          "image_centroid": [
+            196.0397703783286,
+            153.0001287919534
+          ],
+          "label": 0,
+          "metrics": {
+            "center_distance_px": 48.865873052756996,
+            "center_score": 0.8148740894319978,
+            "extent_reasonable_score": 0.24161596773465188,
+            "size_score": 3.0
+          },
+          "point_count": 2574,
+          "score": 6.945414510825849
+        }
+      ],
+      "frame_index": 7,
+      "icp_attempted": true,
+      "icp_fitness": 1.0,
+      "icp_rmse": 0.0017789713079673865,
+      "reason": "registered_segmented_object_cloud",
+      "segmentation_succeeded": true,
+      "selected_cluster": {
+        "bbox_uv": [
+          0,
+          29,
+          319,
+          239
+        ],
+        "centroid": [
+          0.036708641150572485,
+          0.03702649671381621,
+          0.3391931922017907
+        ],
+        "degeneracy_reason": "ok",
+        "degenerate": false,
+        "extent_xyz": [
+          0.388074479596644,
+          0.17886298438879328,
+          0.2601666748523712
+        ],
+        "image_centroid": [
+          196.0397703783286,
+          153.0001287919534
+        ],
+        "label": 0,
+        "metrics": {
+          "center_distance_px": 48.865873052756996,
+          "center_score": 0.8148740894319978,
+          "extent_reasonable_score": 0.24161596773465188,
+          "size_score": 3.0
+        },
+        "point_count": 2574,
+        "score": 6.945414510825849
+      },
+      "selected_cluster_bbox_extents_m": [
+        0.388074479596644,
+        0.17886298438879328,
+        0.2601666748523712
+      ],
+      "selected_cluster_degeneracy_reason": "ok",
+      "selected_cluster_point_count": 2574,
+      "selection_reason": "largest_nondegenerate_near_center"
+    },
+    {
+      "accepted": true,
+      "candidate_clusters": [
+        {
+          "bbox_uv": [
+            0,
+            29,
+            319,
+            239
+          ],
+          "centroid": [
+            0.036822576288382584,
+            0.03755307407439224,
+            0.3383227497279262
+          ],
+          "degeneracy_reason": "ok",
+          "degenerate": false,
+          "extent_xyz": [
+            0.3874509341279605,
+            0.1781814543515545,
+            0.26100000739097595
+          ],
+          "image_centroid": [
+            196.22925869092026,
+            153.56632760685844
+          ],
+          "label": 0,
+          "metrics": {
+            "center_distance_px": 49.38884017978726,
+            "center_score": 0.8112921806421431,
+            "extent_reasonable_score": 0.24328947819355626,
+            "size_score": 3.0
+          },
+          "point_count": 2541,
+          "score": 6.941356967220986
+        }
+      ],
+      "frame_index": 8,
+      "icp_attempted": true,
+      "icp_fitness": 1.0,
+      "icp_rmse": 0.001375559616815372,
+      "reason": "registered_segmented_object_cloud",
+      "segmentation_succeeded": true,
+      "selected_cluster": {
+        "bbox_uv": [
+          0,
+          29,
+          319,
+          239
+        ],
+        "centroid": [
+          0.036822576288382584,
+          0.03755307407439224,
+          0.3383227497279262
+        ],
+        "degeneracy_reason": "ok",
+        "degenerate": false,
+        "extent_xyz": [
+          0.3874509341279605,
+          0.1781814543515545,
+          0.26100000739097595
+        ],
+        "image_centroid": [
+          196.22925869092026,
+          153.56632760685844
+        ],
+        "label": 0,
+        "metrics": {
+          "center_distance_px": 49.38884017978726,
+          "center_score": 0.8112921806421431,
+          "extent_reasonable_score": 0.24328947819355626,
+          "size_score": 3.0
+        },
+        "point_count": 2541,
+        "score": 6.941356967220986
+      },
+      "selected_cluster_bbox_extents_m": [
+        0.3874509341279605,
+        0.1781814543515545,
+        0.26100000739097595
+      ],
+      "selected_cluster_degeneracy_reason": "ok",
+      "selected_cluster_point_count": 2541,
+      "selection_reason": "largest_nondegenerate_near_center"
+    },
+    {
+      "accepted": true,
+      "candidate_clusters": [
+        {
+          "bbox_uv": [
+            0,
+            30,
+            319,
+            239
+          ],
+          "centroid": [
+            0.03659936652480922,
+            0.03718019890562547,
+            0.33838542204988253
+          ],
+          "degeneracy_reason": "ok",
+          "degenerate": false,
+          "extent_xyz": [
+            0.39161768560698107,
+            0.17412901221827026,
+            0.27400003373622894
+          ],
+          "image_centroid": [
+            196.01987727463467,
+            153.22041056754443
+          ],
+          "label": 0,
+          "metrics": {
+            "center_distance_px": 49.000277929374654,
+            "center_score": 0.8139556602491793,
+            "extent_reasonable_score": 0.22826464875395217,
+            "size_score": 3.0
+          },
+          "point_count": 2493,
+          "score": 6.930593705152639
+        }
+      ],
+      "frame_index": 9,
+      "icp_attempted": true,
+      "icp_fitness": 1.0,
+      "icp_rmse": 0.0015677192828148095,
+      "reason": "registered_segmented_object_cloud",
+      "segmentation_succeeded": true,
+      "selected_cluster": {
+        "bbox_uv": [
+          0,
+          30,
+          319,
+          239
+        ],
+        "centroid": [
+          0.03659936652480922,
+          0.03718019890562547,
+          0.33838542204988253
+        ],
+        "degeneracy_reason": "ok",
+        "degenerate": false,
+        "extent_xyz": [
+          0.39161768560698107,
+          0.17412901221827026,
+          0.27400003373622894
+        ],
+        "image_centroid": [
+          196.01987727463467,
+          153.22041056754443
+        ],
+        "label": 0,
+        "metrics": {
+          "center_distance_px": 49.000277929374654,
+          "center_score": 0.8139556602491793,
+          "extent_reasonable_score": 0.22826464875395217,
+          "size_score": 3.0
+        },
+        "point_count": 2493,
+        "score": 6.930593705152639
+      },
+      "selected_cluster_bbox_extents_m": [
+        0.39161768560698107,
+        0.17412901221827026,
+        0.27400003373622894
+      ],
+      "selected_cluster_degeneracy_reason": "ok",
+      "selected_cluster_point_count": 2493,
+      "selection_reason": "largest_nondegenerate_near_center"
+    },
+    {
+      "accepted": true,
+      "candidate_clusters": [
+        {
+          "bbox_uv": [
+            0,
+            28,
+            319,
+            239
+          ],
+          "centroid": [
+            0.038580070259838325,
+            0.036498772438198844,
+            0.34027154114801905
+          ],
+          "degeneracy_reason": "ok",
+          "degenerate": false,
+          "extent_xyz": [
+            0.3919965833648477,
+            0.1759142168447027,
+            0.275166687866052
+          ],
+          "image_centroid": [
+            197.62812456038006,
+            152.41557978464368
+          ],
+          "label": 0,
+          "metrics": {
+            "center_distance_px": 49.665335705158355,
+            "center_score": 0.8093894342999269,
+            "extent_reasonable_score": 0.22697672677525446,
+            "size_score": 3.0
+          },
+          "point_count": 2524,
+          "score": 6.921999821655138
+        }
+      ],
+      "frame_index": 10,
+      "icp_attempted": true,
+      "icp_fitness": 1.0,
+      "icp_rmse": 0.0017144285753334639,
+      "reason": "registered_segmented_object_cloud",
+      "segmentation_succeeded": true,
+      "selected_cluster": {
+        "bbox_uv": [
+          0,
+          28,
+          319,
+          239
+        ],
+        "centroid": [
+          0.038580070259838325,
+          0.036498772438198844,
+          0.34027154114801905
+        ],
+        "degeneracy_reason": "ok",
+        "degenerate": false,
+        "extent_xyz": [
+          0.3919965833648477,
+          0.1759142168447027,
+          0.275166687866052
+        ],
+        "image_centroid": [
+          197.62812456038006,
+          152.41557978464368
+        ],
+        "label": 0,
+        "metrics": {
+          "center_distance_px": 49.665335705158355,
+          "center_score": 0.8093894342999269,
+          "extent_reasonable_score": 0.22697672677525446,
+          "size_score": 3.0
+        },
+        "point_count": 2524,
+        "score": 6.921999821655138
+      },
+      "selected_cluster_bbox_extents_m": [
+        0.3919965833648477,
+        0.1759142168447027,
+        0.275166687866052
+      ],
+      "selected_cluster_degeneracy_reason": "ok",
+      "selected_cluster_point_count": 2524,
+      "selection_reason": "largest_nondegenerate_near_center"
+    },
+    {
+      "accepted": true,
+      "candidate_clusters": [
+        {
+          "bbox_uv": [
+            0,
+            29,
+            319,
+            239
+          ],
+          "centroid": [
+            0.038032681817200244,
+            0.037161427081917456,
+            0.33900434421244074
+          ],
+          "degeneracy_reason": "ok",
+          "degenerate": false,
+          "extent_xyz": [
+            0.38938322642506806,
+            0.17182541828256315,
+            0.26601112865739396
+          ],
+          "image_centroid": [
+            197.26132282485682,
+            153.14152687935487
+          ],
+          "label": 0,
+          "metrics": {
+            "center_distance_px": 49.86749424778828,
+            "center_score": 0.8079943709601728,
+            "extent_reasonable_score": 0.23630649989407831,
+            "size_score": 3.0
+          },
+          "point_count": 2496,
+          "score": 6.929097493430355
+        }
+      ],
+      "frame_index": 11,
+      "icp_attempted": true,
+      "icp_fitness": 1.0,
+      "icp_rmse": 0.001989189945399042,
+      "reason": "registered_segmented_object_cloud",
+      "segmentation_succeeded": true,
+      "selected_cluster": {
+        "bbox_uv": [
+          0,
+          29,
+          319,
+          239
+        ],
+        "centroid": [
+          0.038032681817200244,
+          0.037161427081917456,
+          0.33900434421244074
+        ],
+        "degeneracy_reason": "ok",
+        "degenerate": false,
+        "extent_xyz": [
+          0.38938322642506806,
+          0.17182541828256315,
+          0.26601112865739396
+        ],
+        "image_centroid": [
+          197.26132282485682,
+          153.14152687935487
+        ],
+        "label": 0,
+        "metrics": {
+          "center_distance_px": 49.86749424778828,
+          "center_score": 0.8079943709601728,
+          "extent_reasonable_score": 0.23630649989407831,
+          "size_score": 3.0
+        },
+        "point_count": 2496,
+        "score": 6.929097493430355
+      },
+      "selected_cluster_bbox_extents_m": [
+        0.38938322642506806,
+        0.17182541828256315,
+        0.26601112865739396
+      ],
+      "selected_cluster_degeneracy_reason": "ok",
+      "selected_cluster_point_count": 2496,
+      "selection_reason": "largest_nondegenerate_near_center"
+    },
+    {
+      "accepted": true,
+      "candidate_clusters": [
+        {
+          "bbox_uv": [
+            0,
+            29,
+            319,
+            239
+          ],
+          "centroid": [
+            0.03847893050797603,
+            0.03740379810886853,
+            0.3390393116593186
+          ],
+          "degeneracy_reason": "ok",
+          "degenerate": false,
+          "extent_xyz": [
+            0.389149850540761,
+            0.17436114243980122,
+            0.2701857402920723
+          ],
+          "image_centroid": [
+            197.66316514282678,
+            153.35834711409495
+          ],
+          "label": 0,
+          "metrics": {
+            "center_distance_px": 50.31196011646028,
+            "center_score": 0.8049157996009689,
+            "extent_reasonable_score": 0.23619511612891883,
+            "size_score": 3.0
+          },
+          "point_count": 2494,
+          "score": 6.92406039549047
+        }
+      ],
+      "frame_index": 12,
+      "icp_attempted": true,
+      "icp_fitness": 1.0,
+      "icp_rmse": 0.0018298577597744671,
+      "reason": "registered_segmented_object_cloud",
+      "segmentation_succeeded": true,
+      "selected_cluster": {
+        "bbox_uv": [
+          0,
+          29,
+          319,
+          239
+        ],
+        "centroid": [
+          0.03847893050797603,
+          0.03740379810886853,
+          0.3390393116593186
+        ],
+        "degeneracy_reason": "ok",
+        "degenerate": false,
+        "extent_xyz": [
+          0.389149850540761,
+          0.17436114243980122,
+          0.2701857402920723
+        ],
+        "image_centroid": [
+          197.66316514282678,
+          153.35834711409495
+        ],
+        "label": 0,
+        "metrics": {
+          "center_distance_px": 50.31196011646028,
+          "center_score": 0.8049157996009689,
+          "extent_reasonable_score": 0.23619511612891883,
+          "size_score": 3.0
+        },
+        "point_count": 2494,
+        "score": 6.92406039549047
+      },
+      "selected_cluster_bbox_extents_m": [
+        0.389149850540761,
+        0.17436114243980122,
+        0.2701857402920723
+      ],
+      "selected_cluster_degeneracy_reason": "ok",
+      "selected_cluster_point_count": 2494,
+      "selection_reason": "largest_nondegenerate_near_center"
+    },
+    {
+      "accepted": true,
+      "candidate_clusters": [
+        {
+          "bbox_uv": [
+            190,
+            105,
+            319,
+            143
+          ],
+          "centroid": [
+            0.13760251369540538,
+            0.004066306914698768,
+            0.444894486025955
+          ],
+          "degeneracy_reason": "ok",
+          "degenerate": false,
+          "extent_xyz": [
+            0.20276404296104017,
+            0.05231781461070158,
+            0.12150000035762787
+          ],
+          "image_centroid": [
+            257.9708713950829,
+            122.17664516213074
+          ],
+          "label": 1,
+          "metrics": {
+            "center_distance_px": 97.99504796709729,
+            "center_score": 0.43897843419800403,
+            "extent_reasonable_score": 1.8247158047119996,
+            "size_score": 3.0
+          },
+          "point_count": 571,
+          "score": 7.9270812994288065
+        },
+        {
+          "bbox_uv": [
+            0,
+            30,
+            319,
+            239
+          ],
+          "centroid": [
+            0.010096889930036814,
+            0.04657918637708454,
+            0.3075121827175636
+          ],
+          "degeneracy_reason": "ok",
+          "degenerate": false,
+          "extent_xyz": [
+            0.3464323407143117,
+            0.17631846956867342,
+            0.2050119178990523
+          ],
+          "image_centroid": [
+            172.81918397289462,
+            166.03902827442852
+          ],
+          "label": 0,
+          "metrics": {
+            "center_distance_px": 47.790413287442355,
+            "center_score": 0.8221687305549179,
+            "extent_reasonable_score": 0.45245641328681063,
+            "size_score": 3.0
+          },
+          "point_count": 1896,
+          "score": 7.16792638217468
+        }
+      ],
+      "frame_index": 13,
+      "icp_attempted": true,
+      "icp_fitness": 1.0,
+      "icp_rmse": 0.0017709980990839639,
+      "reason": "registered_segmented_object_cloud",
+      "segmentation_succeeded": true,
+      "selected_cluster": {
+        "bbox_uv": [
+          190,
+          105,
+          319,
+          143
+        ],
+        "centroid": [
+          0.13760251369540538,
+          0.004066306914698768,
+          0.444894486025955
+        ],
+        "degeneracy_reason": "ok",
+        "degenerate": false,
+        "extent_xyz": [
+          0.20276404296104017,
+          0.05231781461070158,
+          0.12150000035762787
+        ],
+        "image_centroid": [
+          257.9708713950829,
+          122.17664516213074
+        ],
+        "label": 1,
+        "metrics": {
+          "center_distance_px": 97.99504796709729,
+          "center_score": 0.43897843419800403,
+          "extent_reasonable_score": 1.8247158047119996,
+          "size_score": 3.0
+        },
+        "point_count": 571,
+        "score": 7.9270812994288065
+      },
+      "selected_cluster_bbox_extents_m": [
+        0.20276404296104017,
+        0.05231781461070158,
+        0.12150000035762787
+      ],
+      "selected_cluster_degeneracy_reason": "ok",
+      "selected_cluster_point_count": 571,
+      "selection_reason": "largest_nondegenerate_near_center"
+    },
+    {
+      "accepted": true,
+      "candidate_clusters": [
+        {
+          "bbox_uv": [
+            0,
+            30,
+            319,
+            239
+          ],
+          "centroid": [
+            0.053025338269942796,
+            0.037589112834079445,
+            0.3354529995291623
+          ],
+          "degeneracy_reason": "ok",
+          "degenerate": false,
+          "extent_xyz": [
+            0.3893198486303737,
+            0.17507438728021074,
+            0.2741000190377235
+          ],
+          "image_centroid": [
+            211.39323543143286,
+            153.89206563090897
+          ],
+          "label": 0,
+          "metrics": {
+            "center_distance_px": 61.562462270774446,
+            "center_score": 0.7225808290352647,
+            "extent_reasonable_score": 0.23508742578195013,
+            "size_score": 3.0
+          },
+          "point_count": 2242,
+          "score": 6.791216752238374
+        },
+        {
+          "bbox_uv": [
+            45,
+            143,
+            118,
+            166
+          ],
+          "centroid": [
+            -0.09289875538524874,
+            0.04077746393155945,
+            0.3622438454148369
+          ],
+          "degeneracy_reason": "ok",
+          "degenerate": false,
+          "extent_xyz": [
+            0.08154752763973236,
+            0.020239032218546258,
+            0.048638892670472444
+          ],
+          "image_centroid": [
+            83.71592276043239,
+            154.0505639088287
+          ],
+          "label": 2,
+          "metrics": {
+            "center_distance_px": 83.53862186319299,
+            "center_score": 0.549739275526452,
+            "extent_reasonable_score": 1.7383777582793898,
+            "size_score": 0.6166666666666667
+          },
+          "point_count": 111,
+          "score": 3.727960599121713
+        },
+        {
+          "bbox_uv": [
+            71,
+            123,
+            109,
+            145
+          ],
+          "centroid": [
+            -0.09352139908904644,
+            0.01999528006905949,
+            0.41202719161871776
+          ],
+          "degeneracy_reason": "ok",
+          "degenerate": false,
+          "extent_xyz": [
+            0.04947877587790191,
+            0.025587413367197515,
+            0.050499990582466125
+          ],
+          "image_centroid": [
+            92.79447252388862,
+            134.31524073072345
+          ],
+          "label": 1,
+          "metrics": {
+            "center_distance_px": 68.71323773859682,
+            "center_score": 0.6671146898252986,
+            "extent_reasonable_score": 1.6248853612939491,
+            "size_score": 0.45555555555555555
+          },
+          "point_count": 82,
+          "score": 3.512268865014427
+        }
+      ],
+      "frame_index": 14,
+      "icp_attempted": true,
+      "icp_fitness": 1.0,
+      "icp_rmse": 0.0021483260346725893,
+      "reason": "registered_segmented_object_cloud",
+      "segmentation_succeeded": true,
+      "selected_cluster": {
+        "bbox_uv": [
+          0,
+          30,
+          319,
+          239
+        ],
+        "centroid": [
+          0.053025338269942796,
+          0.037589112834079445,
+          0.3354529995291623
+        ],
+        "degeneracy_reason": "ok",
+        "degenerate": false,
+        "extent_xyz": [
+          0.3893198486303737,
+          0.17507438728021074,
+          0.2741000190377235
+        ],
+        "image_centroid": [
+          211.39323543143286,
+          153.89206563090897
+        ],
+        "label": 0,
+        "metrics": {
+          "center_distance_px": 61.562462270774446,
+          "center_score": 0.7225808290352647,
+          "extent_reasonable_score": 0.23508742578195013,
+          "size_score": 3.0
+        },
+        "point_count": 2242,
+        "score": 6.791216752238374
+      },
+      "selected_cluster_bbox_extents_m": [
+        0.3893198486303737,
+        0.17507438728021074,
+        0.2741000190377235
+      ],
+      "selected_cluster_degeneracy_reason": "ok",
+      "selected_cluster_point_count": 2242,
+      "selection_reason": "largest_nondegenerate_near_center"
+    },
+    {
+      "accepted": true,
+      "candidate_clusters": [
+        {
+          "bbox_uv": [
+            0,
+            30,
+            319,
+            239
+          ],
+          "centroid": [
+            0.043657381378023684,
+            0.039014843083087974,
+            0.33126424990645076
+          ],
+          "degeneracy_reason": "ok",
+          "degenerate": false,
+          "extent_xyz": [
+            0.39055908269798445,
+            0.17357714314294725,
+            0.26401190335551894
+          ],
+          "image_centroid": [
+            203.29855818101345,
+            155.6550559590758
+          ],
+          "label": 0,
+          "metrics": {
+            "center_distance_px": 56.089643928263925,
+            "center_score": 0.7635910397127078,
+            "extent_reasonable_score": 0.23320536763893177,
+            "size_score": 3.0
+          },
+          "point_count": 2286,
+          "score": 6.854951031179264
+        },
+        {
+          "bbox_uv": [
+            67,
+            122,
+            110,
+            145
+          ],
+          "centroid": [
+            -0.09379855085000906,
+            0.018404392719513878,
+            0.4154989262234676
+          ],
+          "degeneracy_reason": "ok",
+          "degenerate": false,
+          "extent_xyz": [
+            0.05180748534875822,
+            0.02734416662076601,
+            0.055861130356788635
+          ],
+          "image_centroid": [
+            93.17317129157838,
+            133.01033528773993
+          ],
+          "label": 1,
+          "metrics": {
+            "center_distance_px": 68.08152362810438,
+            "center_score": 0.6720755023040009,
+            "extent_reasonable_score": 1.664785684702243,
+            "size_score": 0.4666666666666667
+          },
+          "point_count": 84,
+          "score": 3.580106488388645
+        }
+      ],
+      "frame_index": 15,
+      "icp_attempted": true,
+      "icp_fitness": 1.0,
+      "icp_rmse": 0.0016947182078136766,
+      "reason": "registered_segmented_object_cloud",
+      "segmentation_succeeded": true,
+      "selected_cluster": {
+        "bbox_uv": [
+          0,
+          30,
+          319,
+          239
+        ],
+        "centroid": [
+          0.043657381378023684,
+          0.039014843083087974,
+          0.33126424990645076
+        ],
+        "degeneracy_reason": "ok",
+        "degenerate": false,
+        "extent_xyz": [
+          0.39055908269798445,
+          0.17357714314294725,
+          0.26401190335551894
+        ],
+        "image_centroid": [
+          203.29855818101345,
+          155.6550559590758
+        ],
+        "label": 0,
+        "metrics": {
+          "center_distance_px": 56.089643928263925,
+          "center_score": 0.7635910397127078,
+          "extent_reasonable_score": 0.23320536763893177,
+          "size_score": 3.0
+        },
+        "point_count": 2286,
+        "score": 6.854951031179264
+      },
+      "selected_cluster_bbox_extents_m": [
+        0.39055908269798445,
+        0.17357714314294725,
+        0.26401190335551894
+      ],
+      "selected_cluster_degeneracy_reason": "ok",
+      "selected_cluster_point_count": 2286,
+      "selection_reason": "largest_nondegenerate_near_center"
+    },
+    {
+      "accepted": true,
+      "candidate_clusters": [
+        {
+          "bbox_uv": [
+            0,
+            29,
+            319,
+            239
+          ],
+          "centroid": [
+            0.04327804247933093,
+            0.037816288989237105,
+            0.3362618646648654
+          ],
+          "degeneracy_reason": "ok",
+          "degenerate": false,
+          "extent_xyz": [
+            0.38936237319199907,
+            0.17686566212061738,
+            0.2616857305169106
+          ],
+          "image_centroid": [
+            202.34779349426475,
+            154.01719849315754
+          ],
+          "label": 0,
+          "metrics": {
+            "center_distance_px": 54.318554906733034,
+            "center_score": 0.7765002747932258,
+            "extent_reasonable_score": 0.23732559301136788,
+            "size_score": 3.0
+          },
+          "point_count": 2395,
+          "score": 6.87972603268053
+        },
+        {
+          "bbox_uv": [
+            70,
+            124,
+            110,
+            145
+          ],
+          "centroid": [
+            -0.09363648631764707,
+            0.018912927157426332,
+            0.41464544261932107
+          ],
+          "degeneracy_reason": "ok",
+          "degenerate": false,
+          "extent_xyz": [
+            0.0509841309520728,
+            0.024996859269586086,
+            0.05183333655198413
+          ],
+          "image_centroid": [
+            93.15043436980903,
+            133.4163838018459
+          ],
+          "label": 1,
+          "metrics": {
+            "center_distance_px": 68.18257680128877,
+            "center_score": 0.6712825526105328,
+            "extent_reasonable_score": 1.6394748079017964,
+            "size_score": 0.4111111111111111
+          },
+          "point_count": 74,
+          "score": 3.4535268920786493
+        }
+      ],
+      "frame_index": 16,
+      "icp_attempted": true,
+      "icp_fitness": 1.0,
+      "icp_rmse": 0.0016136173085409108,
+      "reason": "registered_segmented_object_cloud",
+      "segmentation_succeeded": true,
+      "selected_cluster": {
+        "bbox_uv": [
+          0,
+          29,
+          319,
+          239
+        ],
+        "centroid": [
+          0.04327804247933093,
+          0.037816288989237105,
+          0.3362618646648654
+        ],
+        "degeneracy_reason": "ok",
+        "degenerate": false,
+        "extent_xyz": [
+          0.38936237319199907,
+          0.17686566212061738,
+          0.2616857305169106
+        ],
+        "image_centroid": [
+          202.34779349426475,
+          154.01719849315754
+        ],
+        "label": 0,
+        "metrics": {
+          "center_distance_px": 54.318554906733034,
+          "center_score": 0.7765002747932258,
+          "extent_reasonable_score": 0.23732559301136788,
+          "size_score": 3.0
+        },
+        "point_count": 2395,
+        "score": 6.87972603268053
+      },
+      "selected_cluster_bbox_extents_m": [
+        0.38936237319199907,
+        0.17686566212061738,
+        0.2616857305169106
+      ],
+      "selected_cluster_degeneracy_reason": "ok",
+      "selected_cluster_point_count": 2395,
+      "selection_reason": "largest_nondegenerate_near_center"
+    },
+    {
+      "accepted": true,
+      "candidate_clusters": [
+        {
+          "bbox_uv": [
+            0,
+            30,
+            319,
+            239
+          ],
+          "centroid": [
+            0.04358245446638232,
+            0.0388543995046389,
+            0.33293233377496956
+          ],
+          "degeneracy_reason": "ok",
+          "degenerate": false,
+          "extent_xyz": [
+            0.39390954090653746,
+            0.17513908505525316,
+            0.25803572311997414
+          ],
+          "image_centroid": [
+            203.0258601324811,
+            155.32469642920876
+          ],
+          "label": 0,
+          "metrics": {
+            "center_distance_px": 55.66919092240861,
+            "center_score": 0.7666734307126987,
+            "extent_reasonable_score": 0.22497203941791982,
+            "size_score": 3.0
+          },
+          "point_count": 2317,
+          "score": 6.851649528558238
+        },
+        {
+          "bbox_uv": [
+            69,
+            122,
+            109,
+            147
+          ],
+          "centroid": [
+            -0.09435949146024374,
+            0.02034743969685365,
+            0.41132355248076213
+          ],
+          "degeneracy_reason": "ok",
+          "degenerate": false,
+          "extent_xyz": [
+            0.049041930280579155,
+            0.028946314240042667,
+            0.06149999797344208
+          ],
+          "image_centroid": [
+            92.04729298114123,
+            134.60466899404096
+          ],
+          "label": 1,
+          "metrics": {
+            "center_distance_px": 69.50443689158527,
+            "center_score": 0.66088927808294,
+            "extent_reasonable_score": 1.672030097322039,
+            "size_score": 0.55
+          },
+          "point_count": 99,
+          "score": 3.719452942254743
+        }
+      ],
+      "frame_index": 17,
+      "icp_attempted": true,
+      "icp_fitness": 1.0,
+      "icp_rmse": 0.0018243024529077244,
+      "reason": "registered_segmented_object_cloud",
+      "segmentation_succeeded": true,
+      "selected_cluster": {
+        "bbox_uv": [
+          0,
+          30,
+          319,
+          239
+        ],
+        "centroid": [
+          0.04358245446638232,
+          0.0388543995046389,
+          0.33293233377496956
+        ],
+        "degeneracy_reason": "ok",
+        "degenerate": false,
+        "extent_xyz": [
+          0.39390954090653746,
+          0.17513908505525316,
+          0.25803572311997414
+        ],
+        "image_centroid": [
+          203.0258601324811,
+          155.32469642920876
+        ],
+        "label": 0,
+        "metrics": {
+          "center_distance_px": 55.66919092240861,
+          "center_score": 0.7666734307126987,
+          "extent_reasonable_score": 0.22497203941791982,
+          "size_score": 3.0
+        },
+        "point_count": 2317,
+        "score": 6.851649528558238
+      },
+      "selected_cluster_bbox_extents_m": [
+        0.39390954090653746,
+        0.17513908505525316,
+        0.25803572311997414
+      ],
+      "selected_cluster_degeneracy_reason": "ok",
+      "selected_cluster_point_count": 2317,
+      "selection_reason": "largest_nondegenerate_near_center"
+    },
+    {
+      "accepted": true,
+      "candidate_clusters": [
+        {
+          "bbox_uv": [
+            0,
+            29,
+            319,
+            239
+          ],
+          "centroid": [
+            0.02492585914736669,
+            0.040065428907138406,
+            0.33045148834934823
+          ],
+          "degeneracy_reason": "ok",
+          "degenerate": false,
+          "extent_xyz": [
+            0.3625625810599178,
+            0.1756668859377965,
+            0.26600000262260437
+          ],
+          "image_centroid": [
+            185.93901431492714,
+            156.72407771629727
+          ],
+          "label": 0,
+          "metrics": {
+            "center_distance_px": 44.96098695249735,
+            "center_score": 0.8408767218092448,
+            "extent_reasonable_score": 0.32540742397256733,
+            "size_score": 3.0
+          },
+          "point_count": 2340,
+          "score": 7.07081017886736
+        },
+        {
+          "bbox_uv": [
+            261,
+            106,
+            319,
+            125
+          ],
+          "centroid": [
+            0.1970941407178679,
+            -0.006473180195938372,
+            0.4673623882936328
+          ],
+          "degeneracy_reason": "ok",
+          "degenerate": false,
+          "extent_xyz": [
+            0.08846600040229216,
+            0.029035682830049266,
+            0.06579997539520266
+          ],
+          "image_centroid": [
+            292.59830452580263,
+            115.09166354014032
+          ],
+          "label": 1,
+          "metrics": {
+            "center_distance_px": 132.68911835535224,
+            "center_score": 0.22102815150914765,
+            "extent_reasonable_score": 1.8699612907194076,
+            "size_score": 0.9388888888888889
+          },
+          "point_count": 169,
+          "score": 3.9136063331340436
+        }
+      ],
+      "frame_index": 18,
+      "icp_attempted": true,
+      "icp_fitness": 1.0,
+      "icp_rmse": 0.001839628724316373,
+      "reason": "registered_segmented_object_cloud",
+      "segmentation_succeeded": true,
+      "selected_cluster": {
+        "bbox_uv": [
+          0,
+          29,
+          319,
+          239
+        ],
+        "centroid": [
+          0.02492585914736669,
+          0.040065428907138406,
+          0.33045148834934823
+        ],
+        "degeneracy_reason": "ok",
+        "degenerate": false,
+        "extent_xyz": [
+          0.3625625810599178,
+          0.1756668859377965,
+          0.26600000262260437
+        ],
+        "image_centroid": [
+          185.93901431492714,
+          156.72407771629727
+        ],
+        "label": 0,
+        "metrics": {
+          "center_distance_px": 44.96098695249735,
+          "center_score": 0.8408767218092448,
+          "extent_reasonable_score": 0.32540742397256733,
+          "size_score": 3.0
+        },
+        "point_count": 2340,
+        "score": 7.07081017886736
+      },
+      "selected_cluster_bbox_extents_m": [
+        0.3625625810599178,
+        0.1756668859377965,
+        0.26600000262260437
+      ],
+      "selected_cluster_degeneracy_reason": "ok",
+      "selected_cluster_point_count": 2340,
+      "selection_reason": "largest_nondegenerate_near_center"
+    },
+    {
+      "accepted": true,
+      "candidate_clusters": [
+        {
+          "bbox_uv": [
+            0,
+            30,
+            319,
+            239
+          ],
+          "centroid": [
+            0.032547786452849926,
+            0.03869120951675861,
+            0.3352851276831855
+          ],
+          "degeneracy_reason": "ok",
+          "degenerate": false,
+          "extent_xyz": [
+            0.38393559415150624,
+            0.17489081215205599,
+            0.2593333373467127
+          ],
+          "image_centroid": [
+            192.6059453085085,
+            154.922328236438
+          ],
+          "label": 0,
+          "metrics": {
+            "center_distance_px": 47.77778436590548,
+            "center_score": 0.8222538082223265,
+            "extent_reasonable_score": 0.25467307715901527,
+            "size_score": 3.0
+          },
+          "point_count": 2451,
+          "score": 6.970279170314738
+        }
+      ],
+      "frame_index": 19,
+      "icp_attempted": true,
+      "icp_fitness": 1.0,
+      "icp_rmse": 0.0016913822538130064,
+      "reason": "registered_segmented_object_cloud",
+      "segmentation_succeeded": true,
+      "selected_cluster": {
+        "bbox_uv": [
+          0,
+          30,
+          319,
+          239
+        ],
+        "centroid": [
+          0.032547786452849926,
+          0.03869120951675861,
+          0.3352851276831855
+        ],
+        "degeneracy_reason": "ok",
+        "degenerate": false,
+        "extent_xyz": [
+          0.38393559415150624,
+          0.17489081215205599,
+          0.2593333373467127
+        ],
+        "image_centroid": [
+          192.6059453085085,
+          154.922328236438
+        ],
+        "label": 0,
+        "metrics": {
+          "center_distance_px": 47.77778436590548,
+          "center_score": 0.8222538082223265,
+          "extent_reasonable_score": 0.25467307715901527,
+          "size_score": 3.0
+        },
+        "point_count": 2451,
+        "score": 6.970279170314738
+      },
+      "selected_cluster_bbox_extents_m": [
+        0.38393559415150624,
+        0.17489081215205599,
+        0.2593333373467127
+      ],
+      "selected_cluster_degeneracy_reason": "ok",
+      "selected_cluster_point_count": 2451,
+      "selection_reason": "largest_nondegenerate_near_center"
+    },
+    {
+      "accepted": true,
+      "candidate_clusters": [
+        {
+          "bbox_uv": [
+            0,
+            29,
+            319,
+            239
+          ],
+          "centroid": [
+            0.04076692367467558,
+            0.04119461612975723,
+            0.3254856288135868
+          ],
+          "degeneracy_reason": "ok",
+          "degenerate": false,
+          "extent_xyz": [
+            0.3889768169285439,
+            0.17378012268108828,
+            0.2681666774054368
+          ],
+          "image_centroid": [
+            201.283974238371,
+            158.36325352210918
+          ],
+          "label": 0,
+          "metrics": {
+            "center_distance_px": 56.356949435860194,
+            "center_score": 0.7616258337909082,
+            "extent_reasonable_score": 0.23707944431860833,
+            "size_score": 3.0
+          },
+          "point_count": 2209,
+          "score": 6.855680778384062
+        },
+        {
+          "bbox_uv": [
+            192,
+            109,
+            235,
+            132
+          ],
+          "centroid": [
+            0.06801996394038043,
+            0.0012961880289989935,
+            0.45245088658950944
+          ],
+          "degeneracy_reason": "ok",
+          "degenerate": false,
+          "extent_xyz": [
+            0.06319891376865967,
+            0.032358499862121685,
+            0.07700000703334808
+          ],
+          "image_centroid": [
+            209.01104288645493,
+            120.24283195641512
+          ],
+          "label": 1,
+          "metrics": {
+            "center_distance_px": 49.0116444549352,
+            "center_score": 0.8138779212156815,
+            "extent_reasonable_score": 1.8132842665269824,
+            "size_score": 0.7333333333333333
+          },
+          "point_count": 132,
+          "score": 4.435488940472073
+        },
+        {
+          "bbox_uv": [
+            64,
+            124,
+            110,
+            149
+          ],
+          "centroid": [
+            -0.09656014839013152,
+            0.022452160628903515,
+            0.40647094284207064
+          ],
+          "degeneracy_reason": "ok",
+          "degenerate": false,
+          "extent_xyz": [
+            0.056558562453142835,
+            0.02903389819578181,
+            0.05949999392032623
+          ],
+          "image_centroid": [
+            89.53616301338346,
+            136.3823889258302
+          ],
+          "label": 2,
+          "metrics": {
+            "center_distance_px": 72.34317514315799,
+            "center_score": 0.6384631801035425,
+            "extent_reasonable_score": 1.7089537714546281,
+            "size_score": 0.5611111111111111
+          },
+          "point_count": 101,
+          "score": 3.7404948596202967
+        }
+      ],
+      "frame_index": 20,
+      "icp_attempted": true,
+      "icp_fitness": 1.0,
+      "icp_rmse": 0.0017149249461057487,
+      "reason": "registered_segmented_object_cloud",
+      "segmentation_succeeded": true,
+      "selected_cluster": {
+        "bbox_uv": [
+          0,
+          29,
+          319,
+          239
+        ],
+        "centroid": [
+          0.04076692367467558,
+          0.04119461612975723,
+          0.3254856288135868
+        ],
+        "degeneracy_reason": "ok",
+        "degenerate": false,
+        "extent_xyz": [
+          0.3889768169285439,
+          0.17378012268108828,
+          0.2681666774054368
+        ],
+        "image_centroid": [
+          201.283974238371,
+          158.36325352210918
+        ],
+        "label": 0,
+        "metrics": {
+          "center_distance_px": 56.356949435860194,
+          "center_score": 0.7616258337909082,
+          "extent_reasonable_score": 0.23707944431860833,
+          "size_score": 3.0
+        },
+        "point_count": 2209,
+        "score": 6.855680778384062
+      },
+      "selected_cluster_bbox_extents_m": [
+        0.3889768169285439,
+        0.17378012268108828,
+        0.2681666774054368
+      ],
+      "selected_cluster_degeneracy_reason": "ok",
+      "selected_cluster_point_count": 2209,
+      "selection_reason": "largest_nondegenerate_near_center"
+    },
+    {
+      "accepted": true,
+      "candidate_clusters": [
+        {
+          "bbox_uv": [
+            0,
+            29,
+            319,
+            239
+          ],
+          "centroid": [
+            0.03627306386950034,
+            0.037616217560959335,
+            0.3378688230244862
+          ],
+          "degeneracy_reason": "ok",
+          "degenerate": false,
+          "extent_xyz": [
+            0.391948309826493,
+            0.1738814184589535,
+            0.2644166809817155
+          ],
+          "image_centroid": [
+            195.77334888272952,
+            153.66987725350913
+          ],
+          "label": 0,
+          "metrics": {
+            "center_distance_px": 49.126297688222515,
+            "center_score": 0.8130931816448426,
+            "extent_reasonable_score": 0.22899645663411886,
+            "size_score": 3.0
+          },
+          "point_count": 2497,
+          "score": 6.929945547265867
+        }
+      ],
+      "frame_index": 21,
+      "icp_attempted": true,
+      "icp_fitness": 1.0,
+      "icp_rmse": 0.0016403494120849364,
+      "reason": "registered_segmented_object_cloud",
+      "segmentation_succeeded": true,
+      "selected_cluster": {
+        "bbox_uv": [
+          0,
+          29,
+          319,
+          239
+        ],
+        "centroid": [
+          0.03627306386950034,
+          0.037616217560959335,
+          0.3378688230244862
+        ],
+        "degeneracy_reason": "ok",
+        "degenerate": false,
+        "extent_xyz": [
+          0.391948309826493,
+          0.1738814184589535,
+          0.2644166809817155
+        ],
+        "image_centroid": [
+          195.77334888272952,
+          153.66987725350913
+        ],
+        "label": 0,
+        "metrics": {
+          "center_distance_px": 49.126297688222515,
+          "center_score": 0.8130931816448426,
+          "extent_reasonable_score": 0.22899645663411886,
+          "size_score": 3.0
+        },
+        "point_count": 2497,
+        "score": 6.929945547265867
+      },
+      "selected_cluster_bbox_extents_m": [
+        0.391948309826493,
+        0.1738814184589535,
+        0.2644166809817155
+      ],
+      "selected_cluster_degeneracy_reason": "ok",
+      "selected_cluster_point_count": 2497,
+      "selection_reason": "largest_nondegenerate_near_center"
+    },
+    {
+      "accepted": true,
+      "candidate_clusters": [
+        {
+          "bbox_uv": [
+            0,
+            29,
+            319,
+            239
+          ],
+          "centroid": [
+            0.035285854093278335,
+            0.0383722164239928,
+            0.33576105621391106
+          ],
+          "degeneracy_reason": "ok",
+          "degenerate": false,
+          "extent_xyz": [
+            0.388340108469418,
+            0.1748455792409368,
+            0.2564166796704133
+          ],
+          "image_centroid": [
+            195.0753189038807,
+            154.5791386137796
+          ],
+          "label": 0,
+          "metrics": {
+            "center_distance_px": 49.25438887530649,
+            "center_score": 0.8122151961831494,
+            "extent_reasonable_score": 0.24200956985208752,
+            "size_score": 3.0
+          },
+          "point_count": 2468,
+          "score": 6.941553883745127
+        }
+      ],
+      "frame_index": 22,
+      "icp_attempted": true,
+      "icp_fitness": 1.0,
+      "icp_rmse": 0.0015628124683055625,
+      "reason": "registered_segmented_object_cloud",
+      "segmentation_succeeded": true,
+      "selected_cluster": {
+        "bbox_uv": [
+          0,
+          29,
+          319,
+          239
+        ],
+        "centroid": [
+          0.035285854093278335,
+          0.0383722164239928,
+          0.33576105621391106
+        ],
+        "degeneracy_reason": "ok",
+        "degenerate": false,
+        "extent_xyz": [
+          0.388340108469418,
+          0.1748455792409368,
+          0.2564166796704133
+        ],
+        "image_centroid": [
+          195.0753189038807,
+          154.5791386137796
+        ],
+        "label": 0,
+        "metrics": {
+          "center_distance_px": 49.25438887530649,
+          "center_score": 0.8122151961831494,
+          "extent_reasonable_score": 0.24200956985208752,
+          "size_score": 3.0
+        },
+        "point_count": 2468,
+        "score": 6.941553883745127
+      },
+      "selected_cluster_bbox_extents_m": [
+        0.388340108469418,
+        0.1748455792409368,
+        0.2564166796704133
+      ],
+      "selected_cluster_degeneracy_reason": "ok",
+      "selected_cluster_point_count": 2468,
+      "selection_reason": "largest_nondegenerate_near_center"
+    },
+    {
+      "accepted": true,
+      "candidate_clusters": [
+        {
+          "bbox_uv": [
+            0,
+            30,
+            319,
+            239
+          ],
+          "centroid": [
+            0.03569426243839055,
+            0.03802405989255928,
+            0.3364468966288519
+          ],
+          "degeneracy_reason": "ok",
+          "degenerate": false,
+          "extent_xyz": [
+            0.3876686484118931,
+            0.17377511895200876,
+            0.25723810742298764
+          ],
+          "image_centroid": [
+            195.38322271743465,
+            154.18844802278713
+          ],
+          "label": 0,
+          "metrics": {
+            "center_distance_px": 49.201853908957546,
+            "center_score": 0.8125754525078234,
+            "extent_reasonable_score": 0.24378832165555636,
+            "size_score": 3.0
+          },
+          "point_count": 2488,
+          "score": 6.943909045668074
+        }
+      ],
+      "frame_index": 23,
+      "icp_attempted": true,
+      "icp_fitness": 1.0,
+      "icp_rmse": 0.0015833285460821966,
+      "reason": "registered_segmented_object_cloud",
+      "segmentation_succeeded": true,
+      "selected_cluster": {
+        "bbox_uv": [
+          0,
+          30,
+          319,
+          239
+        ],
+        "centroid": [
+          0.03569426243839055,
+          0.03802405989255928,
+          0.3364468966288519
+        ],
+        "degeneracy_reason": "ok",
+        "degenerate": false,
+        "extent_xyz": [
+          0.3876686484118931,
+          0.17377511895200876,
+          0.25723810742298764
+        ],
+        "image_centroid": [
+          195.38322271743465,
+          154.18844802278713
+        ],
+        "label": 0,
+        "metrics": {
+          "center_distance_px": 49.201853908957546,
+          "center_score": 0.8125754525078234,
+          "extent_reasonable_score": 0.24378832165555636,
+          "size_score": 3.0
+        },
+        "point_count": 2488,
+        "score": 6.943909045668074
+      },
+      "selected_cluster_bbox_extents_m": [
+        0.3876686484118931,
+        0.17377511895200876,
+        0.25723810742298764
+      ],
+      "selected_cluster_degeneracy_reason": "ok",
+      "selected_cluster_point_count": 2488,
+      "selection_reason": "largest_nondegenerate_near_center"
+    },
+    {
+      "accepted": true,
+      "candidate_clusters": [
+        {
+          "bbox_uv": [
+            0,
+            28,
+            319,
+            239
+          ],
+          "centroid": [
+            0.03850021850268545,
+            0.03632665198359743,
+            0.34027186231394246
+          ],
+          "degeneracy_reason": "ok",
+          "degenerate": false,
+          "extent_xyz": [
+            0.38929704066006915,
+            0.1777244569273877,
+            0.26415476451317466
+          ],
+          "image_centroid": [
+            197.5558109608071,
+            152.25966553740778
+          ],
+          "label": 0,
+          "metrics": {
+            "center_distance_px": 49.5088371657959,
+            "center_score": 0.8104671590903364,
+            "extent_reasonable_score": 0.23690921422473774,
+            "size_score": 3.0
+          },
+          "point_count": 2470,
+          "score": 6.933656668769276
+        }
+      ],
+      "frame_index": 24,
+      "icp_attempted": true,
+      "icp_fitness": 1.0,
+      "icp_rmse": 0.0016236681560305125,
+      "reason": "registered_segmented_object_cloud",
+      "segmentation_succeeded": true,
+      "selected_cluster": {
+        "bbox_uv": [
+          0,
+          28,
+          319,
+          239
+        ],
+        "centroid": [
+          0.03850021850268545,
+          0.03632665198359743,
+          0.34027186231394246
+        ],
+        "degeneracy_reason": "ok",
+        "degenerate": false,
+        "extent_xyz": [
+          0.38929704066006915,
+          0.1777244569273877,
+          0.26415476451317466
+        ],
+        "image_centroid": [
+          197.5558109608071,
+          152.25966553740778
+        ],
+        "label": 0,
+        "metrics": {
+          "center_distance_px": 49.5088371657959,
+          "center_score": 0.8104671590903364,
+          "extent_reasonable_score": 0.23690921422473774,
+          "size_score": 3.0
+        },
+        "point_count": 2470,
+        "score": 6.933656668769276
+      },
+      "selected_cluster_bbox_extents_m": [
+        0.38929704066006915,
+        0.1777244569273877,
+        0.26415476451317466
+      ],
+      "selected_cluster_degeneracy_reason": "ok",
+      "selected_cluster_point_count": 2470,
+      "selection_reason": "largest_nondegenerate_near_center"
+    },
+    {
+      "accepted": true,
+      "candidate_clusters": [
+        {
+          "bbox_uv": [
+            0,
+            28,
+            319,
+            239
+          ],
+          "centroid": [
+            0.023373459200871183,
+            0.039988893062197446,
+            0.3290049785961117
+          ],
+          "degeneracy_reason": "ok",
+          "degenerate": false,
+          "extent_xyz": [
+            0.34692435484542095,
+            0.17819443416438036,
+            0.2492619202960105
+          ],
+          "image_centroid": [
+            184.58782962995673,
+            156.81666406777495
+          ],
+          "label": 0,
+          "metrics": {
+            "center_distance_px": 44.27220481285261,
+            "center_score": 0.8453193284432016,
+            "extent_reasonable_score": 0.3900086771638917,
+            "size_score": 3.0
+          },
+          "point_count": 2252,
+          "score": 7.142519602673015
+        },
+        {
+          "bbox_uv": [
+            259,
+            107,
+            319,
+            127
+          ],
+          "centroid": [
+            0.19763699328308612,
+            -0.004521264712926958,
+            0.4626841849315386
+          ],
+          "degeneracy_reason": "ok",
+          "degenerate": false,
+          "extent_xyz": [
+            0.0915718525506223,
+            0.029569178998257725,
+            0.06855555209848613
+          ],
+          "image_centroid": [
+            294.27302406231445,
+            116.3485827456019
+          ],
+          "label": 1,
+          "metrics": {
+            "center_distance_px": 134.32266316152533,
+            "center_score": 0.2129154288110793,
+            "extent_reasonable_score": 1.8907791594922254,
+            "size_score": 0.9111111111111111
+          },
+          "point_count": 164,
+          "score": 3.871443845589952
+        }
+      ],
+      "frame_index": 25,
+      "icp_attempted": true,
+      "icp_fitness": 1.0,
+      "icp_rmse": 0.00151296428722572,
+      "reason": "registered_segmented_object_cloud",
+      "segmentation_succeeded": true,
+      "selected_cluster": {
+        "bbox_uv": [
+          0,
+          28,
+          319,
+          239
+        ],
+        "centroid": [
+          0.023373459200871183,
+          0.039988893062197446,
+          0.3290049785961117
+        ],
+        "degeneracy_reason": "ok",
+        "degenerate": false,
+        "extent_xyz": [
+          0.34692435484542095,
+          0.17819443416438036,
+          0.2492619202960105
+        ],
+        "image_centroid": [
+          184.58782962995673,
+          156.81666406777495
+        ],
+        "label": 0,
+        "metrics": {
+          "center_distance_px": 44.27220481285261,
+          "center_score": 0.8453193284432016,
+          "extent_reasonable_score": 0.3900086771638917,
+          "size_score": 3.0
+        },
+        "point_count": 2252,
+        "score": 7.142519602673015
+      },
+      "selected_cluster_bbox_extents_m": [
+        0.34692435484542095,
+        0.17819443416438036,
+        0.2492619202960105
+      ],
+      "selected_cluster_degeneracy_reason": "ok",
+      "selected_cluster_point_count": 2252,
+      "selection_reason": "largest_nondegenerate_near_center"
+    },
+    {
+      "accepted": true,
+      "candidate_clusters": [
+        {
+          "bbox_uv": [
+            0,
+            29,
+            319,
+            239
+          ],
+          "centroid": [
+            0.033832702073493974,
+            0.03726598646408796,
+            0.33758437455634244
+          ],
+          "degeneracy_reason": "ok",
+          "degenerate": false,
+          "extent_xyz": [
+            0.38840067385632604,
+            0.178331436790362,
+            0.25850000232458115
+          ],
+          "image_centroid": [
+            193.57464621914826,
+            153.37907043928777
+          ],
+          "label": 0,
+          "metrics": {
+            "center_distance_px": 47.34362905536395,
+            "center_score": 0.8251702334867319,
+            "extent_reasonable_score": 0.2411210548654896,
+            "size_score": 3.0
+          },
+          "point_count": 2393,
+          "score": 6.961393428444261
+        }
+      ],
+      "frame_index": 26,
+      "icp_attempted": true,
+      "icp_fitness": 1.0,
+      "icp_rmse": 0.0015074024890740555,
+      "reason": "registered_segmented_object_cloud",
+      "segmentation_succeeded": true,
+      "selected_cluster": {
+        "bbox_uv": [
+          0,
+          29,
+          319,
+          239
+        ],
+        "centroid": [
+          0.033832702073493974,
+          0.03726598646408796,
+          0.33758437455634244
+        ],
+        "degeneracy_reason": "ok",
+        "degenerate": false,
+        "extent_xyz": [
+          0.38840067385632604,
+          0.178331436790362,
+          0.25850000232458115
+        ],
+        "image_centroid": [
+          193.57464621914826,
+          153.37907043928777
+        ],
+        "label": 0,
+        "metrics": {
+          "center_distance_px": 47.34362905536395,
+          "center_score": 0.8251702334867319,
+          "extent_reasonable_score": 0.2411210548654896,
+          "size_score": 3.0
+        },
+        "point_count": 2393,
+        "score": 6.961393428444261
+      },
+      "selected_cluster_bbox_extents_m": [
+        0.38840067385632604,
+        0.178331436790362,
+        0.25850000232458115
+      ],
+      "selected_cluster_degeneracy_reason": "ok",
+      "selected_cluster_point_count": 2393,
+      "selection_reason": "largest_nondegenerate_near_center"
+    },
+    {
+      "accepted": true,
+      "candidate_clusters": [
+        {
+          "bbox_uv": [
+            0,
+            28,
+            319,
+            239
+          ],
+          "centroid": [
+            0.022592903664087453,
+            0.04017660930201378,
+            0.32931068994298995
+          ],
+          "degeneracy_reason": "ok",
+          "degenerate": false,
+          "extent_xyz": [
+            0.3469706942527134,
+            0.17776701753446367,
+            0.2559047763546308
+          ],
+          "image_centroid": [
+            183.837450909655,
+            156.95755793640546
+          ],
+          "label": 0,
+          "metrics": {
+            "center_distance_px": 43.978235008842475,
+            "center_score": 0.8472015725938564,
+            "extent_reasonable_score": 0.38709035279634607,
+            "size_score": 3.0
+          },
+          "point_count": 2256,
+          "score": 7.142612868946516
+        },
+        {
+          "bbox_uv": [
+            257,
+            109,
+            319,
+            127
+          ],
+          "centroid": [
+            0.19221581713353827,
+            -0.0031633599829845095,
+            0.45906969490978466
+          ],
+          "degeneracy_reason": "ok",
+          "degenerate": false,
+          "extent_xyz": [
+            0.09550520268562221,
+            0.02553699995569191,
+            0.060242851291384014
+          ],
+          "image_centroid": [
+            291.6716243293138,
+            117.23642800178669
+          ],
+          "label": 1,
+          "metrics": {
+            "center_distance_px": 131.70062256386353,
+            "center_score": 0.22603649463821202,
+            "extent_reasonable_score": 1.8715042750073239,
+            "size_score": 0.8888888888888888
+          },
+          "point_count": 160,
+          "score": 3.8331626664284633
+        }
+      ],
+      "frame_index": 27,
+      "icp_attempted": true,
+      "icp_fitness": 1.0,
+      "icp_rmse": 0.001466633650202864,
+      "reason": "registered_segmented_object_cloud",
+      "segmentation_succeeded": true,
+      "selected_cluster": {
+        "bbox_uv": [
+          0,
+          28,
+          319,
+          239
+        ],
+        "centroid": [
+          0.022592903664087453,
+          0.04017660930201378,
+          0.32931068994298995
+        ],
+        "degeneracy_reason": "ok",
+        "degenerate": false,
+        "extent_xyz": [
+          0.3469706942527134,
+          0.17776701753446367,
+          0.2559047763546308
+        ],
+        "image_centroid": [
+          183.837450909655,
+          156.95755793640546
+        ],
+        "label": 0,
+        "metrics": {
+          "center_distance_px": 43.978235008842475,
+          "center_score": 0.8472015725938564,
+          "extent_reasonable_score": 0.38709035279634607,
+          "size_score": 3.0
+        },
+        "point_count": 2256,
+        "score": 7.142612868946516
+      },
+      "selected_cluster_bbox_extents_m": [
+        0.3469706942527134,
+        0.17776701753446367,
+        0.2559047763546308
+      ],
+      "selected_cluster_degeneracy_reason": "ok",
+      "selected_cluster_point_count": 2256,
+      "selection_reason": "largest_nondegenerate_near_center"
+    },
+    {
+      "accepted": true,
+      "candidate_clusters": [
+        {
+          "bbox_uv": [
+            0,
+            29,
+            319,
+            239
+          ],
+          "centroid": [
+            0.02187510901763166,
+            0.04009751298602822,
+            0.32933733832299944
+          ],
+          "degeneracy_reason": "ok",
+          "degenerate": false,
+          "extent_xyz": [
+            0.343307898158327,
+            0.17838515543604758,
+            0.25680477271477375
+          ],
+          "image_centroid": [
+            183.16443156862806,
+            156.88050277054631
+          ],
+          "label": 0,
+          "metrics": {
+            "center_distance_px": 43.551835489516705,
+            "center_score": 0.8499168127371373,
+            "extent_reasonable_score": 0.4012600353873795,
+            "size_score": 3.0
+          },
+          "point_count": 2255,
+          "score": 7.1611269357667995
+        },
+        {
+          "bbox_uv": [
+            256,
+            107,
+            319,
+            127
+          ],
+          "centroid": [
+            0.18935330540837045,
+            -0.003971078791015223,
+            0.4608981781040862
+          ],
+          "degeneracy_reason": "ok",
+          "degenerate": false,
+          "extent_xyz": [
+            0.09492309534711477,
+            0.029854051459446057,
+            0.0638000011444092
+          ],
+          "image_centroid": [
+            289.2470298895006,
+            116.70478557887567
+          ],
+          "label": 1,
+          "metrics": {
+            "center_distance_px": 129.28902959392434,
+            "center_score": 0.2385687292479068,
+            "extent_reasonable_score": 1.8876722656254417,
+            "size_score": 0.9055555555555556
+          },
+          "point_count": 163,
+          "score": 3.8993822324220924
+        }
+      ],
+      "frame_index": 28,
+      "icp_attempted": true,
+      "icp_fitness": 1.0,
+      "icp_rmse": 0.0013219373908612843,
+      "reason": "registered_segmented_object_cloud",
+      "segmentation_succeeded": true,
+      "selected_cluster": {
+        "bbox_uv": [
+          0,
+          29,
+          319,
+          239
+        ],
+        "centroid": [
+          0.02187510901763166,
+          0.04009751298602822,
+          0.32933733832299944
+        ],
+        "degeneracy_reason": "ok",
+        "degenerate": false,
+        "extent_xyz": [
+          0.343307898158327,
+          0.17838515543604758,
+          0.25680477271477375
+        ],
+        "image_centroid": [
+          183.16443156862806,
+          156.88050277054631
+        ],
+        "label": 0,
+        "metrics": {
+          "center_distance_px": 43.551835489516705,
+          "center_score": 0.8499168127371373,
+          "extent_reasonable_score": 0.4012600353873795,
+          "size_score": 3.0
+        },
+        "point_count": 2255,
+        "score": 7.1611269357667995
+      },
+      "selected_cluster_bbox_extents_m": [
+        0.343307898158327,
+        0.17838515543604758,
+        0.25680477271477375
+      ],
+      "selected_cluster_degeneracy_reason": "ok",
+      "selected_cluster_point_count": 2255,
+      "selection_reason": "largest_nondegenerate_near_center"
+    },
+    {
+      "accepted": true,
+      "candidate_clusters": [
+        {
+          "bbox_uv": [
+            0,
+            30,
+            319,
+            239
+          ],
+          "centroid": [
+            0.03573404378723757,
+            0.036637992751331255,
+            0.3399039012059531
+          ],
+          "degeneracy_reason": "ok",
+          "degenerate": false,
+          "extent_xyz": [
+            0.3873174561538831,
+            0.17780647037801678,
+            0.26540477822224295
+          ],
+          "image_centroid": [
+            195.08692613004203,
+            152.57755582885883
+          ],
+          "label": 0,
+          "metrics": {
+            "center_distance_px": 47.87890484375599,
+            "center_score": 0.8215722032101199,
+            "extent_reasonable_score": 0.2426332667855928,
+            "size_score": 3.0
+          },
+          "point_count": 2453,
+          "score": 6.957148791921785
+        }
+      ],
+      "frame_index": 29,
+      "icp_attempted": true,
+      "icp_fitness": 1.0,
+      "icp_rmse": 0.0014822662825652846,
+      "reason": "registered_segmented_object_cloud",
+      "segmentation_succeeded": true,
+      "selected_cluster": {
+        "bbox_uv": [
+          0,
+          30,
+          319,
+          239
+        ],
+        "centroid": [
+          0.03573404378723757,
+          0.036637992751331255,
+          0.3399039012059531
+        ],
+        "degeneracy_reason": "ok",
+        "degenerate": false,
+        "extent_xyz": [
+          0.3873174561538831,
+          0.17780647037801678,
+          0.26540477822224295
+        ],
+        "image_centroid": [
+          195.08692613004203,
+          152.57755582885883
+        ],
+        "label": 0,
+        "metrics": {
+          "center_distance_px": 47.87890484375599,
+          "center_score": 0.8215722032101199,
+          "extent_reasonable_score": 0.2426332667855928,
+          "size_score": 3.0
+        },
+        "point_count": 2453,
+        "score": 6.957148791921785
+      },
+      "selected_cluster_bbox_extents_m": [
+        0.3873174561538831,
+        0.17780647037801678,
+        0.26540477822224295
+      ],
+      "selected_cluster_degeneracy_reason": "ok",
+      "selected_cluster_point_count": 2453,
+      "selection_reason": "largest_nondegenerate_near_center"
+    },
+    {
+      "accepted": true,
+      "candidate_clusters": [
+        {
+          "bbox_uv": [
+            0,
+            29,
+            319,
+            239
+          ],
+          "centroid": [
+            0.034912203730976935,
+            0.03688302101449188,
+            0.3388435753764468
+          ],
+          "degeneracy_reason": "ok",
+          "degenerate": false,
+          "extent_xyz": [
+            0.38898789047388943,
+            0.17789754581441863,
+            0.25765476624170935
+          ],
+          "image_centroid": [
+            194.44120086927649,
+            152.90435021477467
+          ],
+          "label": 0,
+          "metrics": {
+            "center_distance_px": 47.63289389040301,
+            "center_score": 0.8232289159324941,
+            "extent_reasonable_score": 0.23961430797423763,
+            "size_score": 3.0
+          },
+          "point_count": 2432,
+          "score": 6.9567805734662285
+        }
+      ],
+      "frame_index": 30,
+      "icp_attempted": true,
+      "icp_fitness": 1.0,
+      "icp_rmse": 0.0014517389050818447,
+      "reason": "registered_segmented_object_cloud",
+      "segmentation_succeeded": true,
+      "selected_cluster": {
+        "bbox_uv": [
+          0,
+          29,
+          319,
+          239
+        ],
+        "centroid": [
+          0.034912203730976935,
+          0.03688302101449188,
+          0.3388435753764468
+        ],
+        "degeneracy_reason": "ok",
+        "degenerate": false,
+        "extent_xyz": [
+          0.38898789047388943,
+          0.17789754581441863,
+          0.25765476624170935
+        ],
+        "image_centroid": [
+          194.44120086927649,
+          152.90435021477467
+        ],
+        "label": 0,
+        "metrics": {
+          "center_distance_px": 47.63289389040301,
+          "center_score": 0.8232289159324941,
+          "extent_reasonable_score": 0.23961430797423763,
+          "size_score": 3.0
+        },
+        "point_count": 2432,
+        "score": 6.9567805734662285
+      },
+      "selected_cluster_bbox_extents_m": [
+        0.38898789047388943,
+        0.17789754581441863,
+        0.25765476624170935
+      ],
+      "selected_cluster_degeneracy_reason": "ok",
+      "selected_cluster_point_count": 2432,
+      "selection_reason": "largest_nondegenerate_near_center"
+    },
+    {
+      "accepted": true,
+      "candidate_clusters": [
+        {
+          "bbox_uv": [
+            0,
+            29,
+            319,
+            239
+          ],
+          "centroid": [
+            0.017837469580560535,
+            0.04045370803374977,
+            0.32777762340224814
+          ],
+          "degeneracy_reason": "ok",
+          "degenerate": false,
+          "extent_xyz": [
+            0.33665874461873585,
+            0.17659565141582798,
+            0.25576192016402877
+          ],
+          "image_centroid": [
+            179.46765599675396,
+            157.39393158675074
+          ],
+          "label": 0,
+          "metrics": {
+            "center_distance_px": 42.15798559611862,
+            "center_score": 0.8586666806661098,
+            "extent_reasonable_score": 0.428449755727166,
+            "size_score": 3.0
+          },
+          "point_count": 2229,
+          "score": 7.202316444792942
+        },
+        {
+          "bbox_uv": [
+            259,
+            106,
+            319,
+            136
+          ],
+          "centroid": [
+            0.19104590492579784,
+            -0.0004531529176901701,
+            0.452729673713571
+          ],
+          "degeneracy_reason": "ok",
+          "degenerate": false,
+          "extent_xyz": [
+            0.0920270817566152,
+            0.04187410959746429,
+            0.10090000331401827
+          ],
+          "image_centroid": [
+            292.68172231034646,
+            119.05151814322734
+          ],
+          "label": 1,
+          "metrics": {
+            "center_distance_px": 132.6851124017782,
+            "center_score": 0.22104829730979614,
+            "extent_reasonable_score": 1.9021378159192717,
+            "size_score": 1.3611111111111112
+          },
+          "point_count": 245,
+          "score": 4.705815091614945
+        }
+      ],
+      "frame_index": 31,
+      "icp_attempted": true,
+      "icp_fitness": 1.0,
+      "icp_rmse": 0.0018045426803687458,
+      "reason": "registered_segmented_object_cloud",
+      "segmentation_succeeded": true,
+      "selected_cluster": {
+        "bbox_uv": [
+          0,
+          29,
+          319,
+          239
+        ],
+        "centroid": [
+          0.017837469580560535,
+          0.04045370803374977,
+          0.32777762340224814
+        ],
+        "degeneracy_reason": "ok",
+        "degenerate": false,
+        "extent_xyz": [
+          0.33665874461873585,
+          0.17659565141582798,
+          0.25576192016402877
+        ],
+        "image_centroid": [
+          179.46765599675396,
+          157.39393158675074
+        ],
+        "label": 0,
+        "metrics": {
+          "center_distance_px": 42.15798559611862,
+          "center_score": 0.8586666806661098,
+          "extent_reasonable_score": 0.428449755727166,
+          "size_score": 3.0
+        },
+        "point_count": 2229,
+        "score": 7.202316444792942
+      },
+      "selected_cluster_bbox_extents_m": [
+        0.33665874461873585,
+        0.17659565141582798,
+        0.25576192016402877
+      ],
+      "selected_cluster_degeneracy_reason": "ok",
+      "selected_cluster_point_count": 2229,
+      "selection_reason": "largest_nondegenerate_near_center"
+    },
+    {
+      "accepted": true,
+      "candidate_clusters": [
+        {
+          "bbox_uv": [
+            0,
+            29,
+            319,
+            239
+          ],
+          "centroid": [
+            0.018258527737802847,
+            0.04049762897606135,
+            0.32763833058564124
+          ],
+          "degeneracy_reason": "ok",
+          "degenerate": false,
+          "extent_xyz": [
+            0.3436301542294997,
+            0.17705944194405557,
+            0.2595357336103916
+          ],
+          "image_centroid": [
+            179.87061410816375,
+            157.45141276804617
+          ],
+          "label": 0,
+          "metrics": {
+            "center_distance_px": 42.396339740101716,
+            "center_score": 0.8571842974557978,
+            "extent_reasonable_score": 0.3991337670039254,
+            "size_score": 3.0
+          },
+          "point_count": 2216,
+          "score": 7.1706286429332025
+        },
+        {
+          "bbox_uv": [
+            256,
+            106,
+            319,
+            137
+          ],
+          "centroid": [
+            0.1906840611482784,
+            3.4963310481100374e-05,
+            0.45210673304876614
+          ],
+          "degeneracy_reason": "ok",
+          "degenerate": false,
+          "extent_xyz": [
+            0.10146367794974695,
+            0.04298579638879081,
+            0.10350002348423004
+          ],
+          "image_centroid": [
+            292.6142957590099,
+            119.38380991551658
+          ],
+          "label": 1,
+          "metrics": {
+            "center_distance_px": 132.61572730969118,
+            "center_score": 0.22139742733493362,
+            "extent_reasonable_score": 1.8696200536289025,
+            "size_score": 1.3888888888888888
+          },
+          "point_count": 250,
+          "score": 4.723855937364796
+        }
+      ],
+      "frame_index": 32,
+      "icp_attempted": true,
+      "icp_fitness": 1.0,
+      "icp_rmse": 0.0014856851904044997,
+      "reason": "registered_segmented_object_cloud",
+      "segmentation_succeeded": true,
+      "selected_cluster": {
+        "bbox_uv": [
+          0,
+          29,
+          319,
+          239
+        ],
+        "centroid": [
+          0.018258527737802847,
+          0.04049762897606135,
+          0.32763833058564124
+        ],
+        "degeneracy_reason": "ok",
+        "degenerate": false,
+        "extent_xyz": [
+          0.3436301542294997,
+          0.17705944194405557,
+          0.2595357336103916
+        ],
+        "image_centroid": [
+          179.87061410816375,
+          157.45141276804617
+        ],
+        "label": 0,
+        "metrics": {
+          "center_distance_px": 42.396339740101716,
+          "center_score": 0.8571842974557978,
+          "extent_reasonable_score": 0.3991337670039254,
+          "size_score": 3.0
+        },
+        "point_count": 2216,
+        "score": 7.1706286429332025
+      },
+      "selected_cluster_bbox_extents_m": [
+        0.3436301542294997,
+        0.17705944194405557,
+        0.2595357336103916
+      ],
+      "selected_cluster_degeneracy_reason": "ok",
+      "selected_cluster_point_count": 2216,
+      "selection_reason": "largest_nondegenerate_near_center"
+    },
+    {
+      "accepted": true,
+      "candidate_clusters": [
+        {
+          "bbox_uv": [
+            50,
+            29,
+            319,
+            239
+          ],
+          "centroid": [
+            0.06885212555133866,
+            0.03292806521009512,
+            0.34198889510788166
+          ],
+          "degeneracy_reason": "ok",
+          "degenerate": false,
+          "extent_xyz": [
+            0.34868977601889284,
+            0.16972022689302338,
+            0.2626889011926121
+          ],
+          "image_centroid": [
+            224.71700018640672,
+            149.03196613341095
+          ],
+          "label": 0,
+          "metrics": {
+            "center_distance_px": 70.93056584222974,
+            "center_score": 0.6496382519083813,
+            "extent_reasonable_score": 0.37845816171527297,
+            "size_score": 3.0
+          },
+          "point_count": 2038,
+          "score": 6.817879364768684
+        },
+        {
+          "bbox_uv": [
+            0,
+            125,
+            112,
+            239
+          ],
+          "centroid": [
+            -0.1100447790871667,
+            0.0528546121949866,
+            0.33244774670802113
+          ],
+          "degeneracy_reason": "ok",
+          "degenerate": false,
+          "extent_xyz": [
+            0.09287465329484926,
+            0.09168012090380717,
+            0.19900000467896461
+          ],
+          "image_centroid": [
+            60.750729582502444,
+            168.3549976460075
+          ],
+          "label": 1,
+          "metrics": {
+            "center_distance_px": 110.40209905500414,
+            "center_score": 0.35169955415789705,
+            "extent_reasonable_score": 1.7569039132624111,
+            "size_score": 2.1333333333333333
+          },
+          "point_count": 384,
+          "score": 6.159623199915046
+        }
+      ],
+      "frame_index": 33,
+      "icp_attempted": true,
+      "icp_fitness": 1.0,
+      "icp_rmse": 0.0015193685651258603,
+      "reason": "registered_segmented_object_cloud",
+      "segmentation_succeeded": true,
+      "selected_cluster": {
+        "bbox_uv": [
+          50,
+          29,
+          319,
+          239
+        ],
+        "centroid": [
+          0.06885212555133866,
+          0.03292806521009512,
+          0.34198889510788166
+        ],
+        "degeneracy_reason": "ok",
+        "degenerate": false,
+        "extent_xyz": [
+          0.34868977601889284,
+          0.16972022689302338,
+          0.2626889011926121
+        ],
+        "image_centroid": [
+          224.71700018640672,
+          149.03196613341095
+        ],
+        "label": 0,
+        "metrics": {
+          "center_distance_px": 70.93056584222974,
+          "center_score": 0.6496382519083813,
+          "extent_reasonable_score": 0.37845816171527297,
+          "size_score": 3.0
+        },
+        "point_count": 2038,
+        "score": 6.817879364768684
+      },
+      "selected_cluster_bbox_extents_m": [
+        0.34868977601889284,
+        0.16972022689302338,
+        0.2626889011926121
+      ],
+      "selected_cluster_degeneracy_reason": "ok",
+      "selected_cluster_point_count": 2038,
+      "selection_reason": "largest_nondegenerate_near_center"
+    }
+  ],
+  "obb": {
+    "center": [
+      0.05553403681633673,
+      -0.01832755345295035,
+      0.348355492027841
+    ],
+    "extent": [
+      0.45101331561427616,
+      0.296215446376333,
+      0.15996971749573963
+    ],
+    "rotation": [
+      [
+        0.8709661283240542,
+        -0.4893421511373325,
+        -0.04429743144354084
+      ],
+      [
+        -0.15376354384957128,
+        -0.18582747370002664,
+        -0.9704766471178411
+      ],
+      [
+        0.46666345035263684,
+        0.8520636180113278,
+        -0.23709241861860098
+      ]
+    ]
+  },
+  "output_topic": "/object/point_cloud",
+  "parameters": {
+    "burst_duration_sec": 1.5,
+    "burst_frame_limit": 40,
+    "color_height": 480,
+    "color_width": 640,
+    "dbscan_eps_m": 0.025,
+    "dbscan_min_points": 60,
+    "decimation_magnitude": 2,
+    "depth_height": 480,
+    "depth_width": 640,
+    "device_serial": "",
+    "fps": 30,
+    "frame_id": "object_scan_frame",
+    "hole_filling_mode": 1,
+    "icp_fitness_threshold": 0.35,
+    "icp_max_correspondence_distance_m": 0.04,
+    "max_depth_m": 1.0,
+    "min_depth_m": 0.15,
+    "min_object_height_above_plane_m": 0.01,
+    "output_dir": "/home/dbhaumik/banana_scans",
+    "output_topic": "/object/point_cloud",
+    "plane_distance_threshold_m": 0.008,
+    "plane_ransac_iterations": 300,
+    "publish_debug_topics": false,
+    "save_intermediate_debug_clouds": false,
+    "spatial_filter_alpha": 0.5,
+    "spatial_filter_delta": 20.0,
+    "spatial_filter_magnitude": 2.0,
+    "temporal_filter_alpha": 0.4,
+    "temporal_filter_delta": 20.0,
+    "voxel_size_m": 0.005
+  },
+  "point_count": 3343,
+  "processing_mode": "burst_single_view_tabletop_capture",
+  "scan_timestamp": "2026-03-17T17:55:11"
+}
