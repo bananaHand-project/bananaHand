@@ -2,6 +2,7 @@
 
 End-to-end launch now runs:
 - webcam + hand tracking (`banana_hand_tracking`)
+- optional webcam + RealSense dual-camera tracking in `banana_hand_tracking`
 - hand mapping (`banana_hand_mapping`)  
   `/hand/teleop_joint_trajectory` -> `/tx_positions` (scaled to `0..4095`)
 - serial bridge (`banana_serial_bridge`) to hardware
@@ -23,6 +24,22 @@ ros2 launch banana_bringup bringup.launch.py \
   port:=/dev/ttyACM0 baud:=115200
 ```
 
+Note:
+- `banana_bringup` currently uses the default webcam-only vision path.
+- To test dual-camera vision before involving hardware, launch `banana_hand_tracking` directly with `dual_cam:=true`.
+
+## Run Vision Teleop Only
+Webcam only:
+```bash
+ros2 launch banana_hand_tracking vision_teleop.launch.py
+```
+
+Webcam + RealSense with tracking previews:
+```bash
+ros2 launch banana_hand_tracking vision_teleop.launch.py \
+  dual_cam:=true show_preview:=true
+```
+
 ## Useful Launch Args
 ```bash
 # Disable OpenCV hand preview window (lower latency)
@@ -40,10 +57,16 @@ Args:
 - `include_vision` (default `true`)
 - `include_mapping` (default `true`)
 
+Vision teleop args:
+- `dual_cam` (default `false`) on `banana_hand_tracking/vision_teleop.launch.py`
+- `realsense_serial` (default empty; picks the first detected RealSense)
+
 ## Calibration + Quick Checks
 ```bash
 ros2 service call /hand/calibrate std_srvs/srv/Trigger {}
 ros2 topic hz /hand/teleop_joint_trajectory
+ros2 topic hz /camera/webcam/image_raw
+ros2 topic hz /camera/realsense/image_raw
 ros2 topic echo /tx_positions
 ros2 topic echo /rx_positions
 ros2 topic echo /rx_force
