@@ -6,7 +6,7 @@
 
 <img src="assets/images/bh-demo.gif" width="250"><img src="assets/images/bh-demo-telem-2.gif" width="450">
 
-BananaHand features human-like proportions with no fore-arm, up to 4lb payload capacity, integrated palm and finger tip FSR based force sensing, and a low BOM cost of 1200$CAD.
+BananaHand features human-like proportions with no fore-arm, up to 4lb payload capacity, integrated palm and finger tip FSR based force sensing, and a low BOM cost of $900USD.
 
 With the project being open-source as a top priority, all resources used in the creation are freely available and open-source themselves (KiCad, OnShape, Foxglove, Embassy-rs, etc.).
 
