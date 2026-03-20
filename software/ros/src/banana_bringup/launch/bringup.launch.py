@@ -10,7 +10,7 @@ from launch_ros.actions import Node
 
 
 def generate_launch_description():
-    port = LaunchConfiguration("port")
+    serial_port = LaunchConfiguration("serial_port")
     baud = LaunchConfiguration("baud")
     include_vision = LaunchConfiguration("include_vision")
     include_mapping = LaunchConfiguration("include_mapping")
@@ -38,7 +38,7 @@ def generate_launch_description():
     )
 
     return LaunchDescription([
-        DeclareLaunchArgument("port", default_value="/dev/ttyACM0"),
+        DeclareLaunchArgument("serial_port", default_value="/dev/ttyACM0"),
         DeclareLaunchArgument("baud", default_value="115200"),
         DeclareLaunchArgument("include_vision", default_value="true"),
         DeclareLaunchArgument("include_mapping", default_value="true"),
@@ -85,7 +85,7 @@ def generate_launch_description():
             name="serial_bridge",
             output="screen",
             parameters=[{
-                "port": port,
+                "port": serial_port,
                 "baud": baud,
                 "publish_rate_hz": 100.0,
                 "joint_names": [f"joint_{i}" for i in range(8)],

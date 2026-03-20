@@ -3,10 +3,14 @@
 
 from __future__ import annotations
 
+import contextlib
+from collections import deque
 from pathlib import Path
+import threading
 from typing import Sequence
 
 from ament_index_python.packages import get_package_share_directory
+import glfw
 import mujoco
 import mujoco.viewer
 import rclpy
@@ -17,7 +21,9 @@ from trajectory_msgs.msg import JointTrajectory
 
 
 POSITION_COUNT = 8
+CURRENT_COUNT = 8
 SETTLE_STEPS = 25
+CURRENT_NAMES = [f"current_{idx}" for idx in range(CURRENT_COUNT)]
 FORCE_SENSOR_NAMES = [
     "thumb",
     "index",
@@ -30,6 +36,99 @@ FORCE_SENSOR_NAMES = [
     "palm_4",
     "palm_5",
 ]
+
+
+class EglGlfwMujocoViewer:
+    """Minimal MuJoCo desktop viewer that forces GLFW EGL context creation."""
+
+    def __init__(self, model: mujoco.MjModel, data: mujoco.MjData, title: str) -> None:
+        self._model = model
+        self._data = data
+        self._lock = threading.RLock()
+        self._closed = False
+        self._glfw_initialized = False
+        self._window = None
+
+        if not glfw.init():
+            raise RuntimeError("GLFW initialization failed")
+        self._glfw_initialized = True
+
+        glfw.default_window_hints()
+        if not hasattr(glfw, "EGL_CONTEXT_API"):
+            raise RuntimeError("GLFW EGL context API is unavailable in this environment")
+        glfw.window_hint(glfw.CONTEXT_CREATION_API, glfw.EGL_CONTEXT_API)
+        self._window = glfw.create_window(1280, 720, title, None, None)
+        if not self._window:
+            raise RuntimeError("Failed to create EGL GLFW window")
+
+        glfw.make_context_current(self._window)
+        glfw.swap_interval(1)
+
+        self._camera = mujoco.MjvCamera()
+        self._option = mujoco.MjvOption()
+        self._perturb = mujoco.MjvPerturb()
+        self._scene = mujoco.MjvScene(self._model, maxgeom=10000)
+        self._context = mujoco.MjrContext(self._model, mujoco.mjtFontScale.mjFONTSCALE_150.value)
+        self._cat_mask = int(mujoco.mjtCatBit.mjCAT_ALL.value)
+
+    @contextlib.contextmanager
+    def lock(self):
+        with self._lock:
+            yield
+
+    def sync(self) -> None:
+        if self._closed:
+            return
+        if self._window is None:
+            return
+        if glfw.window_should_close(self._window):
+            self.close()
+            return
+
+        glfw.make_context_current(self._window)
+        width, height = glfw.get_framebuffer_size(self._window)
+        viewport = mujoco.MjrRect(0, 0, max(1, width), max(1, height))
+        mujoco.mjv_updateScene(
+            self._model,
+            self._data,
+            self._option,
+            self._perturb,
+            self._camera,
+            self._cat_mask,
+            self._scene,
+        )
+        mujoco.mjr_render(viewport, self._scene, self._context)
+        glfw.swap_buffers(self._window)
+        glfw.poll_events()
+
+    def close(self) -> None:
+        if self._closed:
+            return
+        self._closed = True
+
+        if self._window is not None:
+            glfw.destroy_window(self._window)
+            self._window = None
+        if self._glfw_initialized:
+            glfw.terminate()
+            self._glfw_initialized = False
+
+
+def glfw_native_context_available() -> bool:
+    """Probe whether default GLFW (GLX on Linux) can create a context."""
+    if not glfw.init():
+        return False
+    window = None
+    try:
+        glfw.default_window_hints()
+        window = glfw.create_window(16, 16, "glfw_probe", None, None)
+        return bool(window)
+    finally:
+        if window is not None:
+            glfw.destroy_window(window)
+        glfw.terminate()
+
+
 
 
 def clamp(value: float, lo: float, hi: float) -> float:
@@ -68,10 +167,13 @@ class BananaHandMujocoVisualizer(Node):
         self.declare_parameter("teleop_source_indices", [0, 1, 2, 3, 4, 5, -1, -1])
         self.declare_parameter("teleop_fill_ratio", 0.0)
         self.declare_parameter("force_input_topic", "/rx_force")
+        self.declare_parameter("current_input_topic", "/rx_current")
         self.declare_parameter("joint_state_topic", "/banana_hand/mujoco_joint_states")
         self.declare_parameter("force_state_topic", "/banana_hand/force_state")
+        self.declare_parameter("current_state_topic", "/banana_hand/current_state")
         self.declare_parameter("force_sensor_indices", list(range(len(FORCE_SENSOR_NAMES))))
         self.declare_parameter("force_scale", 1.0)
+        self.declare_parameter("current_filter_window", 10)
         self.declare_parameter(
             "actuator_map",
             [
@@ -79,8 +181,8 @@ class BananaHandMujocoVisualizer(Node):
                 "middlepiston",
                 "ringpiston",
                 "pinkypiston",
-                "tmpiston",
                 "thumbpiston",
+                "tmpiston",
                 "",
                 "",
             ],
@@ -122,6 +224,9 @@ class BananaHandMujocoVisualizer(Node):
             int(v) for v in self.get_parameter("force_sensor_indices").value
         ]
         self._force_scale = float(self.get_parameter("force_scale").value)
+        self._current_filter_window = max(
+            1, int(self.get_parameter("current_filter_window").value)
+        )
 
         if len(self._actuator_map) != POSITION_COUNT:
             raise ValueError("actuator_map must contain 8 entries")
@@ -149,7 +254,15 @@ class BananaHandMujocoVisualizer(Node):
 
         self._viewer = None
         if self._show_mujoco_viewer:
-            self._viewer = mujoco.viewer.launch_passive(self._model, self._data)
+            if glfw_native_context_available():
+                self._viewer = mujoco.viewer.launch_passive(self._model, self._data)
+                self.get_logger().info("MuJoCo desktop viewer started with default backend")
+            else:
+                self.get_logger().warn(
+                    "Default GLFW/GLX context is unavailable; using GLFW EGL fallback viewer"
+                )
+                self._viewer = EglGlfwMujocoViewer(self._model, self._data, "Banana Hand MuJoCo")
+                self.get_logger().info("MuJoCo desktop viewer started with GLFW EGL fallback")
 
         self._joint_name_to_id = {
             mujoco.mj_id2name(self._model, mujoco.mjtObj.mjOBJ_JOINT, joint_id): joint_id
@@ -159,18 +272,23 @@ class BananaHandMujocoVisualizer(Node):
             mujoco.mj_id2name(self._model, mujoco.mjtObj.mjOBJ_ACTUATOR, actuator_id): actuator_id
             for actuator_id in range(self._model.nu)
         }
+        self._current_history = [deque(maxlen=self._current_filter_window) for _ in range(CURRENT_COUNT)]
 
         joint_state_topic = str(self.get_parameter("joint_state_topic").value)
         teleop_topic = str(self.get_parameter("teleop_topic").value)
         feedback_topic = str(self.get_parameter("feedback_topic").value)
         force_input_topic = str(self.get_parameter("force_input_topic").value)
+        current_input_topic = str(self.get_parameter("current_input_topic").value)
         force_state_topic = str(self.get_parameter("force_state_topic").value)
+        current_state_topic = str(self.get_parameter("current_state_topic").value)
 
         self._joint_pub = self.create_publisher(JointState, joint_state_topic, 10)
         self._force_state_pub = self.create_publisher(JointState, force_state_topic, 10)
+        self._current_state_pub = self.create_publisher(JointState, current_state_topic, 10)
         self.create_subscription(JointTrajectory, teleop_topic, self._on_teleop_trajectory, 10)
         self.create_subscription(JointState, feedback_topic, self._on_feedback_joint_state, 10)
         self.create_subscription(UInt16MultiArray, force_input_topic, self._on_force, 10)
+        self.create_subscription(UInt16MultiArray, current_input_topic, self._on_current, 10)
         self.create_timer(1.0 / self._state_publish_rate_hz, self._publish_states)
 
         self.get_logger().info(
@@ -251,16 +369,27 @@ class BananaHandMujocoVisualizer(Node):
         return min_adc + normalized * (max_adc - min_adc)
 
     def _on_force(self, msg: UInt16MultiArray) -> None:
-        values = [
-            self._value_at(msg.data, sensor_idx)
-            for sensor_idx in self._force_sensor_indices
-        ]
+        values = [self._value_at(msg.data, sensor_idx) for sensor_idx in self._force_sensor_indices]
 
         state_msg = JointState()
         state_msg.header.stamp = self.get_clock().now().to_msg()
         state_msg.name = list(FORCE_SENSOR_NAMES)
         state_msg.position = values
         self._force_state_pub.publish(state_msg)
+
+    def _on_current(self, msg: UInt16MultiArray) -> None:
+        values = []
+        for idx in range(CURRENT_COUNT):
+            raw_value = int(msg.data[idx]) if idx < len(msg.data) else 0
+            history = self._current_history[idx]
+            history.append(raw_value)
+            values.append(float(sum(history) / len(history)))
+
+        state_msg = JointState()
+        state_msg.header.stamp = self.get_clock().now().to_msg()
+        state_msg.name = list(CURRENT_NAMES)
+        state_msg.position = values
+        self._current_state_pub.publish(state_msg)
 
     def _publish_states(self) -> None:
         stamp = self.get_clock().now().to_msg()
@@ -282,6 +411,7 @@ class BananaHandMujocoVisualizer(Node):
             msg.name.append(joint_name)
             msg.position.append(float(self._data.qpos[qpos_adr]))
         return msg
+
 
 def main(args: list[str] | None = None) -> None:
     rclpy.init(args=args)

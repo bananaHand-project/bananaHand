@@ -118,12 +118,31 @@ class SerialBridgeNode(Node):
         self.declare_parameter("timeout_s", 0.02)
         self.declare_parameter("publish_rate_hz", 200.0)
         self.declare_parameter("joint_names", [f"joint_{i}" for i in range(8)])
+        self.declare_parameter("current_filter_enabled", True)
+        self.declare_parameter("current_median_window", 3)
+        self.declare_parameter("current_filter_alpha", 0.25)
+        self.declare_parameter("current_spike_delta", 300)
 
         self.port = self.get_parameter("port").get_parameter_value().string_value
         self.baud = self.get_parameter("baud").get_parameter_value().integer_value
         self.timeout_s = float(self.get_parameter("timeout_s").value)
         self.publish_rate_hz = float(self.get_parameter("publish_rate_hz").value)
         self.joint_names = list(self.get_parameter("joint_names").value)
+        self.current_filter_enabled = bool(self.get_parameter("current_filter_enabled").value)
+        self.current_median_window = int(self.get_parameter("current_median_window").value)
+        self.current_filter_alpha = float(self.get_parameter("current_filter_alpha").value)
+        self.current_spike_delta = int(self.get_parameter("current_spike_delta").value)
+
+        if self.current_median_window < 1:
+            self.current_median_window = 1
+        if self.current_median_window % 2 == 0:
+            self.current_median_window += 1
+        self.current_median_window = min(self.current_median_window, 9)
+        self.current_filter_alpha = max(0.0, min(1.0, self.current_filter_alpha))
+        self.current_spike_delta = max(0, self.current_spike_delta)
+
+        self._current_histories: List[List[int]] = [[] for _ in range(CURRENT_COUNT)]
+        self._current_ema: Optional[List[float]] = None
 
         if len(self.joint_names) != 8:
             self.get_logger().warn("joint_names is not length 8; forcing 8 default names")
@@ -265,8 +284,45 @@ class SerialBridgeNode(Node):
                 self.pub_force.publish(force_msg)
 
                 current_msg = UInt16MultiArray()
-                current_msg.data = [int(v) for v in currents]
+                current_msg.data = self._filter_currents(currents)
                 self.pub_current.publish(current_msg)
+
+    def _filter_currents(self, currents: List[int]) -> List[int]:
+        if len(currents) != CURRENT_COUNT:
+            return [int(v) for v in currents]
+
+        raw = [int(v) for v in currents]
+        if not self.current_filter_enabled:
+            return [max(0, min(65535, v)) for v in raw]
+
+        medians: List[int] = []
+        for idx, value in enumerate(raw):
+            history = self._current_histories[idx]
+            history.append(value)
+            if len(history) > self.current_median_window:
+                history.pop(0)
+            sorted_hist = sorted(history)
+            medians.append(sorted_hist[len(sorted_hist) // 2])
+
+        if self._current_ema is None:
+            self._current_ema = [float(v) for v in medians]
+            return [max(0, min(65535, int(round(v)))) for v in medians]
+
+        out: List[int] = []
+        alpha = self.current_filter_alpha
+        spike_delta = float(self.current_spike_delta)
+        for idx, value in enumerate(medians):
+            prev = self._current_ema[idx]
+            delta = float(value) - prev
+            if abs(delta) > spike_delta:
+                value_for_ema = prev + (spike_delta if delta > 0 else -spike_delta)
+            else:
+                value_for_ema = float(value)
+            ema = prev + alpha * (value_for_ema - prev)
+            self._current_ema[idx] = ema
+            out.append(max(0, min(65535, int(round(ema)))))
+
+        return out
 
     def _extract_one_cobs_encoded_frame(self) -> Optional[bytes]:
         """
@@ -318,7 +374,8 @@ def main():
         pass
     finally:
         node.destroy_node()
-        rclpy.shutdown()
+        if rclpy.ok():
+            rclpy.shutdown()
 
 
 if __name__ == "__main__":
