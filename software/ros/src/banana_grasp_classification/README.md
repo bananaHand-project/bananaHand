@@ -138,6 +138,7 @@ Additional classifier details reflected in the current code:
 - sphere-like objects with curved surfaces, similar height/width, and both dimensions below that 6 cm split get an explicit `tripod` boost
 - sphere-like objects with curved surfaces and both height/width at or above that 6 cm split get extra support for `spherical`
 - non-spherical objects whose visible width and thickness both stay below that 6 cm split get an explicit `pinch` boost, which keeps thin small cylinders and compact cases out of wrap grasps
+- mildly taller-than-wide round shells that are large enough for a wrap grasp but not sphere-dominant get an extra cylindrical bias, which keeps cups and similar hollow objects from being treated as spheres
 - tall curved bodies whose height is noticeably larger than their width lose spherical support and gain cylindrical support, which keeps cups and similar objects from being treated as spheres
 - when that tall curved-body rule wins, the cylindrical opening uses the visible cylindrical diameter span instead of the sphere-fit diameter
 - the JSON output intentionally keeps the `single_view_partial_cloud` assumption enabled for this capture pipeline
