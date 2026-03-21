@@ -284,48 +284,7 @@ class GraspRuleClassifierNode(Node):
             )
             return 1
 
-        threshold_params = {
-            "opening_margin_m": float(self.get_parameter("opening_margin_m").value),
-            "max_hand_opening_m": float(
-                self.get_parameter("max_hand_opening_m").value
-            ),
-            "small_object_max_span_m": float(
-                self.get_parameter("small_object_max_span_m").value
-            ),
-            "tripod_object_max_span_m": float(
-                self.get_parameter("tripod_object_max_span_m").value
-            ),
-            "power_grasp_min_span_m": float(
-                self.get_parameter("power_grasp_min_span_m").value
-            ),
-            "small_body_dimension_max_m": float(
-                self.get_parameter("small_body_dimension_max_m").value
-            ),
-            "spherical_extent_ratio_max": float(
-                self.get_parameter("spherical_extent_ratio_max").value
-            ),
-            "spherical_fit_error_max_m": float(
-                self.get_parameter("spherical_fit_error_max_m").value
-            ),
-            "cylindrical_radius_cv_max": float(
-                self.get_parameter("cylindrical_radius_cv_max").value
-            ),
-            "cylindrical_fit_error_max_m": float(
-                self.get_parameter("cylindrical_fit_error_max_m").value
-            ),
-            "box_flatness_ratio_max": float(
-                self.get_parameter("box_flatness_ratio_max").value
-            ),
-            "box_power_grasp_min_major_m": float(
-                self.get_parameter("box_power_grasp_min_major_m").value
-            ),
-            "box_power_grasp_min_middle_m": float(
-                self.get_parameter("box_power_grasp_min_middle_m").value
-            ),
-            "hook_score_penalty": float(
-                self.get_parameter("hook_score_penalty").value
-            ),
-        }
+        threshold_params = self._current_threshold_params()
 
         try:
             cloud_path = self._find_cloud_path(
@@ -397,6 +356,50 @@ class GraspRuleClassifierNode(Node):
         )
         self.get_logger().info(f"Saved grasp classification JSON to: {output_path}")
         return 0
+
+    def _current_threshold_params(self) -> dict[str, float]:
+        return {
+            "opening_margin_m": float(self.get_parameter("opening_margin_m").value),
+            "max_hand_opening_m": float(
+                self.get_parameter("max_hand_opening_m").value
+            ),
+            "small_object_max_span_m": float(
+                self.get_parameter("small_object_max_span_m").value
+            ),
+            "tripod_object_max_span_m": float(
+                self.get_parameter("tripod_object_max_span_m").value
+            ),
+            "power_grasp_min_span_m": float(
+                self.get_parameter("power_grasp_min_span_m").value
+            ),
+            "small_body_dimension_max_m": float(
+                self.get_parameter("small_body_dimension_max_m").value
+            ),
+            "spherical_extent_ratio_max": float(
+                self.get_parameter("spherical_extent_ratio_max").value
+            ),
+            "spherical_fit_error_max_m": float(
+                self.get_parameter("spherical_fit_error_max_m").value
+            ),
+            "cylindrical_radius_cv_max": float(
+                self.get_parameter("cylindrical_radius_cv_max").value
+            ),
+            "cylindrical_fit_error_max_m": float(
+                self.get_parameter("cylindrical_fit_error_max_m").value
+            ),
+            "box_flatness_ratio_max": float(
+                self.get_parameter("box_flatness_ratio_max").value
+            ),
+            "box_power_grasp_min_major_m": float(
+                self.get_parameter("box_power_grasp_min_major_m").value
+            ),
+            "box_power_grasp_min_middle_m": float(
+                self.get_parameter("box_power_grasp_min_middle_m").value
+            ),
+            "hook_score_penalty": float(
+                self.get_parameter("hook_score_penalty").value
+            ),
+        }
 
     def _find_cloud_path(
         self,
@@ -1158,8 +1161,17 @@ class GraspRuleClassifierNode(Node):
             0.60 * box_like
             + 0.40 * large_face_score * thin_box_score
         )
+        ambiguous_round_shell_score = clamp01(
+            ramp(compact_round_shell_score, 0.40, 0.55)
+            * inverse_ramp(compact_round_shell_score, 0.60, 0.78)
+        )
         tall_round_body_cylinder_support = clamp01(
-            ramp(height_to_width_ratio, 1.18, 1.45)
+            # Cups and similarly hollow round bodies often land in a narrow band:
+            # slightly taller than wide, clearly large enough for a wrap grasp,
+            # and not round-shell-dominant enough to behave like apples/oranges.
+            # Start the tall-body ramp earlier for those ambiguous shells only.
+            ramp(height_to_width_ratio, 1.10, 1.35)
+            * ambiguous_round_shell_score
             * max(
                 cylinder_cv_score,
                 cylinder_fit_score,
@@ -1635,7 +1647,7 @@ class GraspRuleClassifierNode(Node):
             decision_path.append("compact sphere fit dominates the small-object evidence")
         elif family_evidence.get("large_round_object", 0.0) >= 0.45:
             decision_path.append("round body is too large for a precision grasp")
-        elif family_evidence.get("tall_round_body_cylinder_support", 0.0) >= 0.45:
+        elif family_evidence.get("tall_round_body_cylinder_support", 0.0) >= 0.15:
             decision_path.append("curved body is too tall relative to its width to be spherical")
         elif family_evidence["box_power_object"] >= 0.55:
             decision_path.append("large object with thin grasp dimension")
@@ -1664,7 +1676,7 @@ class GraspRuleClassifierNode(Node):
             decision_path.append("round fit is strong enough to override the tiny shell depth")
         elif family_evidence.get("large_round_object", 0.0) >= 0.45:
             decision_path.append("round geometry dominates over cylindrical wrap cues")
-        elif family_evidence.get("tall_round_body_cylinder_support", 0.0) >= 0.45:
+        elif family_evidence.get("tall_round_body_cylinder_support", 0.0) >= 0.15:
             decision_path.append("height is noticeably larger than width, so the round shell is treated as cylindrical")
         elif family_evidence["round_partial_shell"] >= max(family_evidence["box_like"], 0.58):
             decision_path.append("similar visible extents and sphere fit override shell thickness")
@@ -1686,6 +1698,8 @@ class GraspRuleClassifierNode(Node):
 
         if "thickness-like span" in basis_reason:
             decision_path.append("box thickness chosen as the wrap span")
+        elif "width-like span" in basis_reason:
+            decision_path.append("visible width-like span used for pre-contact aperture")
         elif "body diameter" in basis_reason:
             decision_path.append("body diameter chosen as the wrap span")
         elif "sphere diameter" in basis_reason:
@@ -1716,6 +1730,15 @@ class GraspRuleClassifierNode(Node):
         sphere = geometry.sphere
 
         basis_reason = "fallback span"
+        round_like_wrap = (
+            family_evidence.get("round_partial_shell", 0.0) >= 0.50
+            or family_evidence.get("tall_round_body_cylinder_support", 0.0) >= 0.35
+            or family_evidence["sphere_like"] >= 0.40
+            or (
+                family_evidence["cylinder_like"] >= 0.45
+                and family_evidence["box_like"] < 0.55
+            )
+        )
         if selected_grip == "cylindrical":
             strong_box_wrap = (
                 family_evidence["box_power_object"] >= 0.60
@@ -1728,18 +1751,9 @@ class GraspRuleClassifierNode(Node):
             if strong_box_wrap:
                 grasp_span_basis_m = dimensions.thickness_like_m
                 basis_reason = "box-like power grasp uses thickness-like span"
-            elif family_evidence.get("tall_round_body_cylinder_support", 0.0) >= 0.45:
-                grasp_span_basis_m = max(
-                    cylinder.diameter_estimate_m,
-                    dimensions.middle_extent_m,
-                )
-                basis_reason = "tall curved body uses visible cylindrical diameter span"
-            elif (
-                family_evidence.get("round_partial_shell", 0.0) >= 0.58
-                and sphere.diameter_estimate_m > 0.0
-            ):
-                grasp_span_basis_m = sphere.diameter_estimate_m
-                basis_reason = "partial round shell uses sphere diameter as wrap span"
+            elif round_like_wrap:
+                grasp_span_basis_m = dimensions.width_like_m
+                basis_reason = "round-like power grasp uses visible width-like span"
             elif cylinder.diameter_estimate_m > 0.0:
                 # For a single-view half-cylinder the algebraic circle fit tends to
                 # underestimate the true diameter because it only sees one arc.
@@ -1758,12 +1772,8 @@ class GraspRuleClassifierNode(Node):
                 )
                 basis_reason = "fallback to stable power-grasp span"
         elif selected_grip == "spherical":
-            if sphere.diameter_estimate_m > 0.0:
-                grasp_span_basis_m = sphere.diameter_estimate_m
-                basis_reason = "sphere diameter estimated from least-squares fit"
-            else:
-                grasp_span_basis_m = float(np.median(dimensions.pca_extents))
-                basis_reason = "fallback to median compact extent"
+            grasp_span_basis_m = dimensions.width_like_m
+            basis_reason = "sphere-like grasp uses visible width-like span"
         elif selected_grip == "tripod":
             if family_evidence["sphere_like"] >= 0.45 and sphere.diameter_estimate_m > 0.0:
                 grasp_span_basis_m = sphere.diameter_estimate_m

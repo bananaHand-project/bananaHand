@@ -20,6 +20,7 @@ def generate_launch_description() -> LaunchDescription:
     )
     params_file = LaunchConfiguration("params_file")
     show_preview = LaunchConfiguration("show_preview")
+    enable_roi_selection = LaunchConfiguration("enable_roi_selection")
     device_serial = LaunchConfiguration("device_serial")
     output_dir = LaunchConfiguration("output_dir")
     result_topic = LaunchConfiguration("result_topic")
@@ -41,6 +42,7 @@ def generate_launch_description() -> LaunchDescription:
         [
             DeclareLaunchArgument("params_file", default_value=default_params),
             DeclareLaunchArgument("show_preview", default_value="true"),
+            DeclareLaunchArgument("enable_roi_selection", default_value="true"),
             DeclareLaunchArgument("device_serial", default_value=""),
             DeclareLaunchArgument("output_dir", default_value="~/banana_scans"),
             DeclareLaunchArgument(
@@ -74,6 +76,7 @@ def generate_launch_description() -> LaunchDescription:
                 launch_arguments={
                     "params_file": params_file,
                     "show_preview": show_preview,
+                    "enable_roi_selection": enable_roi_selection,
                     "device_serial": device_serial,
                     "output_dir": output_dir,
                 }.items(),
