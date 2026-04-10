@@ -6,6 +6,10 @@
 /vision_teleop/teleop_ws/install/
 /vision_teleop/teleop_ws/log/
 /vision_teleop/teleop_ws/.colcon/
+build/
+log/
+install/
+
 
 # Python artifacts
 **/__pycache__/
@@ -20,6 +24,12 @@
 .idea/
 **/*.swp
 **/*.swo
+
+# Node / Foxglove extension artifacts
+**/node_modules/
+**/dist/
+**/*.foxe
+**/package-lock.json
 
 # OS junk
 **/.DS_Store

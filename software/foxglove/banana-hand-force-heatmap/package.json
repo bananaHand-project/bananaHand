@@ -1,0 +1,25 @@
+{
+  "name": "banana-hand-force-heatmap",
+  "displayName": "Banana Hand Force Heatmap",
+  "publisher": "banana-hand",
+  "version": "0.0.1",
+  "description": "Foxglove custom panel for Banana Hand fingertip and palm force heatmaps.",
+  "license": "MIT",
+  "main": "dist/extension.js",
+  "engines": {
+    "node": ">=20",
+    "npm": ">=10"
+  },
+  "scripts": {
+    "build": "foxglove-extension build",
+    "local-install": "npm run build && foxglove-extension install",
+    "package": "foxglove-extension package"
+  },
+  "dependencies": {
+    "@foxglove/extension": "^2.35.0"
+  },
+  "devDependencies": {
+    "create-foxglove-extension": "^1.0.6",
+    "typescript": "^5.0.0"
+  }
+}

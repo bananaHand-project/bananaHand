@@ -9,6 +9,7 @@ find_package(std_msgs REQUIRED)
 # Add message files to this list as you create them.
 set(msg_files
   "msg/HandState.msg"
+  "msg/GraspRecommendation.msg"
 )
 
 rosidl_generate_interfaces(${PROJECT_NAME}

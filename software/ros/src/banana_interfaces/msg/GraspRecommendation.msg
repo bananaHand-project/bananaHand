@@ -1,0 +1,2 @@
+string selected_grip
+float64 recommended_opening_m

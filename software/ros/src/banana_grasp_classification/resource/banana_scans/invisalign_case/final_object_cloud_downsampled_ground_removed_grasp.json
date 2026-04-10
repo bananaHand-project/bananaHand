@@ -1,0 +1,163 @@
+{
+  "assumptions": {
+    "hook_deprioritized": true,
+    "opening_is_initial_pre_contact_aperture": true,
+    "single_view_partial_cloud": true
+  },
+  "cleanup_warnings": [],
+  "confidence": 0.353179,
+  "decision": {
+    "basis_reason": "sphere diameter estimated from least-squares fit",
+    "decision_path": [
+      "partial cylindrical body evidence is strong",
+      "dominant planar / box-like evidence",
+      "power grasp preferred over precision grasp",
+      "sphere diameter used for pre-contact aperture",
+      "hook suppressed by prior penalty",
+      "minor extent is below the nominal power-grasp span"
+    ],
+    "object_family": "spherical_dominant",
+    "power_span_reference_m": 0.089978,
+    "score_terms": {
+      "cylindrical": {
+        "cylinder_body_evidence": 0.151021,
+        "elongation_or_tallness": 0.016805,
+        "large_box_power_evidence": 0.089999,
+        "precision_penalty": -0.085036,
+        "round_shell_support": 0.05243,
+        "small_round_penalty": -0.0,
+        "usable_power_span": 0.24
+      },
+      "hook": {
+        "handle_like_evidence": 0.196732,
+        "other_grasp_penalty": -0.11617,
+        "small_cross_section_support": 0.0,
+        "suppression_prior": -0.6,
+        "thin_handle_span": 0.35
+      },
+      "pinch": {
+        "not_power_object": 0.071875,
+        "overall_smallness": 0.176883,
+        "power_penalty": -0.2,
+        "precision_shape": 0.2,
+        "round_shell_penalty": -0.146804,
+        "small_opposing_span": 0.32,
+        "sphere_penalty": -0.082195
+      },
+      "spherical": {
+        "box_penalty": -0.091592,
+        "compact_roundness": 0.136006,
+        "elongation_penalty": -0.025207,
+        "large_round_size": 0.18,
+        "not_precision_scale": 0.037482,
+        "partial_round_shell_support": 0.073402,
+        "sphere_fit_and_extent": 0.182654
+      },
+      "tripod": {
+        "compact_roundness": 0.14734,
+        "elongation_penalty": -0.016805,
+        "power_penalty": -0.18,
+        "precision_bias": 0.063777,
+        "small_round_size": 0.0,
+        "sphere_evidence": 0.091327
+      }
+    }
+  },
+  "dimensions_m": {
+    "cylinder_diameter_estimate": 0.065686,
+    "height_like": 0.085693,
+    "obb_major": 0.085693,
+    "obb_middle": 0.059693,
+    "obb_minor": 0.018133,
+    "pca_major": 0.074205,
+    "pca_middle": 0.050823,
+    "pca_minor": 0.010862,
+    "small_span": 0.010862,
+    "sphere_diameter_estimate": 0.104502,
+    "thickness_like": 0.018133,
+    "width_like": 0.059693
+  },
+  "family_evidence": {
+    "box_like": 0.508846,
+    "box_power_object": 0.281248,
+    "cylinder_like": 0.58085,
+    "handle_like": 0.281046,
+    "round_compact_object": 0.566691,
+    "round_partial_shell": 0.524299,
+    "small_precision_object": 0.531478,
+    "sphere_like": 0.456636
+  },
+  "generated_at_utc": "2026-03-18T06:52:24Z",
+  "grasp_span_basis_m": 0.104502,
+  "opening_margin_m": 0.03,
+  "parameters": {
+    "box_flatness_ratio_max": 0.4,
+    "box_power_grasp_min_major_m": 0.1,
+    "box_power_grasp_min_middle_m": 0.06,
+    "cylinder_axis_trim_percent": 10.0,
+    "cylinder_radial_outlier_percent": 95.0,
+    "cylindrical_fit_error_max_m": 0.02,
+    "cylindrical_radius_cv_max": 0.3,
+    "extent_percentile_high": 95.0,
+    "extent_percentile_low": 5.0,
+    "ground_removed_suffix": "_ground_removed",
+    "hook_score_penalty": 0.6,
+    "input_dir": "/home/dbhaumik/banana_scans/invisalign_case",
+    "max_hand_opening_m": 0.0,
+    "normal_estimation_max_nn": 30,
+    "normal_estimation_radius_m": 0.02,
+    "opening_margin_m": 0.03,
+    "output_suffix": "_grasp",
+    "power_grasp_min_span_m": 0.045,
+    "radius_outlier_nb_points": 10,
+    "radius_outlier_radius_m": 0.015,
+    "recursive_search": true,
+    "small_object_max_span_m": 0.045,
+    "sphere_fit_inlier_percentile": 90.0,
+    "spherical_extent_ratio_max": 1.3,
+    "spherical_fit_error_max_m": 0.015,
+    "statistical_nb_neighbors": 20,
+    "statistical_std_ratio": 2.0,
+    "surface_variation_k_neighbors": 20,
+    "tripod_object_max_span_m": 0.065,
+    "use_radius_outlier_filter": true
+  },
+  "point_cloud_stats": {
+    "point_count": 257,
+    "point_count_after_cleanup": 246,
+    "radius_removed": 1,
+    "recomputed_normals": false,
+    "removed_outliers_before_classification": 11,
+    "statistical_removed": 10,
+    "used_normals_from_file": true
+  },
+  "recommended_opening_m": 0.134502,
+  "schema_version": 1,
+  "scores": {
+    "cylindrical": 0.465219,
+    "hook": 0.0,
+    "pinch": 0.33976,
+    "spherical": 0.492744,
+    "tripod": 0.105639
+  },
+  "selected_grip": "spherical",
+  "shape_descriptors": {
+    "cylinder_fit_error_m": 0.002541,
+    "cylinder_radial_outlier_fraction": 0.05102,
+    "cylinder_radius_cv": 0.074601,
+    "elongation_ratio": 1.460061,
+    "flatness_ratio": 0.213716,
+    "is_partial_view": false,
+    "linearity": 0.551512,
+    "mid_to_minor_ratio": 4.679115,
+    "normal_axis_alignment": 0.971918,
+    "normal_dispersion": 0.275226,
+    "planarity": 0.427018,
+    "scattering": 0.02147,
+    "sphere_fit_error_m": 0.002983,
+    "sphere_fit_error_normalized": 0.057099,
+    "surface_variation_median": 0.006753,
+    "view_bias": 0.042978
+  },
+  "source_ply": "/home/dbhaumik/banana_scans/invisalign_case/final_object_cloud_downsampled_ground_removed.ply"
+}

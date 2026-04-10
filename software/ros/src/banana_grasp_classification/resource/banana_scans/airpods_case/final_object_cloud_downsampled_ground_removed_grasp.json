@@ -1,0 +1,159 @@
+{
+  "assumptions": {
+    "hook_deprioritized": true,
+    "opening_is_initial_pre_contact_aperture": true,
+    "single_view_partial_cloud": true
+  },
+  "cleanup_warnings": [],
+  "confidence": 0.493035,
+  "decision": {
+    "basis_reason": "pinch uses the smallest stable opposing-finger span",
+    "decision_path": [
+      "small object with precision-dominated span",
+      "dominant planar / box-like evidence",
+      "small opposing-finger span favors pinch",
+      "precision span remains below power-grasp threshold",
+      "hook suppressed by prior penalty",
+      "minor extent is below the nominal power-grasp span"
+    ],
+    "object_family": "sphere_like_small",
+    "power_span_reference_m": 0.056527,
+    "score_terms": {
+      "cylindrical": {
+        "cylinder_body_evidence": 0.21568,
+        "elongation_or_tallness": 0.066579,
+        "large_box_power_evidence": 0.093273,
+        "precision_penalty": -0.149692,
+        "small_round_penalty": -0.013368,
+        "usable_power_span": 0.092217
+      },
+      "hook": {
+        "handle_like_evidence": 0.348611,
+        "other_grasp_penalty": -0.166325,
+        "small_cross_section_support": 0.061576,
+        "suppression_prior": -0.6,
+        "thin_handle_span": 0.35
+      },
+      "pinch": {
+        "not_power_object": 0.068909,
+        "overall_smallness": 0.166527,
+        "power_penalty": -0.076848,
+        "precision_shape": 0.141193,
+        "small_opposing_span": 0.32,
+        "sphere_penalty": -0.0
+      },
+      "spherical": {
+        "box_penalty": -0.10131,
+        "compact_roundness": 0.033421,
+        "elongation_penalty": -0.099868,
+        "large_round_size": 0.0,
+        "not_precision_scale": 0.01347,
+        "sphere_fit_and_extent": 0.209
+      },
+      "tripod": {
+        "compact_roundness": 0.037432,
+        "elongation_penalty": -0.066579,
+        "power_penalty": -0.069163,
+        "precision_bias": 0.099795,
+        "small_round_size": 0.3,
+        "sphere_evidence": 0.121
+      }
+    }
+  },
+  "dimensions_m": {
+    "cylinder_diameter_estimate": 0.019714,
+    "height_like": 0.086414,
+    "obb_major": 0.086414,
+    "obb_middle": 0.046116,
+    "obb_minor": 0.019966,
+    "pca_major": 0.075715,
+    "pca_middle": 0.036362,
+    "pca_minor": 0.01421,
+    "small_span": 0.01421,
+    "sphere_diameter_estimate": 0.056527,
+    "thickness_like": 0.019966,
+    "width_like": 0.046116
+  },
+  "family_evidence": {
+    "box_like": 0.562833,
+    "box_power_object": 0.310911,
+    "cylinder_like": 0.718932,
+    "handle_like": 0.498016,
+    "round_compact_object": 0.133684,
+    "small_precision_object": 0.831623,
+    "sphere_like": 0.55
+  },
+  "generated_at_utc": "2026-03-17T23:28:44Z",
+  "grasp_span_basis_m": 0.01421,
+  "opening_margin_m": 0.03,
+  "parameters": {
+    "box_flatness_ratio_max": 0.4,
+    "box_power_grasp_min_major_m": 0.1,
+    "box_power_grasp_min_middle_m": 0.06,
+    "cylinder_axis_trim_percent": 10.0,
+    "cylinder_radial_outlier_percent": 95.0,
+    "cylindrical_fit_error_max_m": 0.02,
+    "cylindrical_radius_cv_max": 0.3,
+    "extent_percentile_high": 95.0,
+    "extent_percentile_low": 5.0,
+    "ground_removed_suffix": "_ground_removed",
+    "hook_score_penalty": 0.6,
+    "input_dir": "/home/dbhaumik/banana_scans/scan_20260317_192808",
+    "max_hand_opening_m": 0.0,
+    "normal_estimation_max_nn": 30,
+    "normal_estimation_radius_m": 0.02,
+    "opening_margin_m": 0.03,
+    "output_suffix": "_grasp",
+    "power_grasp_min_span_m": 0.045,
+    "radius_outlier_nb_points": 10,
+    "radius_outlier_radius_m": 0.015,
+    "recursive_search": true,
+    "small_object_max_span_m": 0.045,
+    "sphere_fit_inlier_percentile": 90.0,
+    "spherical_extent_ratio_max": 1.3,
+    "spherical_fit_error_max_m": 0.015,
+    "statistical_nb_neighbors": 20,
+    "statistical_std_ratio": 2.0,
+    "surface_variation_k_neighbors": 20,
+    "tripod_object_max_span_m": 0.065,
+    "use_radius_outlier_filter": true
+  },
+  "point_cloud_stats": {
+    "point_count": 144,
+    "point_count_after_cleanup": 134,
+    "radius_removed": 0,
+    "recomputed_normals": false,
+    "removed_outliers_before_classification": 10,
+    "statistical_removed": 10,
+    "used_normals_from_file": true
+  },
+  "recommended_opening_m": 0.04421,
+  "schema_version": 1,
+  "scores": {
+    "cylindrical": 0.304688,
+    "hook": 0.0,
+    "pinch": 0.619781,
+    "spherical": 0.054713,
+    "tripod": 0.422485
+  },
+  "selected_grip": "pinch",
+  "shape_descriptors": {
+    "cylinder_fit_error_m": 0.00431,
+    "cylinder_radial_outlier_fraction": 0.056604,
+    "cylinder_radius_cv": 0.45331,
+    "elongation_ratio": 2.082237,
+    "flatness_ratio": 0.390786,
+    "is_partial_view": false,
+    "linearity": 0.800064,
+    "mid_to_minor_ratio": 2.558947,
+    "normal_axis_alignment": 0.877511,
+    "normal_dispersion": 0.374608,
+    "planarity": 0.163458,
+    "scattering": 0.036478,
+    "sphere_fit_error_m": 0.008262,
+    "sphere_fit_error_normalized": 0.292304,
+    "surface_variation_median": 0.102268,
+    "view_bias": 0.144056
+  },
+  "source_ply": "/home/dbhaumik/banana_scans/scan_20260317_192808/final_object_cloud_downsampled_ground_removed.ply"
+}

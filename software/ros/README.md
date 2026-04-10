@@ -1,117 +1,163 @@
 # BananaHand ROS Bringup
 
-End-to-end launch now runs:
-- webcam + hand tracking (`banana_hand_tracking`)
-- hand mapping (`banana_hand_mapping`)  
-  `/hand/teleop_joint_trajectory` -> `/tx_positions` (scaled to `0..4095`)
-- serial bridge (`banana_serial_bridge`) to hardware
+## Quick Start
+Build and run the full stack:
+```bash
+cd /home/lokesh/BananaHand/software/ros
+source /opt/ros/humble/setup.bash
+pip install --user -r requirements.txt
+colcon build --symlink-install
+source install/setup.bash
+ros2 launch banana_bringup bringup.launch.py serial_port:=/dev/ttyACM0 baud:=115200
+```
+
+Visualization only:
+```bash
+cd /home/lokesh/BananaHand/software/ros
+source /opt/ros/humble/setup.bash
+source install/setup.bash
+ros2 launch banana_hand_visualization mujoco_visualization.launch.py show_mujoco_viewer:=true
+```
+
+This workspace contains the ROS 2 stack for:
+- hand tracking (`banana_hand_tracking`)
+- hand mapping (`banana_hand_mapping`)
+- serial hardware I/O (`banana_serial_bridge`)
+- visualization and debugging (`banana_hand_visualization`)
+- top-level bringup (`banana_bringup`)
+
+The default end-to-end flow is:
+- webcam + tracking publishes `/hand/teleop_joint_trajectory`
+- mapping converts teleop ratios to `/tx_positions`
+- serial bridge exchanges `/tx_positions`, `/rx_positions`, `/rx_force`, and `/rx_current` with hardware
+- visualization publishes simulated joint state and filtered debug topics for MuJoCo and Foxglove
 
 ## Build
 ```bash
 cd software/ros
 source /opt/ros/humble/setup.bash
-pip install --user -r src/banana_hand_tracking/requirements.txt
+pip install --user -r requirements.txt
 colcon build --symlink-install --packages-select \
   banana_interfaces banana_hand_tracking banana_hand_mapping \
-  banana_serial_bridge banana_bringup
+  banana_serial_bridge banana_hand_visualization banana_bringup
 source install/setup.bash
 ```
 
-## Run Bringup
+Optional Foxglove bridge:
 ```bash
-ros2 launch banana_bringup bringup.launch.py \
-  port:=/dev/ttyACM0 baud:=115200
+sudo apt install ros-$ROS_DISTRO-foxglove-bridge
 ```
 
-## Useful Launch Args
+## Run Full Bringup
 ```bash
-# Disable OpenCV hand preview window (lower latency)
+ros2 launch banana_bringup bringup.launch.py \
+  serial_port:=/dev/ttyACM0 baud:=115200
+```
+
+Useful variants:
+```bash
+# Disable the OpenCV preview window
 ros2 launch banana_bringup bringup.launch.py show_preview:=false
 
-# Run serial bridge only (no vision/mapping)
+# Launch the desktop MuJoCo viewer too
+ros2 launch banana_bringup bringup.launch.py show_mujoco_viewer:=true
+
+# Drive the visualization from teleop instead of rx_positions
+ros2 launch banana_bringup bringup.launch.py \
+  show_mujoco_viewer:=true state_source:=teleop
+
+# Skip the visualization package entirely
+ros2 launch banana_bringup bringup.launch.py include_visualization:=false
+
+# Skip vision and mapping, keep serial + visualization
 ros2 launch banana_bringup bringup.launch.py \
   include_vision:=false include_mapping:=false
 ```
 
-Args:
-- `port` (default `/dev/ttyACM0`)
-- `baud` (default `115200`)
-- `show_preview` (default `true`)
-- `include_vision` (default `true`)
-- `include_mapping` (default `true`)
+Bringup launch arguments:
+- `serial_port` default `/dev/ttyACM0`
+- `baud` default `115200`
+- `include_vision` default `true`
+- `include_mapping` default `true`
+- `include_visualization` default `true`
+- `show_preview` default `true`
+- `show_mujoco_viewer` default `false`
+- `state_source` default `rx_positions`
+- `show_fsr_debugger` default `false`
+- `launch_foxglove_bridge` default `true`
 
-## Calibration + Quick Checks
+## Run Visualization Separately
+Launch the visualization stack by itself:
+```bash
+cd software/ros
+source /opt/ros/humble/setup.bash
+source install/setup.bash
+ros2 launch banana_hand_visualization mujoco_visualization.launch.py
+```
+
+Common variants:
+```bash
+# Open the desktop MuJoCo viewer
+ros2 launch banana_hand_visualization mujoco_visualization.launch.py \
+  show_mujoco_viewer:=true
+
+# Drive the visualization from tracking output instead of rx_positions
+ros2 launch banana_hand_visualization mujoco_visualization.launch.py \
+  state_source:=teleop show_mujoco_viewer:=true
+
+# Disable Foxglove bridge startup
+ros2 launch banana_hand_visualization mujoco_visualization.launch.py \
+  launch_foxglove_bridge:=false
+```
+
+## Run Hand Tracking Separately
+Combined webcam + tracking:
+```bash
+cd software/ros
+source /opt/ros/humble/setup.bash
+source install/setup.bash
+ros2 launch banana_hand_tracking vision_teleop.launch.py
+```
+
+Tracking-only node:
+```bash
+ros2 launch banana_hand_tracking hand_tracking.launch.py
+```
+
+Webcam-only node:
+```bash
+ros2 launch banana_hand_tracking webcam.launch.py
+```
+
+## Foxglove
+The visualization package publishes:
+- `/banana_hand/mujoco_joint_states` (`sensor_msgs/msg/JointState`)
+- `/banana_hand/force_state` (`sensor_msgs/msg/JointState`)
+- `/banana_hand/current_state` (`sensor_msgs/msg/JointState`)
+
+If `foxglove_bridge` is installed, `mujoco_visualization.launch.py` or `bringup.launch.py` can start it automatically.
+
+Suggested Foxglove panels:
+1. Plot `/banana_hand/mujoco_joint_states`
+2. Plot `/banana_hand/force_state`
+3. Plot `/banana_hand/current_state`
+
+Use the desktop MuJoCo viewer for the 3D hand view.
+
+## Quick Checks
 ```bash
 ros2 service call /hand/calibrate std_srvs/srv/Trigger {}
 ros2 topic hz /hand/teleop_joint_trajectory
 ros2 topic echo /tx_positions
 ros2 topic echo /rx_positions
 ros2 topic echo /rx_force
+ros2 topic echo /banana_hand/mujoco_joint_states
 ```
 
-## FSR Visualizer (Desktop GUI)
-2D live visualizer for fingertip force values on `rx_force`.
+## Package Notes
+- `banana_hand_tracking`: webcam capture and MediaPipe-based teleop tracking
+- `banana_hand_mapping`: converts teleop ratios to actuator-scale command values
+- `banana_serial_bridge`: hardware transport for position, force, and current topics
+- `banana_hand_visualization`: MuJoCo state publisher, desktop viewer integration, Foxglove-facing debug topics, and FSR debug GUI
 
-Dependencies:
-- ROS2 (`rclpy`, `std_msgs`)
-- `PySide6`
-
-Install GUI dependency if needed:
-```bash
-sudo apt install python3-pyside6
-# or
-pip install -r src/banana_hand_fsr_visualizer/requirements.txt
-```
-
-Build the package:
-```bash
-cd software/ros
-source /opt/ros/humble/setup.bash
-colcon build --symlink-install --packages-select banana_hand_fsr_visualizer
-source install/setup.bash
-```
-
-Run visualizer:
-```bash
-ros2 run banana_hand_fsr_visualizer fsr_visualizer
-```
-
-Run with launch file:
-```bash
-ros2 launch banana_hand_fsr_visualizer fsr_visualizer.launch.py
-```
-
-No-FSR test publisher:
-```bash
-ros2 run banana_hand_fsr_visualizer fsr_test_publisher
-```
-
-Quick one-liner test publish:
-```bash
-ros2 topic pub /rx_force std_msgs/msg/UInt16MultiArray "{data: [100, 350, 620, 460, 220, 0, 0, 0, 0, 0]}" -r 10
-```
-
-Key visualizer parameters:
-- `topic_name` (default `rx_force`)
-- `finger_indices` (default `[0,1,2,3,4]`)
-- `alpha` (default `0.25`)
-- `global_min`, `global_max`
-- `per_finger_min`, `per_finger_max` (optional length 5)
-- `refresh_hz` (default `30.0`)
-- `contact_threshold` (default `0.7`)
-- `simulate_if_no_data` (default `false`)
-
-Example overrides:
-```bash
-ros2 run banana_hand_fsr_visualizer fsr_visualizer --ros-args \
-  -p topic_name:=rx_force \
-  -p finger_indices:="[0,2,4,6,8]" \
-  -p alpha:=0.35 \
-  -p global_min:=0.0 \
-  -p global_max:=1500.0
-```
-
-Adapting to a different message type:
-- Edit `banana_hand_fsr_visualizer/fsr_visualizer_node.py`.
-- Change `create_subscription(...)` message type.
-- Update `_on_force_msg()` to output 5 values ordered as thumb/index/middle/ring/pinky.
+Each package README documents its own node parameters and launch usage.
