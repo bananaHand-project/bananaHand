@@ -35,11 +35,13 @@ use embassy_time::{Duration, Ticker};
 use hrtim_pwm_hal::{HrtimCore, HrtimPrescaler, period_reg_val};
 
 use config::{COMMAND_COUNT, CURRENT_COUNT, FORCE_COUNT, POSITION_COUNT};
-use control_config::{CONTROL_HZ, CommandInputs, ForceInputs, PositionInputs};
+use control_config::{
+    CONTROL_HZ, CommandInputs, ControlMode, DEFAULT_CONTROL_MODE, ForceInputs, PositionInputs,
+};
 use current_reader::CurAdcPins;
-use motor_control::{Controller, MotorPwmCommand};
+use motor_control::{Controller, MotorCommand, MotorOutputs, MotorPwmCommand};
 use position_reader::PosAdcPins;
-use shared::SharedData;
+use shared::{SharedData, SharedMode};
 
 bind_interrupts!(struct Irqs {
     USART2 => embassy_stm32::usart::InterruptHandler<embassy_stm32::peripherals::USART2>;
@@ -48,9 +50,22 @@ bind_interrupts!(struct Irqs {
 
 static SHARED_POSITIONS: SharedData<POSITION_COUNT> = SharedData::new();
 static SHARED_CURRENTS: SharedData<CURRENT_COUNT> = SharedData::new();
-static SHARED_COMMANDS: SharedData<COMMAND_COUNT> = SharedData::new();
+static SHARED_POSITION_COMMANDS: SharedData<COMMAND_COUNT> = SharedData::new();
+static SHARED_FORCE_COMMANDS: SharedData<COMMAND_COUNT> = SharedData::new();
+static SHARED_CONTROL_MODE: SharedMode = SharedMode::new(DEFAULT_CONTROL_MODE.to_wire());
 static SHARED_FORCE: SharedData<FORCE_COUNT> = SharedData::new();
 const PWM_FREQ: Hertz = Hertz(20_000);
+
+fn coast_all_outputs() -> MotorOutputs {
+    MotorOutputs {
+        ring: MotorCommand::Coast,
+        pinky: MotorCommand::Coast,
+        thumb_flex: MotorCommand::Coast,
+        index1: MotorCommand::Coast,
+        middle: MotorCommand::Coast,
+        thumb_revolve: MotorCommand::Coast,
+    }
+}
 
 #[embassy_executor::main]
 async fn main(_spawner: Spawner) {
@@ -71,6 +86,7 @@ async fn main(_spawner: Spawner) {
         config.rcc.ls = LsConfig::default_lsi();
     }
     let p = embassy_stm32::init(config);
+    SHARED_CONTROL_MODE.write(DEFAULT_CONTROL_MODE.to_wire());
 
     // USART3: PC link (kept off PA2/PA3 because those are used as potentiometer inputs).
     let mut uart3_config = UartConfig::default();
@@ -96,7 +112,12 @@ async fn main(_spawner: Spawner) {
         ))
         .unwrap();
     _spawner
-        .spawn(command_reader::command_reader_task(rx3, &SHARED_COMMANDS))
+        .spawn(command_reader::command_reader_task(
+            rx3,
+            &SHARED_POSITION_COMMANDS,
+            &SHARED_FORCE_COMMANDS,
+            &SHARED_CONTROL_MODE,
+        ))
         .unwrap();
 
     // USART2: C0 force reader (RX only).
@@ -206,26 +227,68 @@ async fn main(_spawner: Spawner) {
 
     let mut controller = Controller::new();
     let mut control_ticker = Ticker::every(Duration::from_hz(CONTROL_HZ));
+    let mut applied_mode = DEFAULT_CONTROL_MODE;
+    let mut waiting_for_fresh_command = false;
+    let mut required_command_seq = SHARED_POSITION_COMMANDS.seq();
 
     // MAIN PID LOOP //
     loop {
-        let latest_cmd = SHARED_COMMANDS.read_snapshot();
+        let requested_mode =
+            ControlMode::from_wire(SHARED_CONTROL_MODE.read()).unwrap_or(DEFAULT_CONTROL_MODE);
+
+        if requested_mode != applied_mode {
+            let latest_positions = SHARED_POSITIONS.read_snapshot();
+            let latest_force = SHARED_FORCE.read_snapshot();
+            let latest_position_commands = SHARED_POSITION_COMMANDS.read_snapshot();
+            let latest_force_commands = SHARED_FORCE_COMMANDS.read_snapshot();
+
+            defmt::info!(
+                "mode change: {} -> {}, position_cmds: {}, force_cmds: {}, positions: {}, forces: {}",
+                applied_mode.to_wire(),
+                requested_mode.to_wire(),
+                latest_position_commands,
+                latest_force_commands,
+                latest_positions,
+                latest_force
+            );
+
+            controller.set_mode(requested_mode);
+            applied_mode = requested_mode;
+            waiting_for_fresh_command = true;
+            required_command_seq = match applied_mode {
+                ControlMode::Position => SHARED_POSITION_COMMANDS.seq(),
+                ControlMode::Force => SHARED_FORCE_COMMANDS.seq(),
+            };
+        }
+
         let latest_force = SHARED_FORCE.read_snapshot();
         let latest_positions = SHARED_POSITIONS.read_snapshot();
+        let position_commands = SHARED_POSITION_COMMANDS.read_snapshot();
+        let force_commands = SHARED_FORCE_COMMANDS.read_snapshot();
 
-        defmt::info!(
-            "command: {}, positions: {}, forces: {}",
-            latest_cmd,
-            latest_positions,
-            latest_force
-        );
+        let active_command_seq = match applied_mode {
+            ControlMode::Position => SHARED_POSITION_COMMANDS.seq(),
+            ControlMode::Force => SHARED_FORCE_COMMANDS.seq(),
+        };
 
-        controller.set_mode(control_config::CONTROL_MODE);
-        let command_inputs = CommandInputs::from_raw(&latest_cmd);
+        if waiting_for_fresh_command && active_command_seq != required_command_seq {
+            waiting_for_fresh_command = false;
+        }
+
+        let active_commands = match applied_mode {
+            ControlMode::Position => &position_commands,
+            ControlMode::Force => &force_commands,
+        };
+
+        let command_inputs = CommandInputs::from_raw(active_commands);
         let position_inputs = PositionInputs::from_raw(&latest_positions);
         let force_inputs = ForceInputs::from_raw(&latest_force);
 
-        let outputs = controller.step(&command_inputs, &position_inputs, &force_inputs);
+        let outputs = if waiting_for_fresh_command {
+            coast_all_outputs()
+        } else {
+            controller.step(&command_inputs, &position_inputs, &force_inputs)
+        };
         let m_ring: MotorPwmCommand = outputs.ring.into();
         let m_pinky: MotorPwmCommand = outputs.pinky.into();
         let m_thumb_1: MotorPwmCommand = outputs.thumb_flex.into();

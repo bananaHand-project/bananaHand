@@ -12,8 +12,24 @@ pub enum ControlMode {
     Force,
 }
 
-// Flip this to switch the controller behavior.
-pub const CONTROL_MODE: ControlMode = ControlMode::Position;
+pub const DEFAULT_CONTROL_MODE: ControlMode = ControlMode::Position;
+
+impl ControlMode {
+    pub const fn from_wire(value: u8) -> Option<Self> {
+        match value {
+            0 => Some(Self::Position),
+            1 => Some(Self::Force),
+            _ => None,
+        }
+    }
+
+    pub const fn to_wire(self) -> u8 {
+        match self {
+            Self::Position => 0,
+            Self::Force => 1,
+        }
+    }
+}
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub enum CommandChannel {

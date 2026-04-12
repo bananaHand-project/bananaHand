@@ -1,7 +1,7 @@
 use crate::control_config::{
-    ACTUATOR_COUNT, ACTUATOR_LOOP_CONFIGS, CONTROL_DT_S, CONTROL_MODE, CommandInputs, ControlMode,
-    FORCE_PID_GAINS, ForceInputs, OUTPUT_DEADBAND_PERCENT, POSITION_PID_GAINS, PositionInputs,
-    force_bits_to_newtons, position_bits_to_mm,
+    ACTUATOR_COUNT, ACTUATOR_LOOP_CONFIGS, CONTROL_DT_S, DEFAULT_CONTROL_MODE, CommandInputs,
+    ControlMode, FORCE_PID_GAINS, ForceInputs, OUTPUT_DEADBAND_PERCENT, POSITION_PID_GAINS,
+    PositionInputs, force_bits_to_newtons, position_bits_to_mm,
 };
 use crate::pid::Pid;
 
@@ -57,12 +57,13 @@ pub struct Controller {
 
 impl Controller {
     pub fn new() -> Self {
+        // TODO: Fix this to be default instead and new should allow the dev to input their own gains
         let (pkp, pki, pkd) = POSITION_PID_GAINS;
         let (fkp, fki, fkd) = FORCE_PID_GAINS;
         Self {
             position_pids: core::array::from_fn(|_| Pid::new(pkp, pki, pkd)),
             force_pids: core::array::from_fn(|_| Pid::new(fkp, fki, fkd)),
-            mode: CONTROL_MODE,
+            mode: DEFAULT_CONTROL_MODE,
         }
     }
 
