@@ -225,7 +225,7 @@ async fn main(_spawner: Spawner) {
     tim_f.ch1_en();
     tim_f.ch2_en();
 
-    let mut controller = Controller::new();
+    let mut controller = Controller::default();
     let mut control_ticker = Ticker::every(Duration::from_hz(CONTROL_HZ));
     let mut applied_mode = DEFAULT_CONTROL_MODE;
     let mut waiting_for_fresh_command = false;

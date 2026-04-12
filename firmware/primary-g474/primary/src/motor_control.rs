@@ -1,7 +1,7 @@
 use crate::control_config::{
-    ACTUATOR_COUNT, ACTUATOR_LOOP_CONFIGS, CONTROL_DT_S, DEFAULT_CONTROL_MODE, CommandInputs,
-    ControlMode, FORCE_PID_GAINS, ForceInputs, OUTPUT_DEADBAND_PERCENT, POSITION_PID_GAINS,
-    PositionInputs, force_bits_to_newtons, position_bits_to_mm,
+    ACTUATOR_COUNT, ACTUATOR_LOOP_CONFIGS, CONTROL_DT_S, CommandInputs, ControlMode,
+    DEFAULT_CONTROL_MODE, FORCE_PID_GAINS, ForceInputs, OUTPUT_DEADBAND_PERCENT,
+    POSITION_PID_GAINS, PositionInputs, force_bits_to_newtons, position_bits_to_mm,
 };
 use crate::pid::Pid;
 
@@ -56,14 +56,13 @@ pub struct Controller {
 }
 
 impl Controller {
-    pub fn new() -> Self {
-        // TODO: Fix this to be default instead and new should allow the dev to input their own gains
-        let (pkp, pki, pkd) = POSITION_PID_GAINS;
-        let (fkp, fki, fkd) = FORCE_PID_GAINS;
+    pub fn new(position_gains: (f32, f32, f32), force_gains: (f32, f32, f32)) -> Self {
+        let (pkp, pki, pkd) = position_gains;
+        let (fkp, fki, fkd) = force_gains;
         Self {
             position_pids: core::array::from_fn(|_| Pid::new(pkp, pki, pkd)),
             force_pids: core::array::from_fn(|_| Pid::new(fkp, fki, fkd)),
-            mode: DEFAULT_CONTROL_MODE,
+            mode: DEFAULT_CONTROL_MODE, // Mode should always start in position. The host device is the one to switch the hand into force control mode.
         }
     }
 
@@ -131,6 +130,12 @@ impl Controller {
         }
 
         MotorOutputs::from_ordered(outputs)
+    }
+}
+
+impl Default for Controller {
+    fn default() -> Self {
+        Self::new(POSITION_PID_GAINS, FORCE_PID_GAINS)
     }
 }
 
