@@ -5,6 +5,7 @@ mod c0_reader;
 mod command_reader;
 mod config;
 mod control_config;
+mod current_reader;
 mod fmt;
 mod motor_control;
 mod pid;
@@ -13,7 +14,6 @@ mod protocol;
 mod shared;
 mod telemetry_sender;
 
-use crate::motor_control::MotorCommand;
 #[cfg(not(feature = "defmt"))]
 use panic_halt as _;
 
@@ -34,8 +34,9 @@ use embassy_stm32::{bind_interrupts, time::khz};
 use embassy_time::{Duration, Ticker};
 use hrtim_pwm_hal::{HrtimCore, HrtimPrescaler, period_reg_val};
 
-use config::{COMMAND_COUNT, FORCE_COUNT, POSITION_COUNT};
+use config::{COMMAND_COUNT, CURRENT_COUNT, FORCE_COUNT, POSITION_COUNT};
 use control_config::{CONTROL_HZ, CommandInputs, ForceInputs, PositionInputs};
+use current_reader::CurAdcPins;
 use motor_control::{Controller, MotorPwmCommand};
 use position_reader::PosAdcPins;
 use shared::SharedData;
@@ -46,6 +47,7 @@ bind_interrupts!(struct Irqs {
 });
 
 static SHARED_POSITIONS: SharedData<POSITION_COUNT> = SharedData::new();
+static SHARED_CURRENTS: SharedData<CURRENT_COUNT> = SharedData::new();
 static SHARED_COMMANDS: SharedData<COMMAND_COUNT> = SharedData::new();
 static SHARED_FORCE: SharedData<FORCE_COUNT> = SharedData::new();
 const PWM_FREQ: Hertz = Hertz(20_000);
@@ -90,6 +92,7 @@ async fn main(_spawner: Spawner) {
             tx3,
             &SHARED_POSITIONS,
             &SHARED_FORCE,
+            &SHARED_CURRENTS,
         ))
         .unwrap();
     _spawner
@@ -126,6 +129,28 @@ async fn main(_spawner: Spawner) {
             dma,
             pos_pins,
             &SHARED_POSITIONS,
+        ))
+        .unwrap();
+
+    // ADC2 + current reader (same logical order as positions/commands).
+    let current_dma = p.DMA2_CH1;
+    let current_adc = Adc::new(p.ADC2, AdcConfig::default());
+    let current_pins = CurAdcPins {
+        index1: p.PB2,
+        middle: p.PC5,
+        ring: p.PA7,
+        pinky: p.PA6,
+        thumb_flex: p.PA5,
+        thumb_revolve: p.PF1,
+        index2: p.PC4,
+        thumb_aux: p.PA4,
+    };
+    _spawner
+        .spawn(current_reader::current_reader_task(
+            current_adc,
+            current_dma,
+            current_pins,
+            &SHARED_CURRENTS,
         ))
         .unwrap();
 
@@ -215,6 +240,7 @@ async fn main(_spawner: Spawner) {
         tim_c.ch1_set_dc_percent(m_thumb_1.ch1_percent);
         tim_c.ch2_set_dc_percent(m_thumb_1.ch2_percent);
 
+        // Note for HRTIM Subtimer D:
         // Channels are swapped due to mistake in the schematic. When the board is revised, the channels can be returned to their proper order.
         tim_d.ch1_set_dc_percent(m_index_1.ch2_percent);
         tim_d.ch2_set_dc_percent(m_index_1.ch1_percent);
