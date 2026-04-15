@@ -34,6 +34,7 @@ use embassy_stm32::{bind_interrupts, time::khz};
 use embassy_time::{Duration, Ticker};
 use hrtim_pwm_hal::{HrtimCore, HrtimPrescaler, period_reg_val};
 
+use banana_hand_common::FORCE_SENS_BAUD;
 use config::{COMMAND_COUNT, CURRENT_COUNT, FORCE_COUNT, POSITION_COUNT};
 use control_config::{
     CONTROL_HZ, CommandInputs, ControlMode, DEFAULT_CONTROL_MODE, ForceInputs, PositionInputs,
@@ -41,6 +42,7 @@ use control_config::{
 use current_reader::CurAdcPins;
 use motor_control::{Controller, MotorCommand, MotorOutputs, MotorPwmCommand};
 use position_reader::PosAdcPins;
+use protocol::TELEM_BAUD;
 use shared::{SharedData, SharedMode};
 
 bind_interrupts!(struct Irqs {
@@ -90,7 +92,7 @@ async fn main(_spawner: Spawner) {
 
     // USART3: PC link (kept off PA2/PA3 because those are used as potentiometer inputs).
     let mut uart3_config = UartConfig::default();
-    uart3_config.baudrate = 115_200;
+    uart3_config.baudrate = TELEM_BAUD;
     let uart3 = Uart::new(
         p.USART3,
         p.PC11, // RX pin (PC -> MCU)
@@ -122,7 +124,7 @@ async fn main(_spawner: Spawner) {
 
     // USART2: C0 force reader (RX only).
     let mut uart1_config = UartConfig::default();
-    uart1_config.baudrate = 115_200;
+    uart1_config.baudrate = FORCE_SENS_BAUD;
 
     // RX on PA15 from C0 USART1_TX (PB6).
     let uart1_rx = UartRx::new(p.USART2, Irqs, p.PA15, p.DMA1_CH1, uart1_config).unwrap();

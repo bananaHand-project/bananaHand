@@ -9,9 +9,9 @@ use panic_halt as _;
 #[cfg(feature = "defmt")]
 use {defmt_rtt as _, panic_probe as _};
 
-use banana_hand_common::ForceDataPacket;
+use banana_hand_common::{FORCE_SENS_BAUD, ForceDataPacket};
 use embassy_executor::Spawner;
-use embassy_stm32::adc::{Adc, AnyAdcChannel, AdcChannel, Resolution, SampleTime};
+use embassy_stm32::adc::{Adc, AdcChannel, AnyAdcChannel, Resolution, SampleTime};
 use embassy_stm32::usart::{Config as UartConfig, UartTx};
 use fmt::{error, info};
 
@@ -35,7 +35,7 @@ async fn main(_spawner: Spawner) {
 
     // C0 -> G4 force stream.
     let mut g4_uart_config = UartConfig::default();
-    g4_uart_config.baudrate = 115_200;
+    g4_uart_config.baudrate = FORCE_SENS_BAUD;
     let mut g4_uart = UartTx::new_blocking(p.USART1, p.PC14, g4_uart_config).unwrap();
 
     // Enable/disable sensors here. Disabled sensors transmit 0.
@@ -81,7 +81,6 @@ async fn main(_spawner: Spawner) {
         //     4000
         // ];
 
-
         let force_packet = match ForceDataPacket::new(readings) {
             Ok(packet) => packet,
             Err(_) => {
@@ -99,9 +98,6 @@ async fn main(_spawner: Spawner) {
         };
 
         let _ = g4_uart.blocking_write(&encoded);
-        info!(
-            "force: {}",
-            readings
-        );
+        info!("force: {}", readings);
     }
 }

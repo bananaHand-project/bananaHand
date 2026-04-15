@@ -2,6 +2,7 @@ use cobs::{decode, encode};
 
 pub const COBS_DELIM: u8 = 0x00;
 pub const MAX_FRAME: usize = 128;
+pub const TELEM_BAUD: u32 = 115_200;
 
 pub enum MessageType {
     PositionUpdate = 0x01,
