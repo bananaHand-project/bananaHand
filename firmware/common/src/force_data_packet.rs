@@ -88,26 +88,7 @@ impl ForceDataPacket {
     ) -> Result<(), ForceDataPacketError> {
         let readings = self.readings();
         validate_readings(&readings)?;
-
-        // Pack each pair of 12-bit readings (a, b) into 3 bytes:
-        // byte0 = a[7:0]
-        // byte1 = a[11:8] in low nibble | b[3:0] in high nibble
-        // byte2 = b[11:4]
-        //
-        // This yields 24 packed bits for every two 12-bit ADC samples.
-        for (pair_idx, chunk) in packet[..PACKED_FORCE_DATA_LEN]
-            .chunks_exact_mut(3)
-            .enumerate()
-        {
-            let a = readings[pair_idx * 2] & FORCE_MAX_READING;
-            let b = readings[pair_idx * 2 + 1] & FORCE_MAX_READING;
-
-            chunk[0] = (a & 0x00FF) as u8;
-            chunk[1] = (((a >> 8) & 0x000F) as u8) | (((b & 0x000F) as u8) << 4);
-            chunk[2] = ((b >> 4) & 0x00FF) as u8;
-        }
-
-        packet[CHECKSUM_INDEX] = checksum(&packet[..PACKED_FORCE_DATA_LEN]);
+        encode_readings_unchecked(&readings, packet);
         Ok(())
     }
 
@@ -143,6 +124,34 @@ impl ForceDataPacket {
 
         Self::new(readings)
     }
+}
+
+/// Encode sensor readings into the wire packet without validation.
+/// Useful since MCU readings ADC values are known to be 12-bit,
+/// so callers can avoid per-frame `Result` handling while keeping one packing implementation.
+pub fn encode_readings_unchecked(
+    readings: &[u16; FORCE_SENSOR_COUNT],
+    packet: &mut [u8; FORCE_DATA_PACKET_LEN],
+) {
+    // Pack each pair of 12-bit readings (a, b) into 3 bytes:
+    // byte0 = a[7:0]
+    // byte1 = a[11:8] in low nibble | b[3:0] in high nibble
+    // byte2 = b[11:4]
+    //
+    // This yields 24 packed bits for every two 12-bit ADC samples.
+    for (pair_idx, chunk) in packet[..PACKED_FORCE_DATA_LEN]
+        .chunks_exact_mut(3)
+        .enumerate()
+    {
+        let a = readings[pair_idx * 2] & FORCE_MAX_READING;
+        let b = readings[pair_idx * 2 + 1] & FORCE_MAX_READING;
+
+        chunk[0] = (a & 0x00FF) as u8;
+        chunk[1] = (((a >> 8) & 0x000F) as u8) | (((b & 0x000F) as u8) << 4);
+        chunk[2] = ((b >> 4) & 0x00FF) as u8;
+    }
+
+    packet[CHECKSUM_INDEX] = checksum(&packet[..PACKED_FORCE_DATA_LEN]);
 }
 
 fn validate_readings(readings: &[u16; FORCE_SENSOR_COUNT]) -> Result<(), ForceDataPacketError> {
@@ -260,5 +269,16 @@ mod tests {
                 value: FORCE_MAX_READING + 1
             })
         );
+    }
+
+    #[test]
+    fn encode_unchecked_matches_encode_for_valid_readings() {
+        let readings = [101, 202, 303, 404, 505, 606, 707, 808, 909, 1001];
+        let expected = ForceDataPacket::new(readings).unwrap().encode().unwrap();
+        let mut actual = [0u8; FORCE_DATA_PACKET_LEN];
+
+        encode_readings_unchecked(&readings, &mut actual);
+
+        assert_eq!(actual, expected);
     }
 }
