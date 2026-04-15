@@ -27,6 +27,16 @@ pub struct MotorPwmCommand {
 }
 
 #[derive(Clone, Copy, PartialEq, Eq)]
+pub struct MotorPwmOutputs {
+    pub ring: MotorPwmCommand,
+    pub pinky: MotorPwmCommand,
+    pub thumb_flex: MotorPwmCommand,
+    pub index1: MotorPwmCommand,
+    pub middle: MotorPwmCommand,
+    pub thumb_revolve: MotorPwmCommand,
+}
+
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct MotorOutputs {
     pub ring: MotorCommand,
     pub pinky: MotorCommand,
@@ -45,6 +55,17 @@ impl MotorOutputs {
             index1: outputs[INDEX1_IDX],
             middle: outputs[MIDDLE_IDX],
             thumb_revolve: outputs[THUMB_REVOLVE_IDX],
+        }
+    }
+
+    pub fn into_pwm_outputs(self) -> MotorPwmOutputs {
+        MotorPwmOutputs {
+            ring: self.ring.into(),
+            pinky: self.pinky.into(),
+            thumb_flex: self.thumb_flex.into(),
+            index1: self.index1.into(),
+            middle: self.middle.into(),
+            thumb_revolve: self.thumb_revolve.into(),
         }
     }
 }

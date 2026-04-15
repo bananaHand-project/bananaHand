@@ -1,6 +1,7 @@
 #![no_std]
 #![no_main]
 
+mod board_map;
 mod c0_reader;
 mod command_reader;
 mod config;
@@ -21,6 +22,8 @@ use panic_halt as _;
 use {defmt_rtt as _, panic_probe as _};
 
 use embassy_executor::Spawner;
+use embassy_stm32::bind_interrupts;
+use embassy_stm32::time::khz;
 use embassy_stm32::{
     Config,
     adc::{Adc, AdcConfig},
@@ -30,18 +33,16 @@ use embassy_stm32::{
     timer::simple_pwm::{PwmPin, SimplePwm},
     usart::{Config as UartConfig, Uart, UartRx},
 };
-use embassy_stm32::{bind_interrupts, time::khz};
 use embassy_time::{Duration, Ticker};
 use hrtim_pwm_hal::{HrtimCore, HrtimPrescaler, period_reg_val};
 
 use banana_hand_common::FORCE_SENS_BAUD;
+use board_map::{MotorPwm, current_adc_pins, position_adc_pins};
 use config::{COMMAND_COUNT, CURRENT_COUNT, FORCE_COUNT, POSITION_COUNT};
 use control_config::{
     CONTROL_HZ, CommandInputs, ControlMode, DEFAULT_CONTROL_MODE, ForceInputs, PositionInputs,
 };
-use current_reader::CurAdcPins;
-use motor_control::{Controller, MotorCommand, MotorOutputs, MotorPwmCommand};
-use position_reader::PosAdcPins;
+use motor_control::{Controller, MotorCommand, MotorOutputs};
 use protocol::TELEM_BAUD;
 use shared::{SharedData, SharedMode};
 
@@ -136,16 +137,7 @@ async fn main(_spawner: Spawner) {
     // ADC + position reader (G4 pots).
     let dma = p.DMA1_CH2;
     let adc = Adc::new(p.ADC1, AdcConfig::default());
-    let pos_pins = PosAdcPins {
-        pinky: p.PF0,
-        ring: p.PB0,
-        middle: p.PB1,
-        index1: p.PA3,
-        index2: p.PB11,
-        thumb_opp: p.PA0,
-        thumb_flex: p.PA2,
-        thumb_aux: p.PA1,
-    };
+    let pos_pins = position_adc_pins(p.PA0, p.PA1, p.PA2, p.PA3, p.PB0, p.PB1, p.PB11, p.PF0);
     _spawner
         .spawn(position_reader::position_reader_task(
             adc,
@@ -158,16 +150,7 @@ async fn main(_spawner: Spawner) {
     // ADC2 + current reader (same logical order as positions/commands).
     let current_dma = p.DMA2_CH1;
     let current_adc = Adc::new(p.ADC2, AdcConfig::default());
-    let current_pins = CurAdcPins {
-        index1: p.PB2,
-        middle: p.PC5,
-        ring: p.PA7,
-        pinky: p.PA6,
-        thumb_flex: p.PA5,
-        thumb_revolve: p.PF1,
-        index2: p.PC4,
-        thumb_aux: p.PA4,
-    };
+    let current_pins = current_adc_pins(p.PA4, p.PA5, p.PA6, p.PA7, p.PB2, p.PC4, p.PC5, p.PF1);
     _spawner
         .spawn(current_reader::current_reader_task(
             current_adc,
@@ -177,55 +160,50 @@ async fn main(_spawner: Spawner) {
         ))
         .unwrap();
 
-    // OTHER PWM TIMERS
-    let thumb_rev_ch1 = PwmPin::new(p.PC0, OutputType::PushPull);
-    let thumb_rev_ch2 = PwmPin::new(p.PC1, OutputType::PushPull);
-    let thumb_flex_ch1 = PwmPin::new(p.PC2, OutputType::PushPull);
-    let thumb_flex_ch2 = PwmPin::new(p.PC3, OutputType::PushPull);
+    let prescaler = HrtimPrescaler::DIV32;
+    let period = period_reg_val(clocks(&p.RCC), APBPrescaler::DIV1, prescaler, PWM_FREQ).unwrap();
+
+    // TIM1 pin/channel contract:
+    // CH1=PC0 and CH2=PC1 drive thumb-revolve H-bridge.
+    // CH3=PC2 and CH4=PC3 are kept enabled but currently unused.
+    let thumb_revolve_ch1_pin = PwmPin::new(p.PC0, OutputType::PushPull); // TIM1_CH1
+    let thumb_revolve_ch2_pin = PwmPin::new(p.PC1, OutputType::PushPull); // TIM1_CH2
+    let thumb_flex_unused_ch1_pin = PwmPin::new(p.PC2, OutputType::PushPull); // TIM1_CH3 (unused)
+    let thumb_flex_unused_ch2_pin = PwmPin::new(p.PC3, OutputType::PushPull); // TIM1_CH4 (unused)
     let thumb_pwm = SimplePwm::new(
         p.TIM1,
-        Some(thumb_rev_ch1),
-        Some(thumb_rev_ch2),
-        Some(thumb_flex_ch1),
-        Some(thumb_flex_ch2),
+        Some(thumb_revolve_ch1_pin),
+        Some(thumb_revolve_ch2_pin),
+        Some(thumb_flex_unused_ch1_pin),
+        Some(thumb_flex_unused_ch2_pin),
         khz(20),
         Default::default(),
     );
     let thumb_pwm_ch = thumb_pwm.split();
-    let mut thumb_rev_ch1 = thumb_pwm_ch.ch1; // THUMB REVOLVE
-    let mut thumb_rev_ch2 = thumb_pwm_ch.ch2; // THUMB REVOLVE
-    let mut thumb_flex_ch1 = thumb_pwm_ch.ch3; // (USELESS)
-    let mut thumb_flex_ch2 = thumb_pwm_ch.ch4; // (USELESS)
 
-    thumb_rev_ch1.enable(); // THUMB REVOLVE
-    thumb_rev_ch2.enable(); // THUMB REVOLVE
-    thumb_flex_ch1.enable(); // (USELESS)
-    thumb_flex_ch2.enable(); // (USELESS)
-
-    // HRTIM PWM TIMERS
-    let prescaler = HrtimPrescaler::DIV32;
-    let period = period_reg_val(clocks(&p.RCC), APBPrescaler::DIV1, prescaler, PWM_FREQ).unwrap();
-    let (tim_a, tim_b, tim_c, tim_d, tim_e, tim_f) = HrtimCore::new()
-        .add_tim_a_ch1_ch2(p.PA8, p.PA9, period, prescaler) // RING
-        .add_tim_b_ch1_ch2(p.PA10, p.PA11, period, prescaler) // PINKY
-        .add_tim_c_ch1_ch2(p.PB12, p.PB13, period, prescaler) // THUMB FLEX
-        .add_tim_d_ch1_ch2(p.PB14, p.PB15, period, prescaler) // INDEX 1 !!
-        .add_tim_e_ch1_ch2(p.PC8, p.PC9, period, prescaler) // MIDDLE
-        .add_tim_f_ch1_ch2(p.PC6, p.PC7, period, prescaler) // INDEX 2!! (USELESS)
+    // HRTIM channels mapped directly to actuators.
+    let (ring, pinky, thumb_flex, index1, middle, index2_unused) = HrtimCore::new()
+        .add_tim_a_ch1_ch2(p.PA8, p.PA9, period, prescaler)
+        .add_tim_b_ch1_ch2(p.PA10, p.PA11, period, prescaler)
+        .add_tim_c_ch1_ch2(p.PB12, p.PB13, period, prescaler)
+        .add_tim_d_ch1_ch2(p.PB14, p.PB15, period, prescaler)
+        .add_tim_e_ch1_ch2(p.PC8, p.PC9, period, prescaler)
+        .add_tim_f_ch1_ch2(p.PC6, p.PC7, period, prescaler)
         .split_active()
         .unwrap();
-    tim_a.ch1_en();
-    tim_a.ch2_en();
-    tim_b.ch1_en();
-    tim_b.ch2_en();
-    tim_c.ch1_en();
-    tim_c.ch2_en();
-    tim_d.ch1_en();
-    tim_d.ch2_en();
-    tim_e.ch1_en();
-    tim_e.ch2_en();
-    tim_f.ch1_en();
-    tim_f.ch2_en();
+
+    let mut motor_pwm = MotorPwm::new(
+        ring,
+        pinky,
+        thumb_flex,
+        index1,
+        middle,
+        index2_unused,
+        thumb_pwm_ch.ch1, // TIM1_CH1 -> PC0 -> thumb_revolve_ch1
+        thumb_pwm_ch.ch2, // TIM1_CH2 -> PC1 -> thumb_revolve_ch2
+        thumb_pwm_ch.ch3, // TIM1_CH3 -> PC2 -> unused
+        thumb_pwm_ch.ch4, // TIM1_CH4 -> PC3 -> unused
+    );
 
     let mut controller = Controller::default();
     let mut control_ticker = Ticker::every(Duration::from_hz(CONTROL_HZ));
@@ -291,29 +269,8 @@ async fn main(_spawner: Spawner) {
         } else {
             controller.step(&command_inputs, &position_inputs, &force_inputs)
         };
-        let m_ring: MotorPwmCommand = outputs.ring.into();
-        let m_pinky: MotorPwmCommand = outputs.pinky.into();
-        let m_thumb_1: MotorPwmCommand = outputs.thumb_flex.into();
-        let m_index_1: MotorPwmCommand = outputs.index1.into();
-        let m_middle: MotorPwmCommand = outputs.middle.into();
-        let m_thumb_2: MotorPwmCommand = outputs.thumb_revolve.into();
-
-        tim_a.ch1_set_dc_percent(m_ring.ch1_percent);
-        tim_a.ch2_set_dc_percent(m_ring.ch2_percent);
-        tim_b.ch1_set_dc_percent(m_pinky.ch1_percent);
-        tim_b.ch2_set_dc_percent(m_pinky.ch2_percent);
-        tim_c.ch1_set_dc_percent(m_thumb_1.ch1_percent);
-        tim_c.ch2_set_dc_percent(m_thumb_1.ch2_percent);
-
-        // Note for HRTIM Subtimer D:
-        // Channels are swapped due to mistake in the schematic. When the board is revised, the channels can be returned to their proper order.
-        tim_d.ch1_set_dc_percent(m_index_1.ch2_percent);
-        tim_d.ch2_set_dc_percent(m_index_1.ch1_percent);
-
-        tim_e.ch1_set_dc_percent(m_middle.ch1_percent);
-        tim_e.ch2_set_dc_percent(m_middle.ch2_percent);
-        thumb_rev_ch1.set_duty_cycle_percent(m_thumb_2.ch1_percent);
-        thumb_rev_ch2.set_duty_cycle_percent(m_thumb_2.ch2_percent);
+        let pwm_outputs = outputs.into_pwm_outputs();
+        motor_pwm.apply_outputs(pwm_outputs);
 
         control_ticker.next().await;
     }
