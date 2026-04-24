@@ -1,4 +1,9 @@
 use crate::config::{COMMAND_COUNT, FORCE_COUNT, POSITION_COUNT};
+use banana_hand_common::{
+    FORCE_SENSOR_INDEX_IDX, FORCE_SENSOR_MIDDLE_IDX, FORCE_SENSOR_PALM_1_IDX, FORCE_SENSOR_PALM_2_IDX,
+    FORCE_SENSOR_PALM_3_IDX, FORCE_SENSOR_PALM_4_IDX, FORCE_SENSOR_PALM_5_IDX, FORCE_SENSOR_PINKY_IDX,
+    FORCE_SENSOR_RING_IDX, FORCE_SENSOR_THUMB_IDX,
+};
 
 pub const CONTROL_HZ: u64 = 200;
 pub const CONTROL_DT_S: f32 = 1.0 / CONTROL_HZ as f32;
@@ -157,16 +162,16 @@ pub struct ForceInputs {
 impl ForceInputs {
     pub fn from_raw(raw: &[u16; FORCE_COUNT]) -> Self {
         Self {
-            index: raw[0],
-            middle: raw[1],
-            ring: raw[2],
-            pinky: raw[3],
-            thumb: raw[4],
-            palm_1: raw[5],
-            palm_2: raw[6],
-            palm_3: raw[7],
-            palm_4: raw[8],
-            palm_5: raw[9],
+            index: raw[FORCE_SENSOR_INDEX_IDX],
+            middle: raw[FORCE_SENSOR_MIDDLE_IDX],
+            ring: raw[FORCE_SENSOR_RING_IDX],
+            pinky: raw[FORCE_SENSOR_PINKY_IDX],
+            thumb: raw[FORCE_SENSOR_THUMB_IDX],
+            palm_1: raw[FORCE_SENSOR_PALM_1_IDX],
+            palm_2: raw[FORCE_SENSOR_PALM_2_IDX],
+            palm_3: raw[FORCE_SENSOR_PALM_3_IDX],
+            palm_4: raw[FORCE_SENSOR_PALM_4_IDX],
+            palm_5: raw[FORCE_SENSOR_PALM_5_IDX],
         }
     }
 

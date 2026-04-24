@@ -4,6 +4,18 @@ pub const PACKED_FORCE_DATA_LEN: usize = (FORCE_SENSOR_COUNT * FORCE_BITS_PER_RE
 pub const FORCE_DATA_PACKET_LEN: usize = PACKED_FORCE_DATA_LEN + 1;
 pub const FORCE_MAX_READING: u16 = 4095; // U12 MAX
 
+// Canonical force packet slot indices shared across producer/consumer crates.
+pub const FORCE_SENSOR_INDEX_IDX: usize = 0;
+pub const FORCE_SENSOR_MIDDLE_IDX: usize = 1;
+pub const FORCE_SENSOR_RING_IDX: usize = 2;
+pub const FORCE_SENSOR_PINKY_IDX: usize = 3;
+pub const FORCE_SENSOR_THUMB_IDX: usize = 4;
+pub const FORCE_SENSOR_PALM_1_IDX: usize = 5;
+pub const FORCE_SENSOR_PALM_2_IDX: usize = 6;
+pub const FORCE_SENSOR_PALM_3_IDX: usize = 7;
+pub const FORCE_SENSOR_PALM_4_IDX: usize = 8;
+pub const FORCE_SENSOR_PALM_5_IDX: usize = 9;
+
 const CHECKSUM_INDEX: usize = PACKED_FORCE_DATA_LEN;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
