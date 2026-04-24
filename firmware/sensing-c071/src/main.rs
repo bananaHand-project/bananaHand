@@ -16,6 +16,7 @@ use embassy_executor::Spawner;
 use embassy_stm32::adc::{Adc, AdcChannel, AnyAdcChannel, Resolution, SampleTime};
 use embassy_stm32::usart::{Config as UartConfig, UartTx};
 use embassy_time::{Duration, Ticker};
+#[cfg(feature = "debug")]
 use fmt::info;
 
 // Keep these indices aligned with uart_g4_combo control_config FORCE_MAPS:
@@ -32,6 +33,8 @@ use fmt::info;
 // const FORCE_PALM_5: usize = 9;
 
 const SAMPLE_PERIOD: Duration = Duration::from_millis(5); // 200 Hz
+#[cfg(feature = "debug")]
+const FORCE_LOG_EVERY_SAMPLES: u32 = 20; // 10 Hz at 200 Hz sample rate
 
 #[embassy_executor::main]
 async fn main(_spawner: Spawner) {
@@ -66,6 +69,8 @@ async fn main(_spawner: Spawner) {
     let mut readings: [u16; FORCE_SENSOR_COUNT] = [0; FORCE_SENSOR_COUNT];
     let mut encoded: [u8; FORCE_DATA_PACKET_LEN] = [0; FORCE_DATA_PACKET_LEN];
     let mut ticker = Ticker::every(SAMPLE_PERIOD);
+    #[cfg(feature = "debug")]
+    let mut sample_counter: u32 = 0;
     loop {
         ticker.next().await;
 
@@ -85,6 +90,12 @@ async fn main(_spawner: Spawner) {
         // In embassy-stm32 v0.5.0 this TX path is effectively infallible on Result
         // (blocking_write always return Ok(()))
         let _ = g4_uart.blocking_write(&encoded);
-        info!("force: {}", readings);
+        #[cfg(feature = "debug")]
+        {
+            sample_counter = sample_counter.wrapping_add(1);
+            if sample_counter % FORCE_LOG_EVERY_SAMPLES == 0 {
+                info!("force: {}", readings);
+            }
+        }
     }
 }
