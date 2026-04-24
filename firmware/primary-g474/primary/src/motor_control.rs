@@ -141,6 +141,8 @@ impl Controller {
 
         for (idx, actuator) in ACTUATOR_LOOP_CONFIGS.iter().copied().enumerate() {
             let Some(force_channel) = actuator.force else {
+                // Actuators without force feedback are explicitly coasted in force mode.
+                outputs[idx] = MotorCommand::Coast;
                 continue;
             };
 
