@@ -8,7 +8,7 @@ use crate::protocol::build_telemetry_frame;
 use crate::shared::SharedData;
 
 pub const TELEM_TX_HZ: u64 = 20;
-const TX_TIMEOUT_MS: u64 = 5;
+const TX_TIMEOUT_MS: u64 = 15;
 const TX_MAX_ATTEMPTS: usize = 3;
 
 async fn send_frame_with_timeout_retries(tx: &mut UartTx<'static, Async>, frame: &[u8]) {
