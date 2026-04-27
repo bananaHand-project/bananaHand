@@ -1,13 +1,11 @@
-# This file was automatically generated.
-
-[target.thumbv6m-none-eabi]
-runner = 'probe-rs run --chip stm32c071rbTx'
-
 [build]
 target = "thumbv6m-none-eabi"
 
+[target.thumbv6m-none-eabi]
+runner = "probe-rs run --chip STM32C071K8 --log-format '{s}'"
+
 [env]
-DEFMT_LOG = "trace"
+DEFMT_LOG = "info"
 
 [unstable]
 build-std = ["core"]

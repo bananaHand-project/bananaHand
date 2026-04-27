@@ -1,10 +1,10 @@
 # This file was automatically generated.
 
-[target.thumbv7em-none-eabihf]
+[target.thumbv7em-none-eabi]
 runner = 'probe-rs run --chip STM32G474RETx'
 
 [build]
-target = "thumbv7em-none-eabihf"
+target = "thumbv7em-none-eabi"
 
 [env]
 DEFMT_LOG = "trace"
