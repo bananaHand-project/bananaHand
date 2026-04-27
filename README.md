@@ -14,13 +14,14 @@ With the project being open-source as a top priority, all resources used in the 
 
 ## Repo Structure
 
-- `docs/` contains build instructions, getting started guide, and more.
-- `firmware/` contains the code that runs on the bananaHand main board.
-  - `firmware/primary-g474/` contains the firmware run on the primary MCU (stm32g474).
-  - `firmware/sensing-c071/` contains the firmware run on the sensing MCU (stm32c071).
-  - firmware/experiments/` contains code used in the development of the hand.
-- `hardware/` contains both electrical and mechanical CAD models, BOMs, and detailed descriptions.
-- `software/` contains ROS and Foxglove implementations.
+- [`docs/`](./docs/) contains build instructions, getting started guide, and more.
+- [`firmware/`](./firmware/) contains the code that runs on the bananaHand main board.
+  - [`firmware/primary-g474/`](./firmware/primary-g474/) contains the firmware run on the primary MCU (stm32g474).
+  - [`firmware/sensing-c071/`](./firmware/sensing-c071/) contains the firmware run on the sensing MCU (stm32c071).
+  - [`firmware/common/`](./firmware/common/) contains code used by both MCUs.
+  - [`firmware/experiments/`](./firmware/experiments/) contains code used in the development of the hand.
+- [`hardware/`](./hardware/) contains both electrical and mechanical CAD models, BOMs, and detailed descriptions.
+- [`software/`](./software/) contains ROS and Foxglove implementations.
 
 ---
 ***We can't wait to see what you grasp!***
